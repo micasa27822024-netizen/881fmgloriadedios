@@ -29,7 +29,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      /* Reemplazá 'fondo.jpg' por el nombre de tu imagen */
+      /* Reemplazá 'fondo.jpg' por el nombre de tu imagen si usás otro */
       background: url('fondo.jpg') no-repeat center center/cover;
       display: flex;
       flex-direction: column;
@@ -45,7 +45,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.2);
       z-index: 1;
     }
 
@@ -89,21 +89,22 @@
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Reproductor central */
+    /* Reproductor en la zona inferior (debajo del logo) */
     .player-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 20px;
+      margin-top: auto;   /* Empuja el botón hacia la parte inferior */
+      margin-bottom: 20px; /* Distancia respecto a la caja de redes sociales */
     }
 
     .btn-play {
-      width: 90px;
-      height: 90px;
+      width: 85px;
+      height: 85px;
       border-radius: 50%;
       background: linear-gradient(135deg, #f59e0b, #d97706);
-      border: 4px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
       color: white;
       font-size: 2.2rem;
       display: flex;
@@ -117,7 +118,7 @@
     .btn-play.playing {
       padding-left: 0;
       background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
     }
 
     .btn-play:hover {
@@ -128,15 +129,15 @@
     .footer-section {
       width: 100%;
       text-align: center;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(10px);
-      padding: 15px 10px 25px 10px;
+      padding: 15px 10px 20px 10px;
       border-radius: 20px 20px 0 0;
       border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .footer-title {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       margin-bottom: 4px;
       text-transform: uppercase;
@@ -144,7 +145,7 @@
     }
 
     .footer-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #e5e7eb;
       margin-bottom: 12px;
     }
@@ -156,14 +157,14 @@
     }
 
     .social-btn {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       text-decoration: none;
       transition: transform 0.2s, filter 0.2s;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -192,7 +193,7 @@
         </button>
       </div>
 
-      <!-- Botón central de Play / Pause -->
+      <!-- Botón central de Play / Pause posicionado abajo del logo -->
       <div class="player-container">
         <button class="btn-play" id="playBtn" onclick="toggleAudio()">
           <i class="fa-solid fa-play" id="playIcon"></i>
@@ -200,7 +201,7 @@
       </div>
 
       <!-- Elemento de Audio en streaming -->
-      <!-- REEMPLAZÁ 'https://TU_STREAMING_URL' POR LA URL DIRECTA DE TU STREAM DE RADIO -->
+      <!-- REEMPLAZÁ 'https://tu-servidor-stream.com/stream' POR LA URL DIRECTA DE TU STREAM DE RADIO -->
       <audio id="radioStream" src="https://tu-servidor-stream.com/stream"></audio>
 
       <!-- Pie de página con botones de Redes Sociales -->
