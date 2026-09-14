@@ -235,6 +235,33 @@
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
 
+    // Configuración de la API MediaSession (Notificación de reproducción)
+    function setupMediaSession() {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: 'Radio 88.1 FM',
+          artist: 'Gloria de Dios',
+          album: 'En Vivo',
+          artwork: [
+            { src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }
+          ]
+        });
+
+        // Controles desde la barra de notificaciones / pantalla de bloqueo / auriculares
+        navigator.mediaSession.setActionHandler('play', () => {
+          if (audio.paused) toggleAudio();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+          if (!audio.paused) toggleAudio();
+        });
+
+        navigator.mediaSession.setActionHandler('stop', () => {
+          if (!audio.paused) toggleAudio();
+        });
+      }
+    }
+
     function toggleAudio() {
       if (audio.paused) {
         // Muestra icono de cargando (ruedita girando) mientras conecta
@@ -244,6 +271,12 @@
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
+
+          // Activar notificación multimedia del sistema
+          setupMediaSession();
+          if ('mediaSession' in navigator) {
+            navigator.mediaSession.playbackState = 'playing';
+          }
         }).catch(error => {
           console.error("Error al reproducir audio:", error);
           playIcon.className = 'fa-solid fa-play';
@@ -255,6 +288,10 @@
         audio.removeAttribute('src');
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'paused';
+        }
       }
     }
 
