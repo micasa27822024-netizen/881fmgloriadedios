@@ -197,7 +197,6 @@
         </button>
       </div>
 
-      <!-- Elemento de Audio con tipo MPEG explícito -->
       <audio id="radioStream" src="https://stream.zeno.fm/ggq0ed8yus8uv.mp3" type="audio/mpeg" preload="none"></audio>
 
       <div class="footer-section">
@@ -223,13 +222,13 @@
 
   <script>
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
+    const shareUrl = "https://micasa27822024-netizen.github.io/881fmgloriadedios/";
     const audio = document.getElementById('radioStream');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
 
     function toggleAudio() {
       if (audio.paused) {
-        // Asegura la reconexión al directo sin interrumpir la promesa del navegador
         audio.src = streamUrl + "?t=" + new Date().getTime();
         audio.play().then(() => {
           playBtn.classList.add('playing');
@@ -240,7 +239,7 @@
         });
       } else {
         audio.pause();
-        audio.removeAttribute('src'); // Detiene la descarga de datos por completo
+        audio.removeAttribute('src');
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
       }
@@ -251,10 +250,10 @@
         navigator.share({
           title: 'Radio 88.1 FM - Gloria de Dios',
           text: '¡Escuchá la radio en vivo!',
-          url: window.location.href
+          url: shareUrl
         }).catch((error) => console.log('Error al compartir:', error));
       } else {
-        navigator.clipboard.writeText(window.location.href);
+        navigator.clipboard.writeText(shareUrl);
         alert('¡Enlace de la web copiado al portapapeles!');
       }
     }
