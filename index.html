@@ -88,13 +88,13 @@
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Reproductor en la zona inferior (debajo del logo) */
+    /* Reproductor en la zona inferior */
     .player-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: auto;   /* Empuja el botón hacia la parte inferior */
-      margin-bottom: 20px; /* Distancia respecto a la caja de redes sociales */
+      margin-top: auto;
+      margin-bottom: 20px;
     }
 
     .btn-play {
@@ -111,7 +111,7 @@
       align-items: center;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      padding-left: 5px; /* Centrado óptico del ícono play */
+      padding-left: 5px;
     }
 
     .btn-play.playing {
@@ -185,35 +185,30 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Botón de compartir arriba a la derecha -->
       <div class="top-bar">
         <button class="btn-share" onclick="shareWebsite()" title="Compartir">
           <i class="fa-solid fa-share-nodes"></i>
         </button>
       </div>
 
-      <!-- Botón central de Play / Pause posicionado abajo del logo -->
       <div class="player-container">
         <button class="btn-play" id="playBtn" onclick="toggleAudio()">
           <i class="fa-solid fa-play" id="playIcon"></i>
         </button>
       </div>
 
-      <!-- Elemento de Audio conectado a la transmisión en vivo de Zeno FM -->
-      <audio id="radioStream" src="https://stream-176.surfernetwork.com/ggq0ed8yus8uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJnZ3EwZWQ4eXVzOHV2IiwiaG9zdCI6InN0cmVhbS0xNzYuc3VyZmVybmV0d29yay5jb20iLCJydHRsIjo1LCJqdGkiOiI0X2JsTW1vQVMtV1pibUJsUjVsXzRBIiwiaWF0IjoxNzg5NDEyNjI4LCJleHAiOjE3ODk0MTI2ODh9.rl4lhBd1t-FQclsvGj0PIwXCb_mEXXGfEkqR5k1i7Tg" preload="none"></audio>
+      <!-- Elemento de Audio con tipo MPEG explícito -->
+      <audio id="radioStream" src="https://stream.zeno.fm/ggq0ed8yus8uv.mp3" type="audio/mpeg" preload="none"></audio>
 
-      <!-- Pie de página con botones de Redes Sociales -->
       <div class="footer-section">
         <div class="footer-title">¡Mándanos un mensaje!</div>
         <div class="footer-subtitle">Y seguinos en las redes sociales</div>
 
         <div class="social-buttons">
-          <!-- Reemplazá con los enlaces reales a tus redes -->
           <a href="https://facebook.com/tu_pagina" target="_blank" class="social-btn facebook" title="Facebook">
             <i class="fa-brands fa-facebook-f"></i>
           </a>
           
-          <!-- Reemplazá el número de teléfono con tu número completo con código de área -->
           <a href="https://wa.me/5491100000000?text=Hola%20Radio%2088.1%20FM" target="_blank" class="social-btn whatsapp" title="WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
           </a>
@@ -227,16 +222,15 @@
   </div>
 
   <script>
-    const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv";
+    const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
     const audio = document.getElementById('radioStream');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
 
     function toggleAudio() {
       if (audio.paused) {
-        // Recargar la URL al dar Play para conectar siempre al vivo exacto
-        audio.src = streamUrl;
-        audio.load();
+        // Asegura la reconexión al directo sin interrumpir la promesa del navegador
+        audio.src = streamUrl + "?t=" + new Date().getTime();
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
@@ -246,13 +240,12 @@
         });
       } else {
         audio.pause();
-        audio.src = ""; // Corta la descarga de datos en segundo plano
+        audio.removeAttribute('src'); // Detiene la descarga de datos por completo
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
       }
     }
 
-    // Función del botón Compartir usando la API nativa del navegador
     function shareWebsite() {
       if (navigator.share) {
         navigator.share({
@@ -261,7 +254,6 @@
           url: window.location.href
         }).catch((error) => console.log('Error al compartir:', error));
       } else {
-        // Alternativa para navegadores de escritorio que no soportan Web Share
         navigator.clipboard.writeText(window.location.href);
         alert('¡Enlace de la web copiado al portapapeles!');
       }
