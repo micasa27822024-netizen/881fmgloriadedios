@@ -167,35 +167,6 @@
       gap: 12px;
     }
 
-    .equalizer {
-      display: flex;
-      align-items: flex-end;
-      height: 18px;
-      gap: 4px;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .equalizer.active { opacity: 1; }
-
-    .bar {
-      width: 4px;
-      height: 100%;
-      background: #f59e0b;
-      border-radius: 2px;
-      animation: bounce 1.2s infinite ease-in-out alternate;
-    }
-
-    .bar:nth-child(1) { animation-delay: 0.1s; }
-    .bar:nth-child(2) { animation-delay: 0.4s; }
-    .bar:nth-child(3) { animation-delay: 0.2s; }
-    .bar:nth-child(4) { animation-delay: 0.5s; }
-
-    @keyframes bounce {
-      0% { height: 4px; }
-      100% { height: 20px; }
-    }
-
     .btn-play {
       width: 85px;
       height: 85px;
@@ -385,13 +356,6 @@
 
       <!-- Reproductor -->
       <div class="player-container">
-        <div class="equalizer" id="equalizer">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-        </div>
-
         <button class="btn-play" id="playBtn" onclick="toggleAudio()">
           <i class="fa-solid fa-play" id="playIcon"></i>
         </button>
@@ -462,7 +426,6 @@
     const audio = document.getElementById('radioStream');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
-    const equalizer = document.getElementById('equalizer');
     const volSlider = document.getElementById('volSlider');
     const volIcon = document.getElementById('volIcon');
 
@@ -505,12 +468,10 @@
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
-          equalizer.classList.add('active');
           setupMediaSession();
         }).catch(error => {
           playIcon.className = 'fa-solid fa-play';
           playBtn.classList.remove('playing');
-          equalizer.classList.remove('active');
           alert("No se pudo conectar con el servidor.");
         });
       } else {
@@ -518,7 +479,6 @@
         audio.removeAttribute('src');
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
-        equalizer.classList.remove('active');
       }
     }
 
