@@ -348,10 +348,10 @@
         </div>
       </div>
 
-      <!-- Versículo Bíblico Rotativo -->
+      <!-- Versículo Bíblico Diario -->
       <div class="verse-card">
-        <div class="verse-text" id="verseText">"El Señor es mi pastor; nada me faltará."</div>
-        <div class="verse-ref" id="verseRef">Salmos 23:1</div>
+        <div class="verse-text" id="verseText"></div>
+        <div class="verse-ref" id="verseRef"></div>
       </div>
 
       <!-- Reproductor -->
@@ -432,20 +432,27 @@
     let timerTimeout = null;
     let timerMinutes = 0;
 
-    // Versículos rotativos
+    // Colección de versículos para rotación diaria
     const verses = [
       { text: '"El Señor es mi pastor; nada me faltará."', ref: "Salmos 23:1" },
       { text: '"Todo lo puedo en Cristo que me fortalece."', ref: "Filipenses 4:13" },
       { text: '"Porque yo sé los pensamientos que tengo acerca de vosotros..."', ref: "Jeremías 29:11" },
       { text: '"Clama a mí, y yo te responderé, y te enseñaré cosas grandes..."', ref: "Jeremías 33:3" }
     ];
-    let verseIndex = 0;
 
-    setInterval(() => {
-      verseIndex = (verseIndex + 1) % verses.length;
+    // Lógica para establecer el versículo del día (se actualiza cada 24 horas a medianoche)
+    function setDailyVerse() {
+      const now = new Date();
+      // Calcula los días enteros transcurridos desde la época Unix
+      const currentDay = Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
+      const verseIndex = currentDay % verses.length;
+
       document.getElementById('verseText').innerText = verses[verseIndex].text;
       document.getElementById('verseRef').innerText = verses[verseIndex].ref;
-    }, 10000);
+    }
+
+    // Inicializar versículo diario
+    setDailyVerse();
 
     function setupMediaSession() {
       if ('mediaSession' in navigator) {
