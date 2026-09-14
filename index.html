@@ -29,7 +29,6 @@
       left: 0;
       width: 100%;
       height: 100%;
-      /* Reemplazá 'fondo.jpg' por el nombre de tu imagen si usás otro */
       background: url('fondo.jpg') no-repeat center center/cover;
       display: flex;
       flex-direction: column;
@@ -200,9 +199,8 @@
         </button>
       </div>
 
-      <!-- Elemento de Audio en streaming -->
-      <!-- REEMPLAZÁ 'https://tu-servidor-stream.com/stream' POR LA URL DIRECTA DE TU STREAM DE RADIO -->
-      <audio id="radioStream" src="https://tu-servidor-stream.com/stream"></audio>
+      <!-- Elemento de Audio conectado a la transmisión en vivo de Zeno FM -->
+      <audio id="radioStream" src="https://stream.zeno.fm/ggq0ed8yus8uv" preload="none"></audio>
 
       <!-- Pie de página con botones de Redes Sociales -->
       <div class="footer-section">
@@ -215,7 +213,7 @@
             <i class="fa-brands fa-facebook-f"></i>
           </a>
           
-          <!-- Reemplazá el número de teléfono con código de país (ejemplo: 5491123456789) -->
+          <!-- Reemplazá el número de teléfono con tu número completo con código de área -->
           <a href="https://wa.me/5491100000000?text=Hola%20Radio%2088.1%20FM" target="_blank" class="social-btn whatsapp" title="WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
           </a>
@@ -229,12 +227,16 @@
   </div>
 
   <script>
+    const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv";
     const audio = document.getElementById('radioStream');
     const playBtn = document.getElementById('playBtn');
     const playIcon = document.getElementById('playIcon');
 
     function toggleAudio() {
       if (audio.paused) {
+        // Recargar la URL al dar Play para conectar siempre al vivo exacto
+        audio.src = streamUrl;
+        audio.load();
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
@@ -244,6 +246,7 @@
         });
       } else {
         audio.pause();
+        audio.src = ""; // Corta la descarga de datos en segundo plano
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
       }
