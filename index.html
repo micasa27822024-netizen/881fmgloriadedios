@@ -305,9 +305,33 @@
     .schedule-item {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
-      padding: 8px 0;
+      align-items: center;
+      padding: 10px 0;
       border-bottom: 1px dashed rgba(255,255,255,0.1);
+    }
+
+    .schedule-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .schedule-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .schedule-days {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .schedule-time {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f59e0b;
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -394,28 +418,36 @@
     </div>
   </div>
 
-  <!-- Modal de Programación -->
+  <!-- Modal de Programación Real -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-radio"></i> Programación</h3>
         <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal(false)"></i>
       </div>
+      
       <div class="schedule-item">
-        <span>Mañanas de Bendición</span>
-        <strong style="color: #f59e0b;">08:00 - 12:00</strong>
+        <div class="schedule-info">
+          <span class="schedule-title">Caminando en Libertad</span>
+          <span class="schedule-days">Lunes, Miércoles y Viernes</span>
+        </div>
+        <span class="schedule-time">10:00 - 12:00</span>
       </div>
+
       <div class="schedule-item">
-        <span>Alabanzas en Vivo</span>
-        <strong style="color: #f59e0b;">12:00 - 16:00</strong>
+        <div class="schedule-info">
+          <span class="schedule-title">Transformando tu Vida</span>
+          <span class="schedule-days">Jueves</span>
+        </div>
+        <span class="schedule-time">09:00 - 11:00</span>
       </div>
+
       <div class="schedule-item">
-        <span>Palabra y Esperanza</span>
-        <strong style="color: #f59e0b;">16:00 - 20:00</strong>
-      </div>
-      <div class="schedule-item">
-        <span>Noche de Adoración</span>
-        <strong style="color: #f59e0b;">20:00 - 00:00</strong>
+        <div class="schedule-info">
+          <span class="schedule-title">Conectados</span>
+          <span class="schedule-days">Miércoles</span>
+        </div>
+        <span class="schedule-time">18:00 - 20:00</span>
       </div>
     </div>
   </div>
@@ -443,7 +475,6 @@
     // Lógica para establecer el versículo del día (se actualiza cada 24 horas a medianoche)
     function setDailyVerse() {
       const now = new Date();
-      // Calcula los días enteros transcurridos desde la época Unix
       const currentDay = Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
       const verseIndex = currentDay % verses.length;
 
