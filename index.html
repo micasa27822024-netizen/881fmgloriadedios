@@ -22,7 +22,7 @@
       color: #ffffff;
     }
 
-    /* Fondo de pantalla completa */
+    /* Fondo por defecto para celulares (imagen vertical) */
     .background-container {
       position: fixed;
       top: 0;
@@ -35,6 +35,13 @@
       justify-content: space-between;
       align-items: center;
       padding: 20px;
+    }
+
+    /* Fondo para PC y pantallas anchas (imagen horizontal) */
+    @media (min-width: 768px) {
+      .background-container {
+        background-image: url('fondo-pc.jpg');
+      }
     }
 
     /* Capa oscura suave para resaltar los botones */
@@ -127,6 +134,7 @@
     /* Sección Inferior: Mensajes y Redes Sociales */
     .footer-section {
       width: 100%;
+      max-width: 600px;
       text-align: center;
       background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(10px);
@@ -204,17 +212,14 @@
         <div class="footer-subtitle">Y seguinos en las redes sociales</div>
 
         <div class="social-buttons">
-          <!-- Facebook -->
           <a href="https://www.facebook.com/people/881-FM-Gloria-de-Dios/61582872864718/" target="_blank" class="social-btn facebook" title="Facebook">
             <i class="fa-brands fa-facebook-f"></i>
           </a>
           
-          <!-- WhatsApp -->
           <a href="https://wa.me/5493416948385?text=Hola%20Radio%2088.1%20FM" target="_blank" class="social-btn whatsapp" title="WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
           </a>
 
-          <!-- YouTube -->
           <a href="https://www.youtube.com/@iglesiamontedesantidad6232" target="_blank" class="social-btn youtube" title="YouTube">
             <i class="fa-brands fa-youtube"></i>
           </a>
