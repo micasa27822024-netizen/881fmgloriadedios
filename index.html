@@ -37,14 +37,12 @@
       padding: 20px;
     }
 
-    /* Fondo para PC y pantallas anchas */
     @media (min-width: 768px) {
       .background-container {
         background-image: url('fondo-pc.jpg');
       }
     }
 
-    /* Capa oscura suave */
     .overlay {
       position: absolute;
       top: 0;
@@ -55,7 +53,6 @@
       z-index: 1;
     }
 
-    /* Contenido principal */
     .content {
       position: relative;
       z-index: 2;
@@ -75,7 +72,6 @@
       align-items: center;
     }
 
-    /* Badge EN VIVO */
     .live-badge {
       background: rgba(220, 38, 38, 0.85);
       backdrop-filter: blur(8px);
@@ -108,7 +104,7 @@
 
     .top-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
     .btn-top {
@@ -116,13 +112,13 @@
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.4);
       color: white;
-      height: 42px;
-      padding: 0 14px;
-      border-radius: 21px;
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
@@ -135,29 +131,52 @@
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Reproductor en la zona inferior */
+    /* Tarjeta de Versículo Rotativo */
+    .verse-card {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 10px 16px;
+      max-width: 90%;
+      text-align: center;
+      margin-top: 15px;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .verse-text {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: #f3f4f6;
+    }
+
+    .verse-ref {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #f59e0b;
+      margin-top: 3px;
+    }
+
+    /* Reproductor */
     .player-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: auto;
-      margin-bottom: 20px;
-      gap: 15px;
+      margin-bottom: 15px;
+      gap: 12px;
     }
 
-    /* Ecualizador animado */
     .equalizer {
       display: flex;
       align-items: flex-end;
-      height: 20px;
+      height: 18px;
       gap: 4px;
       opacity: 0;
       transition: opacity 0.3s;
     }
 
-    .equalizer.active {
-      opacity: 1;
-    }
+    .equalizer.active { opacity: 1; }
 
     .bar {
       width: 4px;
@@ -174,7 +193,7 @@
 
     @keyframes bounce {
       0% { height: 4px; }
-      100% { height: 22px; }
+      100% { height: 20px; }
     }
 
     .btn-play {
@@ -200,11 +219,6 @@
       box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
     }
 
-    .btn-play:hover {
-      transform: scale(1.08);
-    }
-
-    /* Control de Volumen */
     .volume-container {
       display: flex;
       align-items: center;
@@ -218,7 +232,7 @@
 
     .volume-slider {
       -webkit-appearance: none;
-      width: 80px;
+      width: 75px;
       height: 4px;
       border-radius: 2px;
       background: rgba(255, 255, 255, 0.4);
@@ -234,7 +248,7 @@
       cursor: pointer;
     }
 
-    /* Sección Inferior: Mensajes y Redes Sociales */
+    /* Pie de Página */
     .footer-section {
       width: 100%;
       max-width: 600px;
@@ -263,32 +277,67 @@
     .social-buttons {
       display: flex;
       justify-content: center;
-      gap: 18px;
+      gap: 16px;
     }
 
     .social-btn {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       text-decoration: none;
       transition: transform 0.2s, filter 0.2s;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
-    .social-btn:hover {
-      transform: translateY(-3px);
-      filter: brightness(1.15);
-    }
-
     .facebook { background-color: #1877f2; }
     .whatsapp { background-color: #25d366; }
-    .youtube  { background-color: #ff0000; }
     .oracion  { background-color: #f59e0b; }
+    .youtube  { background-color: #ff0000; }
+
+    /* Modal de Programación */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #121824;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      color: #fff;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.1);
+    }
   </style>
 </head>
 <body>
@@ -305,20 +354,37 @@
         </div>
 
         <div class="top-actions">
+          <!-- Temporizador -->
+          <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador de apagado">
+            <i class="fa-solid fa-clock"></i>
+            <span id="timerLabel">Off</span>
+          </button>
+
+          <!-- Horarios -->
+          <button class="btn-top" onclick="toggleModal(true)" title="Programación">
+            <i class="fa-solid fa-calendar-days"></i>
+          </button>
+
+          <!-- App -->
           <a href="https://www.appcreator24.com/app4188732-4ujkte" target="_blank" class="btn-top" title="Descargar App">
             <i class="fa-solid fa-mobile-screen-button"></i>
-            <span>App</span>
           </a>
 
+          <!-- Compartir -->
           <button class="btn-top" onclick="shareWebsite()" title="Compartir">
             <i class="fa-solid fa-share-nodes"></i>
           </button>
         </div>
       </div>
 
-      <!-- Contenedor del Reproductor -->
+      <!-- Versículo Bíblico Rotativo -->
+      <div class="verse-card">
+        <div class="verse-text" id="verseText">"El Señor es mi pastor; nada me faltará."</div>
+        <div class="verse-ref" id="verseRef">Salmos 23:1</div>
+      </div>
+
+      <!-- Reproductor -->
       <div class="player-container">
-        <!-- Ecualizador de Audio -->
         <div class="equalizer" id="equalizer">
           <div class="bar"></div>
           <div class="bar"></div>
@@ -326,12 +392,10 @@
           <div class="bar"></div>
         </div>
 
-        <!-- Botón Play/Pause -->
         <button class="btn-play" id="playBtn" onclick="toggleAudio()">
           <i class="fa-solid fa-play" id="playIcon"></i>
         </button>
 
-        <!-- Control de Volumen -->
         <div class="volume-container">
           <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.9rem;"></i>
           <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
@@ -340,7 +404,7 @@
 
       <audio id="radioStream" src="https://stream.zeno.fm/ggq0ed8yus8uv.mp3" type="audio/mpeg" preload="none"></audio>
 
-      <!-- Pie de página con redes -->
+      <!-- Pie de página -->
       <div class="footer-section">
         <div class="footer-title">¡Mándanos un mensaje!</div>
         <div class="footer-subtitle">Y seguinos en las redes sociales</div>
@@ -366,6 +430,32 @@
     </div>
   </div>
 
+  <!-- Modal de Programación -->
+  <div class="modal" id="scheduleModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-radio"></i> Programación</h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal(false)"></i>
+      </div>
+      <div class="schedule-item">
+        <span>Mañanas de Bendición</span>
+        <strong style="color: #f59e0b;">08:00 - 12:00</strong>
+      </div>
+      <div class="schedule-item">
+        <span>Alabanzas en Vivo</span>
+        <strong style="color: #f59e0b;">12:00 - 16:00</strong>
+      </div>
+      <div class="schedule-item">
+        <span>Palabra y Esperanza</span>
+        <strong style="color: #f59e0b;">16:00 - 20:00</strong>
+      </div>
+      <div class="schedule-item">
+        <span>Noche de Adoración</span>
+        <strong style="color: #f59e0b;">20:00 - 00:00</strong>
+      </div>
+    </div>
+  </div>
+
   <script>
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
     const shareUrl = "https://www.appcreator24.com/app4188732-4ujkte";
@@ -376,7 +466,23 @@
     const volSlider = document.getElementById('volSlider');
     const volIcon = document.getElementById('volIcon');
 
-    let lastVolume = 1;
+    let timerTimeout = null;
+    let timerMinutes = 0;
+
+    // Versículos rotativos
+    const verses = [
+      { text: '"El Señor es mi pastor; nada me faltará."', ref: "Salmos 23:1" },
+      { text: '"Todo lo puedo en Cristo que me fortalece."', ref: "Filipenses 4:13" },
+      { text: '"Porque yo sé los pensamientos que tengo acerca de vosotros..."', ref: "Jeremías 29:11" },
+      { text: '"Clama a mí, y yo te responderé, y te enseñaré cosas grandes..."', ref: "Jeremías 33:3" }
+    ];
+    let verseIndex = 0;
+
+    setInterval(() => {
+      verseIndex = (verseIndex + 1) % verses.length;
+      document.getElementById('verseText').innerText = verses[verseIndex].text;
+      document.getElementById('verseRef').innerText = verses[verseIndex].ref;
+    }, 10000);
 
     function setupMediaSession() {
       if ('mediaSession' in navigator) {
@@ -384,37 +490,28 @@
           title: 'Radio 88.1 FM',
           artist: 'Gloria de Dios',
           album: 'En Vivo',
-          artwork: [
-            { src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }
-          ]
+          artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
         });
 
         navigator.mediaSession.setActionHandler('play', () => { if (audio.paused) toggleAudio(); });
         navigator.mediaSession.setActionHandler('pause', () => { if (!audio.paused) toggleAudio(); });
-        navigator.mediaSession.setActionHandler('stop', () => { if (!audio.paused) toggleAudio(); });
       }
     }
 
     function toggleAudio() {
       if (audio.paused) {
         playIcon.className = 'fa-solid fa-spinner fa-spin';
-
         audio.src = streamUrl + "?t=" + new Date().getTime();
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
           equalizer.classList.add('active');
-
           setupMediaSession();
-          if ('mediaSession' in navigator) {
-            navigator.mediaSession.playbackState = 'playing';
-          }
         }).catch(error => {
-          console.error("Error al reproducir audio:", error);
           playIcon.className = 'fa-solid fa-play';
           playBtn.classList.remove('playing');
           equalizer.classList.remove('active');
-          alert("No se pudo conectar con el servidor de la radio.");
+          alert("No se pudo conectar con el servidor.");
         });
       } else {
         audio.pause();
@@ -422,45 +519,57 @@
         playBtn.classList.remove('playing');
         playIcon.className = 'fa-solid fa-play';
         equalizer.classList.remove('active');
-
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-        }
       }
     }
 
+    /* Temporizador de apagado */
+    function cycleTimer() {
+      if (timerMinutes === 0) timerMinutes = 15;
+      else if (timerMinutes === 15) timerMinutes = 30;
+      else if (timerMinutes === 30) timerMinutes = 60;
+      else timerMinutes = 0;
+
+      clearTimeout(timerTimeout);
+      const label = document.getElementById('timerLabel');
+
+      if (timerMinutes > 0) {
+        label.innerText = timerMinutes + 'm';
+        timerTimeout = setTimeout(() => {
+          if (!audio.paused) toggleAudio();
+          timerMinutes = 0;
+          label.innerText = 'Off';
+        }, timerMinutes * 60 * 1000);
+      } else {
+        label.innerText = 'Off';
+      }
+    }
+
+    /* Controles de volumen */
     function setVolume(val) {
       audio.volume = val;
-      if (val == 0) {
-        volIcon.className = 'fa-solid fa-volume-xmark';
-      } else if (val < 0.5) {
-        volIcon.className = 'fa-solid fa-volume-low';
-      } else {
-        volIcon.className = 'fa-solid fa-volume-high';
-      }
+      volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
     }
 
     function toggleMute() {
       if (audio.volume > 0) {
-        lastVolume = audio.volume;
         volSlider.value = 0;
         setVolume(0);
       } else {
-        volSlider.value = lastVolume || 1;
-        setVolume(volSlider.value);
+        volSlider.value = 1;
+        setVolume(1);
       }
+    }
+
+    function toggleModal(show) {
+      document.getElementById('scheduleModal').style.display = show ? 'flex' : 'none';
     }
 
     function shareWebsite() {
       if (navigator.share) {
-        navigator.share({
-          title: 'Radio 88.1 FM - Gloria de Dios',
-          text: '¡Escuchá la radio en vivo!',
-          url: shareUrl
-        }).catch((error) => console.log('Error al compartir:', error));
+        navigator.share({ title: 'Radio 88.1 FM', text: '¡Escuchá la radio en vivo!', url: shareUrl });
       } else {
         navigator.clipboard.writeText(shareUrl);
-        alert('¡Enlace copiado al portapapeles!');
+        alert('¡Enlace copiado!');
       }
     }
   </script>
