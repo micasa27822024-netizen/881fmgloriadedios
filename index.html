@@ -237,12 +237,17 @@
 
     function toggleAudio() {
       if (audio.paused) {
+        // Muestra icono de cargando (ruedita girando) mientras conecta
+        playIcon.className = 'fa-solid fa-spinner fa-spin';
+
         audio.src = streamUrl + "?t=" + new Date().getTime();
         audio.play().then(() => {
           playBtn.classList.add('playing');
           playIcon.className = 'fa-solid fa-pause';
         }).catch(error => {
           console.error("Error al reproducir audio:", error);
+          playIcon.className = 'fa-solid fa-play';
+          playBtn.classList.remove('playing');
           alert("No se pudo conectar con el servidor de la radio.");
         });
       } else {
