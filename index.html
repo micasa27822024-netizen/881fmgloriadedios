@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radio 88.1 FM - Gloria de Dios</title>
+  
+  <!-- Iconos de FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      color: #ffffff;
+    }
+
+    /* Fondo de pantalla completa */
+    .background-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Reemplazá 'fondo.jpg' por el nombre de tu imagen */
+      background: url('fondo.jpg') no-repeat center center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Capa oscura suave para resaltar los botones */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.25);
+      z-index: 1;
+    }
+
+    /* Contenido sobre la capa */
+    .content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Botón superior de compartir */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-share {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-share:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Reproductor central */
+    .player-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-play {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: 4px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+      color: white;
+      font-size: 2.2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      padding-left: 5px; /* Centrado óptico del ícono play */
+    }
+
+    .btn-play.playing {
+      padding-left: 0;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+    }
+
+    .btn-play:hover {
+      transform: scale(1.08);
+    }
+
+    /* Sección Inferior: Mensajes y Redes Sociales */
+    .footer-section {
+      width: 100%;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      padding: 15px 10px 25px 10px;
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .footer-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-subtitle {
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      margin-bottom: 12px;
+    }
+
+    .social-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .social-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 1.5rem;
+      text-decoration: none;
+      transition: transform 0.2s, filter 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .social-btn:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.15);
+    }
+
+    .facebook { background-color: #1877f2; }
+    .whatsapp { background-color: #25d366; }
+    .youtube  { background-color: #ff0000; }
+  </style>
+</head>
+<body>
+
+  <div class="background-container">
+    <div class="overlay"></div>
+
+    <div class="content">
+      <!-- Botón de compartir arriba a la derecha -->
+      <div class="top-bar">
+        <button class="btn-share" onclick="shareWebsite()" title="Compartir">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+      </div>
+
+      <!-- Botón central de Play / Pause -->
+      <div class="player-container">
+        <button class="btn-play" id="playBtn" onclick="toggleAudio()">
+          <i class="fa-solid fa-play" id="playIcon"></i>
+        </button>
+      </div>
+
+      <!-- Elemento de Audio en streaming -->
+      <!-- REEMPLAZÁ 'https://TU_STREAMING_URL' POR LA URL DIRECTA DE TU STREAM DE RADIO -->
+      <audio id="radioStream" src="https://tu-servidor-stream.com/stream"></audio>
+
+      <!-- Pie de página con botones de Redes Sociales -->
+      <div class="footer-section">
+        <div class="footer-title">¡Mándanos un mensaje!</div>
+        <div class="footer-subtitle">Y seguinos en las redes sociales</div>
+
+        <div class="social-buttons">
+          <!-- Reemplazá con los enlaces reales a tus redes -->
+          <a href="https://facebook.com/tu_pagina" target="_blank" class="social-btn facebook" title="Facebook">
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+          
+          <!-- Reemplazá el número de teléfono con código de país (ejemplo: 5491123456789) -->
+          <a href="https://wa.me/5491100000000?text=Hola%20Radio%2088.1%20FM" target="_blank" class="social-btn whatsapp" title="WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
+
+          <a href="https://youtube.com/@tu_canal" target="_blank" class="social-btn youtube" title="YouTube">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('radioStream');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+
+    function toggleAudio() {
+      if (audio.paused) {
+        audio.play().then(() => {
+          playBtn.classList.add('playing');
+          playIcon.className = 'fa-solid fa-pause';
+        }).catch(error => {
+          console.error("Error al reproducir audio:", error);
+          alert("No se pudo conectar con el servidor de la radio.");
+        });
+      } else {
+        audio.pause();
+        playBtn.classList.remove('playing');
+        playIcon.className = 'fa-solid fa-play';
+      }
+    }
+
+    // Función del botón Compartir usando la API nativa del navegador
+    function shareWebsite() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Radio 88.1 FM - Gloria de Dios',
+          text: '¡Escuchá la radio en vivo!',
+          url: window.location.href
+        }).catch((error) => console.log('Error al compartir:', error));
+      } else {
+        // Alternativa para navegadores de escritorio que no soportan Web Share
+        navigator.clipboard.writeText(window.location.href);
+        alert('¡Enlace de la web copiado al portapapeles!');
+      }
+    }
+  </script>
+</body>
+</html>
