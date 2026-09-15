@@ -264,7 +264,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior limpia y sin botones molestos -->
+      <!-- Barra Superior limpia -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -343,7 +343,7 @@
               <i class="fa-solid fa-share-nodes"></i>
             </button>
 
-            <!-- Botón Transmitir a TV idéntico en tamaño y formato -->
+            <!-- Botón Transmitir a TV -->
             <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
               <i class="fa-solid fa-tv"></i>
             </button>
@@ -575,14 +575,32 @@
     let isUserPaused = true;
     let isReconnecting = false;
     let wakeLock = null;
+    let castSession = null;
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
         try {
-          cast.framework.CastContext.getInstance().setOptions({
+          const context = cast.framework.CastContext.getInstance();
+          context.setOptions({
             receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
             autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGINAL_URL
           });
+
+          context.addEventListener(
+            cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+            function(event) {
+              castSession = context.getCurrentSession();
+              const castBtn = document.querySelector('.cast-btn');
+              
+              if (castSession) {
+                castBtn.style.backgroundColor = '#22c55e';
+                castBtn.title = "Transmitiendo a Smart TV (Tocar para desconectar)";
+              } else {
+                castBtn.style.backgroundColor = '#3b82f6';
+                castBtn.title = "Transmitir a Smart TV";
+              }
+            }
+          );
         } catch(e) {}
       }
     };
@@ -591,25 +609,35 @@
       try {
         if (typeof cast !== 'undefined' && cast.framework) {
           const context = cast.framework.CastContext.getInstance();
-          context.requestSession().then(() => {
-            const session = context.getCurrentSession();
-            if (session) {
-              pauseAudio();
-              const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
-              mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
-              mediaInfo.metadata.title = 'Radio 88.1 FM';
-              mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
-              mediaInfo.metadata.images = [{ url: window.location.origin + window.location.pathname.replace('index.html', '') + 'fondo.jpg' }];
-              session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
+          const currentSession = context.getCurrentSession();
+
+          if (currentSession) {
+            if (confirm("¿Deseas detener la transmisión en la Smart TV?")) {
+              currentSession.endSession(true);
             }
-          }).catch(err => {
-            alert("No se encontró ningún dispositivo Smart TV / Chromecast disponible en la red Wi-Fi.");
-          });
+          } else {
+            context.requestSession().then(() => {
+              const session = context.getCurrentSession();
+              if (session) {
+                pauseAudio();
+                const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
+                mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+                mediaInfo.metadata.title = 'Radio 88.1 FM';
+                mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
+                mediaInfo.metadata.images = [{ url: window.location.origin + window.location.pathname.replace('index.html', '') + 'fondo.jpg' }];
+                
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                session.loadMedia(request);
+              }
+            }).catch(err => {
+              console.log("Sesión de Cast cancelada o sin dispositivos cercanos.");
+            });
+          }
         } else {
-          alert("La función de transmisión requiere Google Chrome o un navegador compatible con Chromecast.");
+          alert("La función de transmisión requiere Google Chrome o un navegador compatible.");
         }
       } catch (e) {
-        alert("Para transmitir, asegúrate de estar conectado a la misma red Wi-Fi que tu Smart TV.");
+        alert("Asegurate de estar conectado a la misma red Wi-Fi que tu Smart TV.");
       }
     }
 
