@@ -116,7 +116,7 @@
       width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
 
-    /* Versículo / Metadatos de canción Rotativo */
+    /* Versículo Rotativo / Metadatos */
     .verse-card {
       background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(8px);
@@ -303,9 +303,10 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
+        <!-- Versículo Diario restaurado + Metadatos de Zeno -->
         <div class="verse-card">
-          <div class="verse-text" id="verseText">Cargando transmisión...</div>
-          <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
+          <div class="verse-text" id="verseText"></div>
+          <div class="verse-ref" id="verseRef"></div>
         </div>
 
         <div class="player-row">
@@ -583,7 +584,6 @@
     let isReconnecting = false;
     let wakeLock = null;
     let castSession = null;
-    let metadataInterval = null;
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
@@ -649,12 +649,12 @@
       }
     }
 
-    function setupMediaSession() {
+    function setupMediaSession(songTitle = 'Radio 88.1 FM') {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: currentSongTitle || 'Radio 88.1 FM',
+          title: songTitle,
           artist: 'Gloria de Dios',
-          album: 'En vivo',
+          album: '88.1 FM En Vivo',
           artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
         });
         navigator.mediaSession.setActionHandler('play', () => { playAudio(); });
@@ -664,6 +664,45 @@
     }
 
     setupMediaSession();
+
+    // --- VERSÍCULO DIARIO ---
+    const verses = [
+      { text: '"El Señor es mi pastor; nada me faltará."', ref: "Salmos 23:1" },
+      { text: '"Todo lo puedo en Cristo que me fortalece."', ref: "Filipenses 4:13" },
+      { text: '"Porque yo sé los pensamientos que tengo acerca de vosotros..."', ref: "Jeremías 29:11" },
+      { text: '"Clama a mí, y yo te responderé, y te enseñaré cosas grandes..."', ref: "Jeremías 33:3" }
+    ];
+
+    let showSongMetadata = false; // Alterna o prioriza canción/versículo
+
+    function setDailyVerse() {
+      const now = new Date();
+      const currentDay = Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
+      const verseIndex = currentDay % verses.length;
+      document.getElementById('verseText').innerText = verses[verseIndex].text;
+      document.getElementById('verseRef').innerText = verses[verseIndex].ref;
+    }
+    setDailyVerse();
+
+    // --- CONSULTAR METADATOS DE ZENO.FM ---
+    function fetchZenoMetadata() {
+      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.title) {
+            document.getElementById('verseText').innerText = "🎵 " + data.title;
+            document.getElementById('verseRef').innerText = "EN VIVO - 88.1 FM";
+            setupMediaSession(data.title);
+          }
+        })
+        .catch(err => {
+          // Si falla la API, se mantiene el versículo diario sin romper nada
+        });
+    }
+
+    // Consulta los metadatos cada 15 segundos
+    setInterval(fetchZenoMetadata, 15000);
+    fetchZenoMetadata();
 
     const workerBlob = new Blob([`
       let interval = null;
@@ -684,33 +723,6 @@
         if (audio.paused || audio.readyState < 2) { forceReconnect(); }
       }
     };
-
-    // --- CONSULTA DE METADATOS EN VIVO DE ZENO.FM ---
-    let currentSongTitle = "Radio 88.1 FM - En vivo";
-
-    function fetchZenoMetadata() {
-      // Extrae el ID del mount de tu enlace de Zeno (en tu caso: ggq0ed8yus8uv)
-      const mountId = "ggq0ed8yus8uv";
-      const url = `https://api.zeno.fm/mounts/metadata/${mountId}?t=` + new Date().getTime();
-
-      fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.title) {
-            currentSongTitle = data.title;
-            document.getElementById('verseText').innerText = currentSongTitle;
-            document.getElementById('verseRef').innerText = "Radio 88.1 FM - Transmitiendo";
-            setupMediaSession(); // Actualiza el reproductor flotante del celular
-          }
-        })
-        .catch(err => {
-          // Si falla momentáneamente, mantenemos el texto por defecto o anterior
-        });
-    }
-
-    // Iniciar la consulta periódica de metadatos (cada 10 segundos)
-    fetchZenoMetadata();
-    metadataInterval = setInterval(fetchZenoMetadata, 10000);
 
     function updateStatus(state, text) {
       statusDot.className = 'status-dot ' + state;
