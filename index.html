@@ -22,7 +22,6 @@
       color: #ffffff;
     }
 
-    /* Fondo por defecto para celulares */
     .background-container {
       position: fixed;
       top: 0;
@@ -133,7 +132,7 @@
       background: rgba(255, 255, 255, 0.35);
     }
 
-    /* Tarjeta de Versículo Rotativo */
+    /* Versículo Rotativo */
     .verse-card {
       background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(8px);
@@ -143,7 +142,6 @@
       max-width: 90%;
       text-align: center;
       margin-top: 15px;
-      transition: opacity 0.5s ease-in-out;
     }
 
     .verse-text {
@@ -159,7 +157,7 @@
       margin-top: 3px;
     }
 
-    /* Reproductor */
+    /* Reproductor Radio */
     .player-container {
       display: flex;
       flex-direction: column;
@@ -238,7 +236,6 @@
       font-weight: 700;
       margin-bottom: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .footer-subtitle {
@@ -263,7 +260,6 @@
       color: white;
       font-size: 1.3rem;
       text-decoration: none;
-      transition: transform 0.2s, filter 0.2s;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
 
@@ -290,10 +286,10 @@
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 16px;
       padding: 20px;
-      max-width: 440px;
+      max-width: 480px;
       width: 100%;
       color: #fff;
-      max-height: 85vh;
+      max-height: 88vh;
       overflow-y: auto;
     }
 
@@ -310,8 +306,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 0;
+      padding: 12px 0;
       border-bottom: 1px dashed rgba(255,255,255,0.1);
+      gap: 10px;
     }
 
     .schedule-info {
@@ -338,81 +335,59 @@
       white-space: nowrap;
     }
 
-    /* Banner & Estilos Prédicas */
-    .yt-banner {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.45));
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      padding: 12px;
-      border-radius: 12px;
-      color: white;
-      text-decoration: none;
-      transition: transform 0.2s, background 0.2s;
+    /* Estilos del Reproductor de Video Integrado */
+    .video-wrapper {
+      display: none;
       margin-bottom: 15px;
-    }
-
-    .yt-banner:hover {
-      transform: scale(1.02);
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(185, 28, 28, 0.6));
-    }
-
-    .yt-banner i.fa-satellite-dish {
-      font-size: 1.5rem;
-      color: #ef4444;
-    }
-
-    .yt-banner strong {
-      display: block;
-      font-size: 0.88rem;
-    }
-
-    .yt-banner p {
-      font-size: 0.75rem;
-      color: #d1d5db;
-    }
-
-    .btn-action-sm {
-      background: #f59e0b;
-      color: #000;
-      border: none;
-      padding: 6px 10px;
+      background: #000;
       border-radius: 12px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      transition: transform 0.2s, background 0.2s;
+      overflow: hidden;
+      border: 1px solid rgba(245, 158, 11, 0.4);
     }
 
-    .btn-action-sm:hover {
-      background: #d97706;
-      color: #fff;
-      transform: scale(1.05);
+    .video-title-bar {
+      background: #1f2937;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #f59e0b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .video-container {
-      display: none;
       position: relative;
       padding-bottom: 56.25%;
       height: 0;
-      overflow: hidden;
-      border-radius: 12px;
-      margin-top: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .video-container iframe {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       border: 0;
+    }
+
+    .btn-play-video {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-play-video:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #f87171, #ef4444);
     }
   </style>
 </head>
@@ -541,71 +516,83 @@
 
   <!-- Modal de Prédicas y Transmisiones -->
   <div class="modal" id="podcastsModal">
-    <div class="modal-content">
+    <div class="modal-content" id="modalPodcastsContent">
       <div class="modal-header">
         <h3 style="font-size: 1.1rem; color: #f59e0b;">
-          <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i> Prédicas y Mensajes
+          <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i> Prédicas & Mensajes
         </h3>
         <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="closePodcastsModal()"></i>
       </div>
 
-      <!-- Banner de Canal Oficial -->
-      <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="yt-banner">
-        <i class="fa-solid fa-satellite-dish"></i>
-        <div>
-          <strong>Canal Oficial de Transmisiones</strong>
-          <p>Ver cultos en vivo y grabado en YouTube</p>
+      <!-- Reproductor de Video Integrado -->
+      <div class="video-wrapper" id="videoWrapper">
+        <div class="video-title-bar">
+          <span id="videoTitleDisplay">Reproduciendo...</span>
+          <i class="fa-solid fa-xmark" style="cursor: pointer;" onclick="closeEmbeddedVideo()"></i>
         </div>
-        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.8rem; margin-left: auto;"></i>
-      </a>
-
-      <!-- Contenedor del Reproductor de Video Integrado -->
-      <div class="video-container" id="videoBox">
-        <iframe id="ytPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      </div>
-
-      <div style="margin-top: 15px; font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase;">
-        Últimas Reuniones
-      </div>
-
-      <!-- Lista de Prédicas -->
-      <div class="schedule-item">
-        <div class="schedule-info">
-          <span class="schedule-title">Domingo - Día del Señor</span>
-          <span class="schedule-days">Reunión Principal & Adoración</span>
+        <div class="video-container">
+          <iframe id="ytIframePlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
-        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
-          <i class="fa-solid fa-play"></i> Ver
-        </a>
       </div>
 
+      <div style="font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px;">
+        Selecciona una transmisión para ver:
+      </div>
+
+      <!-- Lista de Prédicas Integradas -->
       <div class="schedule-item">
         <div class="schedule-info">
           <span class="schedule-title">Oración por las Familias</span>
           <span class="schedule-days">Martes de Clamor e Intercesión</span>
         </div>
-        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
-          <i class="fa-solid fa-play"></i> Ver
-        </a>
+        <button onclick="playEmbeddedVideo('3LLeyVYAJ_A', 'Oración por las Familias')" class="btn-play-video">
+          <i class="fa-solid fa-play"></i> Ver aquí
+        </button>
       </div>
 
       <div class="schedule-item">
         <div class="schedule-info">
-          <span class="schedule-title">Noche de Liberación y Milagros</span>
-          <span class="schedule-days">Sábados de Fe & Poder</span>
+          <span class="schedule-title">Domingo - Día del Señor</span>
+          <span class="schedule-days">Reunión Principal & Adoración</span>
         </div>
-        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
-          <i class="fa-solid fa-play"></i> Ver
-        </a>
+        <button onclick="playEmbeddedVideo('Fgg8xCU_05E', 'Domingo - Día del Señor')" class="btn-play-video">
+          <i class="fa-solid fa-play"></i> Ver aquí
+        </button>
       </div>
 
       <div class="schedule-item">
         <div class="schedule-info">
-          <span class="schedule-title">Estudio Bíblico & Discipulado</span>
+          <span class="schedule-title">Programa Conectados</span>
+          <span class="schedule-days">Miércoles de Transmisión Especial</span>
+        </div>
+        <button onclick="playEmbeddedVideo('moqBe6Tn7hg', 'Programa Conectados')" class="btn-play-video">
+          <i class="fa-solid fa-play"></i> Ver aquí
+        </button>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Reunión Especial - Ap. Héctor Giménez</span>
+          <span class="schedule-days">Edición Especial</span>
+        </div>
+        <button onclick="playEmbeddedVideo('8jZ_BK1vHXg', 'Reunión Especial - Ap. Héctor Giménez')" class="btn-play-video">
+          <i class="fa-solid fa-play"></i> Ver aquí
+        </button>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Transformando tu Vida</span>
           <span class="schedule-days">Jueves de Enseñanza</span>
         </div>
-        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
-          <i class="fa-solid fa-play"></i> Ver
+        <button onclick="playEmbeddedVideo('jY40c0Wolrk', 'Transformando tu Vida')" class="btn-play-video">
+          <i class="fa-solid fa-play"></i> Ver aquí
+        </button>
+      </div>
+
+      <div style="margin-top: 15px; text-align: center;">
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" style="color: #9ca3af; font-size: 0.78rem; text-decoration: underline;">
+          <i class="fa-brands fa-youtube"></i> Abrir canal completo en YouTube
         </a>
       </div>
     </div>
@@ -625,7 +612,7 @@
     let isUserPaused = true;
     let isReconnecting = false;
 
-    // Colección de versículos para rotación diaria
+    // Versículos rotativos
     const verses = [
       { text: '"El Señor es mi pastor; nada me faltará."', ref: "Salmos 23:1" },
       { text: '"Todo lo puedo en Cristo que me fortalece."', ref: "Filipenses 4:13" },
@@ -666,8 +653,7 @@
     }
 
     function playAudio() {
-      // Si hay un video de YouTube reproduciéndose, se detiene
-      closeVideoEmbedded();
+      closeEmbeddedVideo(); // Detiene cualquier video de YouTube que esté sonando
 
       isUserPaused = false;
       playIcon.className = 'fa-solid fa-spinner fa-spin';
@@ -759,23 +745,38 @@
       if (!isUserPaused) forceReconnect();
     });
 
-    /* Funciones para Prédicas y Modales */
+    /* Funciones para Prédicas con Reproductor Integrado */
+    function playEmbeddedVideo(videoId, title) {
+      pauseAudio(); // Pausa automáticamente la radio en vivo
+
+      const wrapper = document.getElementById('videoWrapper');
+      const player = document.getElementById('ytIframePlayer');
+      const titleDisplay = document.getElementById('videoTitleDisplay');
+
+      titleDisplay.innerText = title;
+      player.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+      wrapper.style.display = 'block';
+
+      // Desplaza el modal suavemente hacia arriba para enfocar el video
+      document.getElementById('modalPodcastsContent').scrollTop = 0;
+    }
+
+    function closeEmbeddedVideo() {
+      const wrapper = document.getElementById('videoWrapper');
+      const player = document.getElementById('ytIframePlayer');
+      if (wrapper && player) {
+        player.src = '';
+        wrapper.style.display = 'none';
+      }
+    }
+
     function toggleModal(modalId, show) {
       document.getElementById(modalId).style.display = show ? 'flex' : 'none';
     }
 
     function closePodcastsModal() {
-      closeVideoEmbedded();
+      closeEmbeddedVideo();
       toggleModal('podcastsModal', false);
-    }
-
-    function closeVideoEmbedded() {
-      const box = document.getElementById('videoBox');
-      const player = document.getElementById('ytPlayer');
-      if (box && player) {
-        player.src = '';
-        box.style.display = 'none';
-      }
     }
 
     /* Temporizador de apagado */
