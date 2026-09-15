@@ -700,35 +700,25 @@
     }
     setDailyVerse();
 
-    // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ---
+    // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
     function fetchZenoMetadata() {
-      const targetUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
-      const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl + '?t=' + new Date().getTime());
+      const zenoApiUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
+      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(zenoApiUrl + '?t=' + new Date().getTime());
 
       fetch(proxyUrl, { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.contents) {
-          let songTitle = "";
-          try {
-            const parsed = JSON.parse(data.contents);
-            songTitle = parsed.title || "";
-          } catch (e) {
-            songTitle = data.contents;
-          }
-
+        .then(res => res.json())
+        .then(data => {
           const songTextElement = document.getElementById('songInfoText');
-          if (songTitle && songTitle.trim() !== "" && !songTitle.startsWith("<")) {
-            songTextElement.innerText = songTitle;
-            setupMediaSession(songTitle);
+          if (data && data.title) {
+            songTextElement.innerText = data.title;
+            setupMediaSession(data.title);
           } else {
             songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
           }
-        }
-      })
-      .catch(err => {
-        console.warn("Actualizando metadatos...", err);
-      });
+        })
+        .catch(err => {
+          console.warn("Actualizando metadatos de Zeno...", err);
+        });
     }
 
     // Consulta los metadatos cada 5 segundos
