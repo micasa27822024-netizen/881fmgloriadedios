@@ -104,7 +104,9 @@
 
     .top-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .btn-top {
@@ -270,12 +272,12 @@
     .oracion  { background-color: #f59e0b; }
     .youtube  { background-color: #ff0000; }
 
-    /* Modal de Programación */
+    /* Modales */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       backdrop-filter: blur(8px);
       z-index: 10;
       justify-content: center;
@@ -288,9 +290,11 @@
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 16px;
       padding: 20px;
-      max-width: 400px;
+      max-width: 440px;
       width: 100%;
       color: #fff;
+      max-height: 85vh;
+      overflow-y: auto;
     }
 
     .modal-header {
@@ -333,6 +337,83 @@
       color: #f59e0b;
       white-space: nowrap;
     }
+
+    /* Banner & Estilos Prédicas */
+    .yt-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.45));
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      padding: 12px;
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      transition: transform 0.2s, background 0.2s;
+      margin-bottom: 15px;
+    }
+
+    .yt-banner:hover {
+      transform: scale(1.02);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.35), rgba(185, 28, 28, 0.6));
+    }
+
+    .yt-banner i.fa-satellite-dish {
+      font-size: 1.5rem;
+      color: #ef4444;
+    }
+
+    .yt-banner strong {
+      display: block;
+      font-size: 0.88rem;
+    }
+
+    .yt-banner p {
+      font-size: 0.75rem;
+      color: #d1d5db;
+    }
+
+    .btn-action-sm {
+      background: #f59e0b;
+      color: #000;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-action-sm:hover {
+      background: #d97706;
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    .video-container {
+      display: none;
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-top: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
   </style>
 </head>
 <body>
@@ -356,8 +437,14 @@
           </button>
 
           <!-- Horarios -->
-          <button class="btn-top" onclick="toggleModal(true)" title="Programación">
+          <button class="btn-top" onclick="toggleModal('scheduleModal', true)" title="Programación">
             <i class="fa-solid fa-calendar-days"></i>
+          </button>
+
+          <!-- Prédicas y YouTube -->
+          <button class="btn-top" onclick="toggleModal('podcastsModal', true)" title="Prédicas y Transmisiones">
+            <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i>
+            <span>Prédicas</span>
           </button>
 
           <!-- App -->
@@ -418,12 +505,12 @@
     </div>
   </div>
 
-  <!-- Modal de Programación Real -->
+  <!-- Modal de Programación -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-radio"></i> Programación</h3>
-        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal(false)"></i>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('scheduleModal', false)"></i>
       </div>
       
       <div class="schedule-item">
@@ -452,6 +539,78 @@
     </div>
   </div>
 
+  <!-- Modal de Prédicas y Transmisiones -->
+  <div class="modal" id="podcastsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #f59e0b;">
+          <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i> Prédicas y Mensajes
+        </h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="closePodcastsModal()"></i>
+      </div>
+
+      <!-- Banner de Canal Oficial -->
+      <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="yt-banner">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <div>
+          <strong>Canal Oficial de Transmisiones</strong>
+          <p>Ver cultos en vivo y grabado en YouTube</p>
+        </div>
+        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.8rem; margin-left: auto;"></i>
+      </a>
+
+      <!-- Contenedor del Reproductor de Video Integrado -->
+      <div class="video-container" id="videoBox">
+        <iframe id="ytPlayer" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+
+      <div style="margin-top: 15px; font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase;">
+        Últimas Reuniones
+      </div>
+
+      <!-- Lista de Prédicas -->
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Domingo - Día del Señor</span>
+          <span class="schedule-days">Reunión Principal & Adoración</span>
+        </div>
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
+          <i class="fa-solid fa-play"></i> Ver
+        </a>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Oración por las Familias</span>
+          <span class="schedule-days">Martes de Clamor e Intercesión</span>
+        </div>
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
+          <i class="fa-solid fa-play"></i> Ver
+        </a>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Noche de Liberación y Milagros</span>
+          <span class="schedule-days">Sábados de Fe & Poder</span>
+        </div>
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
+          <i class="fa-solid fa-play"></i> Ver
+        </a>
+      </div>
+
+      <div class="schedule-item">
+        <div class="schedule-info">
+          <span class="schedule-title">Estudio Bíblico & Discipulado</span>
+          <span class="schedule-days">Jueves de Enseñanza</span>
+        </div>
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" class="btn-action-sm">
+          <i class="fa-solid fa-play"></i> Ver
+        </a>
+      </div>
+    </div>
+  </div>
+
   <script>
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
     const shareUrl = "https://www.appcreator24.com/app4188732-4ujkte";
@@ -463,7 +622,7 @@
 
     let timerTimeout = null;
     let timerMinutes = 0;
-    let isUserPaused = true; // Permite saber si el usuario decidió pausar o fue el sistema
+    let isUserPaused = true;
     let isReconnecting = false;
 
     // Colección de versículos para rotación diaria
@@ -507,6 +666,9 @@
     }
 
     function playAudio() {
+      // Si hay un video de YouTube reproduciéndose, se detiene
+      closeVideoEmbedded();
+
       isUserPaused = false;
       playIcon.className = 'fa-solid fa-spinner fa-spin';
       audio.src = streamUrl + "?t=" + new Date().getTime();
@@ -518,7 +680,7 @@
         updateMediaSessionState('playing');
       }).catch(error => {
         if (!isUserPaused) {
-          setTimeout(playAudio, 1500); // Reintenta silenciosamente en caso de fallo de red
+          setTimeout(playAudio, 1500);
         } else {
           playIcon.className = 'fa-solid fa-play';
           playBtn.classList.remove('playing');
@@ -572,9 +734,7 @@
       }, 300);
     }
 
-    /* MANEJADORES DE RECUPERACIÓN AUTOMÁTICA DE SEGUNDO PLANO */
-
-    // 1. Detectar si el sistema interrumpió el audio (ej. reprodujeron audio en WhatsApp)
+    /* MANEJADORES DE RECUPERACIÓN AUTOMÁTICA EN SEGUNDO PLANO */
     audio.addEventListener('pause', () => {
       if (!isUserPaused && !isReconnecting) {
         updateMediaSessionState('paused');
@@ -584,11 +744,9 @@
       }
     });
 
-    // 2. Detectar corte de conexión o congelamiento del socket
     audio.addEventListener('stalled', () => { if (!isUserPaused) forceReconnect(); });
     audio.addEventListener('error', () => { if (!isUserPaused) forceReconnect(); });
 
-    // 3. Detectar cuando el usuario vuelve a la app o desbloquea el teléfono
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !isUserPaused) {
         if (audio.paused || audio.readyState < 2) {
@@ -597,10 +755,28 @@
       }
     });
 
-    // 4. Detectar cuando vuelve el internet tras una pérdida de señal
     window.addEventListener('online', () => {
       if (!isUserPaused) forceReconnect();
     });
+
+    /* Funciones para Prédicas y Modales */
+    function toggleModal(modalId, show) {
+      document.getElementById(modalId).style.display = show ? 'flex' : 'none';
+    }
+
+    function closePodcastsModal() {
+      closeVideoEmbedded();
+      toggleModal('podcastsModal', false);
+    }
+
+    function closeVideoEmbedded() {
+      const box = document.getElementById('videoBox');
+      const player = document.getElementById('ytPlayer');
+      if (box && player) {
+        player.src = '';
+        box.style.display = 'none';
+      }
+    }
 
     /* Temporizador de apagado */
     function cycleTimer() {
@@ -638,10 +814,6 @@
         volSlider.value = 1;
         setVolume(1);
       }
-    }
-
-    function toggleModal(show) {
-      document.getElementById('scheduleModal').style.display = show ? 'flex' : 'none';
     }
 
     function shareWebsite() {
