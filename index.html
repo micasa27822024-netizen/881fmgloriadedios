@@ -60,7 +60,7 @@
     }
 
     .top-actions {
-      display: flex; gap: 6px; justify-content: center; align-items: center;
+      display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;
     }
 
     .btn-top {
@@ -203,6 +203,76 @@
     .schedule-days { font-size: 0.75rem; color: #9ca3af; }
     .schedule-time { font-size: 0.85rem; font-weight: 700; color: #f59e0b; white-space: nowrap; }
 
+    /* Estilos Modal Reuniones Iglesia */
+    .reuniones-header-box {
+      text-align: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .subtitulo-iglesia {
+      font-size: 0.7rem;
+      letter-spacing: 1.5px;
+      color: #38bdf8;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .reuniones-header-box h2 {
+      margin: 2px 0;
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-style: italic;
+    }
+    .reunion-row {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      gap: 12px;
+    }
+    .reunion-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .reunion-details {
+      display: flex;
+      flex-direction: column;
+    }
+    .reunion-time-tag {
+      display: flex;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+    .reunion-time-tag .day { color: #ffffff; }
+    .reunion-time-tag .hour { color: #38bdf8; }
+    .reunion-name {
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .reunion-row.domingo {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .reunion-row.domingo .reunion-icon-box {
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+    .reunion-row.domingo .hour {
+      color: #f59e0b;
+    }
+
     .video-wrapper { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(245, 158, 11, 0.4); }
     .video-title-bar { background: #1f2937; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; color: #f59e0b; display: flex; justify-content: space-between; align-items: center; }
     .video-container { position: relative; padding-bottom: 56.25%; height: 0; }
@@ -230,7 +300,13 @@
           </button>
 
           <button class="btn-top" onclick="toggleModal('scheduleModal', true)" title="Programación">
-            <i class="fa-solid fa-calendar-days"></i>
+            <i class="fa-solid fa-radio"></i>
+            <span>Radio</span>
+          </button>
+
+          <button class="btn-top" onclick="toggleModal('reunionesModal', true)" title="Reuniones de la Iglesia">
+            <i class="fa-solid fa-church" style="color: #38bdf8;"></i>
+            <span>Reuniones</span>
           </button>
 
           <button class="btn-top" onclick="toggleModal('podcastsModal', true)" title="Prédicas y Transmisiones">
@@ -311,11 +387,11 @@
   <!-- Audio Silencioso -->
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
-  <!-- Modal Programación -->
+  <!-- Modal Programación Radio -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-radio"></i> Programación</h3>
+        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-radio"></i> Programación de Radio</h3>
         <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('scheduleModal', false)"></i>
       </div>
       
@@ -341,6 +417,73 @@
           <span class="schedule-days">Miércoles</span>
         </div>
         <span class="schedule-time">18:00 - 20:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Reuniones de la Iglesia -->
+  <div class="modal" id="reunionesModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #38bdf8;"><i class="fa-solid fa-church"></i> Nuestras Reuniones</h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('reunionesModal', false)"></i>
+      </div>
+
+      <div class="reuniones-header-box">
+        <span class="subtitulo-iglesia">Iglesia Cristiana</span>
+        <h2>Monte de Santidad</h2>
+      </div>
+
+      <div class="reunion-row">
+        <div class="reunion-icon-box">
+          <i class="fa-solid fa-hands-praying"></i>
+        </div>
+        <div class="reunion-details">
+          <div class="reunion-time-tag">
+            <span class="day">MARTES</span>
+            <span class="hour">20:00 HS</span>
+          </div>
+          <span class="reunion-name">Oración por las Familias</span>
+        </div>
+      </div>
+
+      <div class="reunion-row">
+        <div class="reunion-icon-box">
+          <i class="fa-solid fa-book-bible"></i>
+        </div>
+        <div class="reunion-details">
+          <div class="reunion-time-tag">
+            <span class="day">JUEVES</span>
+            <span class="hour">20:00 HS</span>
+          </div>
+          <span class="reunion-name">Discipulado</span>
+        </div>
+      </div>
+
+      <div class="reunion-row">
+        <div class="reunion-icon-box">
+          <i class="fa-solid fa-dove"></i>
+        </div>
+        <div class="reunion-details">
+          <div class="reunion-time-tag">
+            <span class="day">SÁBADO</span>
+            <span class="hour">20:00 HS</span>
+          </div>
+          <span class="reunion-name">Noche de Liberación y Milagros</span>
+        </div>
+      </div>
+
+      <div class="reunion-row domingo">
+        <div class="reunion-icon-box">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="reunion-details">
+          <div class="reunion-time-tag">
+            <span class="day">DOMINGO</span>
+            <span class="hour">10:30 HS</span>
+          </div>
+          <span class="reunion-name">Reunión General</span>
+        </div>
       </div>
     </div>
   </div>
@@ -428,7 +571,7 @@
   </div>
 
   <script>
-    /* --- INSTALACIÓN NATIva PWA --- */
+    /* --- INSTALACIÓN NATIVA PWA --- */
     let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
