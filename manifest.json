@@ -10,15 +10,31 @@
   "icons": [
     {
       "src": "fondo.jpg",
-      "sizes": "192x192",
+      "sizes": "768x1365",
       "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "fondo.jpg",
-      "sizes": "512x512",
+      "src": "fondo-pc.jpg",
+      "sizes": "1376x768",
       "type": "image/jpeg",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "fondo.jpg",
+      "sizes": "768x1365",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Radio 88.1 FM Móvil"
+    },
+    {
+      "src": "fondo-pc.jpg",
+      "sizes": "1376x768",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Radio 88.1 FM Escritorio"
     }
   ]
 }
