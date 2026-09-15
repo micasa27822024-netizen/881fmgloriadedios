@@ -16,6 +16,9 @@
   <!-- Iconos FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Script Oficial Google Cast SDK -->
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -117,27 +120,6 @@
     .verse-text { font-size: 0.75rem; font-style: italic; color: #f3f4f6; line-height: 1.2; }
     .verse-ref { font-size: 0.68rem; font-weight: 700; color: #f59e0b; margin-top: 2px; }
 
-    /* Tarjeta de Canción en Vivo (Metadatos Zeno) */
-    .now-playing-card {
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 10px;
-      padding: 4px 10px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.72rem;
-      color: #fbbf24;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .now-playing-card span {
-      font-weight: 600;
-      color: #ffffff;
-    }
-
     /* Fila de Reproducción */
     .player-row {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
@@ -229,6 +211,7 @@
     .oracion  { background-color: #f59e0b; }
     .youtube   { background-color: #ff0000; }
     .compartir { background-color: #8b5cf6; }
+    .cast-btn  { background-color: #3b82f6; }
 
     /* Modales */
     .modal {
@@ -281,7 +264,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior -->
+      <!-- Barra Superior limpia -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -316,11 +299,6 @@
         <div class="verse-card">
           <div class="verse-text" id="verseText"></div>
           <div class="verse-ref" id="verseRef"></div>
-        </div>
-
-        <!-- Tarjeta de Canción / Programa en Vivo -->
-        <div class="now-playing-card" id="nowPlayingCard">
-          <i class="fa-solid fa-music" style="color: #f59e0b; margin-right: 4px;"></i> En vivo: <span id="nowPlayingText">Radio 88.1 FM - Gloria de Dios</span>
         </div>
 
         <div class="player-row">
@@ -360,8 +338,14 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
+            <!-- Botón Compartir App -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
+            </button>
+
+            <!-- Botón Transmitir a TV -->
+            <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
+              <i class="fa-solid fa-tv"></i>
             </button>
           </div>
         </div>
@@ -369,7 +353,7 @@
     </div>
   </div>
 
-  <audio id="radioStream" preload="none"></audio>
+  <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modales -->
@@ -535,6 +519,7 @@
 
   <script>
     let deferredPrompt = null;
+
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -566,11 +551,12 @@
         text: '¡Escuchá Radio 88.1 FM Gloria de Dios en vivo!',
         url: window.location.href
       };
+
       if (navigator.share) {
         navigator.share(shareData).catch(err => console.log(err));
       } else {
         navigator.clipboard.writeText(window.location.href);
-        alert('¡Enlace copiado!');
+        alert('¡Enlace copiado al portapapeles!');
       }
     }
 
@@ -583,36 +569,76 @@
     const volIcon = document.getElementById('volIcon');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
-    const nowPlayingText = document.getElementById('nowPlayingText');
 
     let timerTimeout = null;
     let timerMinutes = 0;
     let isUserPaused = true;
     let isReconnecting = false;
     let wakeLock = null;
-    let metadataInterval = null;
+    let castSession = null;
 
-    // Función actualizada para obtener metadatos frescos de Zeno.fm
-    function fetchNowPlaying() {
-      if (isUserPaused) return;
-      
-      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
-        .then(response => response.json())
-        .then(data => {
-          let songTitle = "";
-          if (data && data.title) {
-            songTitle = data.title;
-          } else if (data && data.song) {
-            songTitle = data.song;
+    window.__onGCastApiAvailable = function(isAvailable) {
+      if (isAvailable) {
+        try {
+          const context = cast.framework.CastContext.getInstance();
+          context.setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGINAL_URL
+          });
+
+          context.addEventListener(
+            cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+            function(event) {
+              castSession = context.getCurrentSession();
+              const castBtn = document.querySelector('.cast-btn');
+              
+              if (castSession) {
+                castBtn.style.backgroundColor = '#22c55e';
+                castBtn.title = "Transmitiendo a Smart TV (Tocar para desconectar)";
+              } else {
+                castBtn.style.backgroundColor = '#3b82f6';
+                castBtn.title = "Transmitir a Smart TV";
+              }
+            }
+          );
+        } catch(e) {}
+      }
+    };
+
+    function triggerCast() {
+      try {
+        if (typeof cast !== 'undefined' && cast.framework) {
+          const context = cast.framework.CastContext.getInstance();
+          const currentSession = context.getCurrentSession();
+
+          if (currentSession) {
+            if (confirm("¿Deseas detener la transmisión en la Smart TV?")) {
+              currentSession.endSession(true);
+            }
+          } else {
+            context.requestSession().then(() => {
+              const session = context.getCurrentSession();
+              if (session) {
+                pauseAudio();
+                const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
+                mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+                mediaInfo.metadata.title = 'Radio 88.1 FM';
+                mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
+                mediaInfo.metadata.images = [{ url: window.location.origin + window.location.pathname.replace('index.html', '') + 'fondo.jpg' }];
+                
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                session.loadMedia(request);
+              }
+            }).catch(err => {
+              console.log("Sesión de Cast cancelada o sin dispositivos cercanos.");
+            });
           }
-          
-          if (songTitle && songTitle.trim() !== "") {
-            nowPlayingText.innerText = songTitle;
-          }
-        })
-        .catch(err => {
-          console.log("Error al consultar metadatos:", err);
-        });
+        } else {
+          alert("La función de transmisión requiere Google Chrome o un navegador compatible.");
+        }
+      } catch (e) {
+        alert("Asegurate de estar conectado a la misma red Wi-Fi que tu Smart TV.");
+      }
     }
 
     function setupMediaSession() {
@@ -699,6 +725,7 @@
       requestWakeLock();
 
       audio.src = streamUrl + "?t=" + new Date().getTime();
+      
       audio.play().then(() => {
         playBtn.classList.add('playing');
         playIcon.className = 'fa-solid fa-pause';
@@ -706,12 +733,6 @@
         setupMediaSession();
         updateMediaSessionState('playing');
         keepAliveWorker.postMessage('start');
-        
-        // Consultar metadatos al iniciar y luego cada 15 segundos
-        fetchNowPlaying();
-        if (!metadataInterval) {
-          metadataInterval = setInterval(fetchNowPlaying, 15000);
-        }
       }).catch(() => {
         if (!isUserPaused) {
           updateStatus('reconnecting', 'REINTENTANDO');
@@ -727,11 +748,6 @@
       keepAliveWorker.postMessage('stop');
       releaseWakeLock();
 
-      if (metadataInterval) {
-        clearInterval(metadataInterval);
-        metadataInterval = null;
-      }
-
       audio.pause();
       silentAudio.pause();
       audio.removeAttribute('src');
@@ -741,7 +757,6 @@
       playIcon.className = 'fa-solid fa-play';
       updateStatus('offline', 'EN PAUSA');
       updateMediaSessionState('paused');
-      nowPlayingText.innerText = "Radio 88.1 FM - Gloria de Dios";
     }
 
     function toggleAudio() {
@@ -757,6 +772,7 @@
       audio.pause();
       audio.removeAttribute('src');
       audio.load();
+
       setTimeout(() => {
         if (!isUserPaused) {
           audio.src = streamUrl + "?t=" + new Date().getTime();
@@ -765,7 +781,6 @@
             playIcon.className = 'fa-solid fa-pause';
             updateStatus('online', 'EN LÍNEA');
             updateMediaSessionState('playing');
-            fetchNowPlaying();
           }).catch(() => {
             if (!isUserPaused) setTimeout(forceReconnect, 2000);
           }).finally(() => { isReconnecting = false; });
@@ -825,6 +840,7 @@
       else if (timerMinutes === 15) timerMinutes = 30;
       else if (timerMinutes === 30) timerMinutes = 60;
       else timerMinutes = 0;
+
       clearTimeout(timerTimeout);
       const label = document.getElementById('timerLabel');
 
