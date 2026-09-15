@@ -708,25 +708,35 @@
     // --- ACTUALIZADOR DE METADATOS VÍA CANAL CORS SEGURO (ZENO EMBED) ---
     // Como el reproductor oficial dentro del iframe oculto se conecta directamente a Zeno sin restricciones CORS,
     // usamos una técnica de respaldo inteligente consultando el servidor proxy público de metadatos RSS/JSON.
-    function updateSongMetadata() {
-      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.zeno.fm/stations/agxzfnplbm8tc3JkaG5seG50Z0N5SnBnY1Btb0RjeTlDeTlkZXNJZktpQkJwbW84c3RhdGlvbnNyQAsSBlN0YXRpb24GICR1cmwD'))
-        .then(response => {
-          if (response.ok) return response.json();
-          throw new Error('Network response was not ok.');
-        })
-        .then(data => {
-          const parsed = JSON.parse(data.contents);
-          if (parsed && parsed.title && parsed.title.trim() !== "") {
-            document.getElementById('songInfoText').innerText = parsed.title;
-            setupMediaSession(parsed.title);
-          }
-        })
-        .catch(err => {
-          // Si el proxy falla, dejamos el texto genérico amigable en vivo
-          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Transmitiendo en vivo";
-        });
-    }
+  function fetchZenoMetadata() {
+    fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv')
+      .then(res => res.json())
+      .then(data => {
+        let songTitle = "";
+        
+        // Zeno.fm devuelve el título directamente como string o dentro de un objeto
+        if (typeof data === 'string') {
+          songTitle = data;
+        } else if (data && data.title) {
+          songTitle = data.title;
+        }
 
+        const songTextElement = document.getElementById('songInfoText');
+        if (songTitle && songTitle.trim() !== "") {
+          songTextElement.innerText = songTitle;
+          setupMediaSession(songTitle);
+        } else {
+          songTextElement.innerText = "Radio Cristiana Fm Gloria de Dios 88.1";
+        }
+      })
+      .catch(err => {
+        console.warn("No se pudieron obtener los metadatos:", err);
+      });
+  }
+
+  // Actualizar cada 8 segundos
+  setInterval(fetchZenoMetadata, 8000);
+  fetchZenoMetadata();
     // Actualizar al cargar y cada 10 segundos
     updateSongMetadata();
     setInterval(updateSongMetadata, 10000);
