@@ -64,7 +64,7 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR COMPACTA Y DELGADA --- */
+    /* --- BARRA SUPERIOR --- */
     .top-bar {
       width: 100%; 
       display: flex; 
@@ -127,14 +127,14 @@
     .verse-text { font-size: 0.72rem; font-style: italic; color: #f3f4f6; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .verse-ref { font-size: 0.65rem; font-weight: 700; color: #f59e0b; margin-top: 1px; }
 
-    /* --- REPRODUCTOR NATIVO PERSONALIZADO --- */
+    /* --- REPRODUCTOR CON METADATOS EN VIVO --- */
     .custom-player {
       background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(245, 158, 11, 0.5);
       border-radius: 12px;
       width: 100%;
-      max-width: 340px;
+      max-width: 360px;
       padding: 10px 14px;
       display: flex;
       align-items: center;
@@ -173,7 +173,7 @@
     }
 
     .player-station {
-      font-size: 0.82rem;
+      font-size: 0.80rem;
       font-weight: 700;
       color: #ffffff;
       white-space: nowrap;
@@ -181,19 +181,29 @@
       text-overflow: ellipsis;
     }
 
-    .player-status {
+    /* Canción actual que viene de la API de Zeno */
+    .player-song {
       font-size: 0.72rem;
       color: #f59e0b;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .player-status {
+      font-size: 0.65rem;
+      color: #9ca3af;
       display: flex;
       align-items: center;
       gap: 5px;
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     .live-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       background-color: #ef4444;
       border-radius: 50%;
       display: inline-block;
@@ -280,7 +290,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior limpia -->
+      <!-- Barra Superior -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -318,13 +328,14 @@
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Reproductor Nativo Personalizado (Sin rastro de Zeno ni tiendas) -->
+        <!-- Reproductor con Lectura de Canciones en Vivo -->
         <div class="custom-player">
           <button class="player-btn-main" id="playPauseBtn" onclick="togglePlay()" title="Reproducir / Pausar">
             <i class="fa-solid fa-play" id="playIcon"></i>
           </button>
           <div class="player-info">
             <div class="player-station">Radio 88.1 FM Gloria de Dios</div>
+            <div class="player-song" id="currentSong">Conectando...</div>
             <div class="player-status" id="playerStatusText">
               <span class="live-dot" id="liveDot"></span> Tocar para escuchar
             </div>
@@ -350,12 +361,10 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
-            <!-- Botón Compartir App -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
 
-            <!-- Botón Transmitir a TV -->
             <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
               <i class="fa-solid fa-tv"></i>
             </button>
@@ -572,11 +581,32 @@
       }
     }
 
-    // --- CONTROLADOR DEL REPRODUCTOR NATIVO ---
+    // --- REPRODUCTOR Y LECTURA DE CANCIONES (API DE ZENO) ---
     const audioStream = document.getElementById('radioStream');
     const playIcon = document.getElementById('playIcon');
     const statusText = document.getElementById('playerStatusText');
-    const liveDot = document.getElementById('liveDot');
+    const currentSongEl = document.getElementById('currentSong');
+
+    // Función que consulta el estado actual de la radio en Zeno.fm
+    function fetchNowPlaying() {
+      // Usamos el endpoint público de Zeno para tu ID de stream (ggq0ed8yus8uv)
+      fetch('https://zeno.fm/api/station/ggq0ed8yus8uv')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.np) {
+            currentSongEl.innerText = data.np;
+          } else {
+            currentSongEl.innerText = "Transmisión en vivo";
+          }
+        })
+        .catch(err => {
+          currentSongEl.innerText = "Radio 88.1 FM";
+        });
+    }
+
+    // Consultar al iniciar y luego cada 15 segundos para actualizar el tema
+    fetchNowPlaying();
+    setInterval(fetchNowPlaying, 15000);
 
     function togglePlay() {
       if (audioStream.paused) {
