@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radio 88.1 FM - Gloria de Dios</title>
 
+  <!-- Manifest PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f59e0b">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,6 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="Radio 88.1 FM">
   <link rel="apple-touch-icon" href="fondo.jpg">
   
+  <!-- Iconos FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
@@ -279,6 +281,7 @@
     <div class="overlay"></div>
 
     <div class="content">
+      <!-- Barra Superior -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -308,12 +311,14 @@
         </div>
       </div>
 
+      <!-- Área Inferior -->
       <div class="bottom-section">
         <div class="verse-card">
           <div class="verse-text" id="verseText"></div>
           <div class="verse-ref" id="verseRef"></div>
         </div>
 
+        <!-- Tarjeta de Canción / Programa en Vivo -->
         <div class="now-playing-card" id="nowPlayingCard">
           <i class="fa-solid fa-music" style="color: #f59e0b; margin-right: 4px;"></i> En vivo: <span id="nowPlayingText">Radio 88.1 FM - Gloria de Dios</span>
         </div>
@@ -367,6 +372,7 @@
   <audio id="radioStream" preload="none"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
+  <!-- Modales -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -586,19 +592,26 @@
     let wakeLock = null;
     let metadataInterval = null;
 
-    // Función para obtener los metadatos en vivo de Zeno.fm
+    // Función actualizada para obtener metadatos frescos de Zeno.fm
     function fetchNowPlaying() {
       if (isUserPaused) return;
-      // Consultamos el JSON de Zeno.fm asociado a esta estación
-      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv')
+      
+      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
         .then(response => response.json())
         .then(data => {
+          let songTitle = "";
           if (data && data.title) {
-            nowPlayingText.innerText = data.title;
+            songTitle = data.title;
+          } else if (data && data.song) {
+            songTitle = data.song;
+          }
+          
+          if (songTitle && songTitle.trim() !== "") {
+            nowPlayingText.innerText = songTitle;
           }
         })
         .catch(err => {
-          // Si falla la API pública, mantenemos el nombre general
+          console.log("Error al consultar metadatos:", err);
         });
     }
 
@@ -694,7 +707,7 @@
         updateMediaSessionState('playing');
         keepAliveWorker.postMessage('start');
         
-        // Iniciar la consulta periódica de metadatos (cada 15 segundos)
+        // Consultar metadatos al iniciar y luego cada 15 segundos
         fetchNowPlaying();
         if (!metadataInterval) {
           metadataInterval = setInterval(fetchNowPlaying, 15000);
