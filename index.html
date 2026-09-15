@@ -700,24 +700,47 @@
     }
     setDailyVerse();
 
-    // --- CONSULTAR METADATOS EXACTOS DE ZENO.FM ---
-    function fetchZenoMetadata() {
-      // Consultamos el JSON directo del mount point de tu radio en Zeno
-      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
-        .then(res => res.json())
-        .then(data => {
-          // Verificamos si Zeno devolvió el título de la canción actual
-          if (data && data.title && data.title.trim() !== "" && data.title !== "Radio Cristiana Fm Gloria de Dios 88.1mhz") {
-            document.getElementById('songInfoText').innerText = data.title;
-            setupMediaSession(data.title);
-          } else {
-            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+    // --- CONEXIÓN EN TIEMPO REAL A LOS METADATOS DE ZENO.FM ---
+    function initZenoMetadataStream() {
+      if (window.EventSource) {
+        const eventSource = new EventSource('https://api.zeno.fm/mounts/metadata/subscribe/ggq0ed8yus8uv');
+
+        eventSource.onmessage = function(event) {
+          try {
+            const data = JSON.parse(event.data);
+            const artist = data.currentArtist || '';
+            const song = data.currentSong || '';
+            let fullTitle = '';
+
+            if (artist && song) {
+              fullTitle = `${artist} - ${song}`;
+            } else if (song) {
+              fullTitle = song;
+            } else if (data.title) {
+              fullTitle = data.title;
+            }
+
+            if (fullTitle && fullTitle.trim() !== "" && !fullTitle.includes("Radio Cristiana Fm Gloria de Dios")) {
+              document.getElementById('songInfoText').innerText = fullTitle;
+              setupMediaSession(fullTitle);
+            } else {
+              document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+            }
+          } catch (e) {
+            console.error("Error al procesar metadatos de Zeno:", e);
           }
-        })
-        .catch(err => {
-          // Si falla la API principal, intentamos con el widget alternativo
-          fetchWidgetMetadata();
-        });
+        };
+
+        eventSource.onerror = function(err) {
+          console.log("Reconectando al flujo de metadatos de Zeno...", err);
+          eventSource.close();
+          setTimeout(initZenoMetadataStream, 5000);
+        };
+      } else {
+        // Fallback periódico para navegadores sin soporte de EventSource
+        setInterval(fetchWidgetMetadata, 10000);
+        fetchWidgetMetadata();
+      }
     }
 
     function fetchWidgetMetadata() {
@@ -736,9 +759,8 @@
         });
     }
 
-    // Consulta los metadatos cada 6 segundos
-    setInterval(fetchZenoMetadata, 6000);
-    fetchZenoMetadata();
+    // Iniciar flujo de metadatos en vivo
+    initZenoMetadataStream();
 
     const workerBlob = new Blob([`
       let interval = null;
