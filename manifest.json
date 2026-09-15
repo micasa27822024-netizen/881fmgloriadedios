@@ -9,14 +9,14 @@
   "theme_color": "#f59e0b",
   "icons": [
     {
-      "src": "fondo.jpg",
-      "sizes": "768x1365",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "fondo-pc.jpg",
-      "sizes": "1376x768",
+      "src": "fondo.jpg",
+      "sizes": "768x1365",
       "type": "image/jpeg",
       "purpose": "any"
     }
