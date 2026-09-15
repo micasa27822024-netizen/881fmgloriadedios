@@ -127,32 +127,85 @@
     .verse-text { font-size: 0.72rem; font-style: italic; color: #f3f4f6; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .verse-ref { font-size: 0.65rem; font-weight: 700; color: #f59e0b; margin-top: 1px; }
 
-    /* Contenedor Zeno.fm con recorte estricto para ocultar las tiendas (Apple/Play Store) */
-    .zeno-embed-container {
+    /* --- REPRODUCTOR NATIVO PERSONALIZADO --- */
+    .custom-player {
       background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(245, 158, 11, 0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
       border-radius: 12px;
       width: 100%;
       max-width: 340px;
-      height: 82px;
-      overflow: hidden;
-      position: relative;
+      padding: 10px 14px;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: space-between;
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      gap: 12px;
     }
 
-    .zeno-embed-container iframe {
-      position: absolute;
-      width: 460px;
-      height: 95px;
+    .player-btn-main {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
       border: none;
-      background: transparent;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      color: #000;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
+      transition: transform 0.2s, background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .player-btn-main:hover {
+      transform: scale(1.08);
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    }
+
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .player-station {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-status {
+      font-size: 0.72rem;
+      color: #f59e0b;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #ef4444;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .live-dot.active {
+      animation: pulse-red 1.5s infinite;
+    }
+
+    @keyframes pulse-red {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
     /* Redes Sociales y Compartir */
@@ -265,9 +318,17 @@
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Widget Zeno.fm con diseño limpio recortado (sin rastros de Play Store / Apple) -->
-        <div class="zeno-embed-container">
-          <iframe src="https://zeno.fm/player/radio-cristiana-fm-gloria-de-dios-88-1mhz" frameborder="0" scrolling="no"></iframe>
+        <!-- Reproductor Nativo Personalizado (Sin rastro de Zeno ni tiendas) -->
+        <div class="custom-player">
+          <button class="player-btn-main" id="playPauseBtn" onclick="togglePlay()" title="Reproducir / Pausar">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+          </button>
+          <div class="player-info">
+            <div class="player-station">Radio 88.1 FM Gloria de Dios</div>
+            <div class="player-status" id="playerStatusText">
+              <span class="live-dot" id="liveDot"></span> Tocar para escuchar
+            </div>
+          </div>
         </div>
 
         <div class="footer-section">
@@ -304,7 +365,8 @@
     </div>
   </div>
 
-  <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
+  <!-- Audio Stream Directo -->
+  <audio id="radioStream" preload="none" src="https://stream.zeno.fm/ggq0ed8yus8uv.mp3" crossorigin="anonymous"></audio>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -510,6 +572,27 @@
       }
     }
 
+    // --- CONTROLADOR DEL REPRODUCTOR NATIVO ---
+    const audioStream = document.getElementById('radioStream');
+    const playIcon = document.getElementById('playIcon');
+    const statusText = document.getElementById('playerStatusText');
+    const liveDot = document.getElementById('liveDot');
+
+    function togglePlay() {
+      if (audioStream.paused) {
+        audioStream.play().then(() => {
+          playIcon.className = "fa-solid fa-pause";
+          statusText.innerHTML = '<span class="live-dot active" id="liveDot"></span> Reproduciendo en vivo';
+        }).catch(err => {
+          alert("No se pudo iniciar la reproducción automáticamente.");
+        });
+      } else {
+        audioStream.pause();
+        playIcon.className = "fa-solid fa-play";
+        statusText.innerHTML = '<span class="live-dot" id="liveDot"></span> En pausa';
+      }
+    }
+
     let timerTimeout = null;
     let timerMinutes = 0;
     let castSession = null;
@@ -607,7 +690,7 @@
 
     function closeEmbeddedVideo() {
       const wrapper = document.getElementById('videoWrapper');
-      const player = document.getElementById('ytIframeIndicator') || document.getElementById('ytIframePlayer');
+      const player = document.getElementById('ytIframePlayer');
       if (wrapper && player) {
         player.src = '';
         wrapper.style.display = 'none';
@@ -637,6 +720,11 @@
         timerTimeout = setTimeout(() => {
           timerMinutes = 0;
           label.innerText = 'Off';
+          if (!audioStream.paused) {
+            audioStream.pause();
+            playIcon.className = "fa-solid fa-play";
+            statusText.innerHTML = '<span class="live-dot" id="liveDot"></span> Temporizador finalizado';
+          }
         }, timerMinutes * 60 * 1000);
       } else {
         label.innerText = 'Off';
