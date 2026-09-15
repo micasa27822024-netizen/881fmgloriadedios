@@ -1,3 +1,5 @@
+const CACHE_NAME = 'radio-v1';
+
 self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
@@ -7,5 +9,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Service worker básico para habilitar PWA
+  // Manejo de peticiones necesario para cumplir con el estándar PWA en Chrome PC
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
 });
