@@ -1,24 +1,19 @@
 {
-  "id": "/881fmgloriadedios/",
   "name": "Radio 88.1 FM - Gloria de Dios",
   "short_name": "Radio 88.1",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#f59e0b",
+  "categories": ["media", "music", "lifestyle"],
   "icons": [
     {
       "src": "icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "fondo.jpg",
-      "sizes": "768x1365",
-      "type": "image/jpeg",
-      "purpose": "any"
     }
   ],
   "screenshots": [
