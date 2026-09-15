@@ -33,7 +33,7 @@
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 20px;
+      padding: 15px 12px;
     }
 
     @media (min-width: 768px) {
@@ -63,125 +63,100 @@
       align-items: center;
     }
 
-    /* Barra Superior */
+    /* Barra Superior Ordenada */
     .top-bar {
       width: 100%;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-    }
-
-    .live-badge {
-      background: rgba(220, 38, 38, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 800;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      text-transform: uppercase;
-    }
-
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ffffff;
-      border-radius: 50%;
-      box-shadow: 0 0 0 rgba(255, 255, 255, 0.7);
-      animation: pulse 1.6s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
     }
 
     .top-actions {
       display: flex;
       gap: 6px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 100%;
     }
 
     .btn-top {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.4);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.35);
       color: white;
-      height: 40px;
-      padding: 0 12px;
-      border-radius: 20px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: 18px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
-      gap: 6px;
+      gap: 5px;
+      white-space: nowrap;
       transition: transform 0.2s, background 0.2s;
     }
 
     .btn-top:hover {
       transform: scale(1.05);
-      background: rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.6);
     }
 
-    /* Versículo Rotativo */
-    .verse-card {
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      padding: 10px 16px;
-      max-width: 90%;
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    .verse-text {
-      font-size: 0.85rem;
-      font-style: italic;
-      color: #f3f4f6;
-    }
-
-    .verse-ref {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #f59e0b;
-      margin-top: 3px;
-    }
-
-    /* Reproductor Radio */
+    /* Reproductor y Versículo abajo */
     .player-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: auto;
-      margin-bottom: 15px;
-      gap: 12px;
+      margin-bottom: 10px;
+      gap: 10px;
+      width: 100%;
+    }
+
+    /* Versículo Rotativo Ubicado abajo para dejar limpio el logo */
+    .verse-card {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 12px;
+      padding: 8px 14px;
+      max-width: 92%;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .verse-text {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #f3f4f6;
+      line-height: 1.25;
+    }
+
+    .verse-ref {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #f59e0b;
+      margin-top: 3px;
     }
 
     .btn-play {
-      width: 85px;
-      height: 85px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       background: linear-gradient(135deg, #f59e0b, #d97706);
       border: 4px solid rgba(255, 255, 255, 0.9);
       box-shadow: 0 0 25px rgba(245, 158, 11, 0.7);
       color: white;
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
-      padding-left: 5px;
+      padding-left: 4px;
     }
 
     .btn-play.playing {
@@ -194,16 +169,16 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(6px);
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .volume-slider {
       -webkit-appearance: none;
-      width: 75px;
+      width: 70px;
       height: 4px;
       border-radius: 2px;
       background: rgba(255, 255, 255, 0.4);
@@ -224,41 +199,41 @@
       width: 100%;
       max-width: 600px;
       text-align: center;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.68);
       backdrop-filter: blur(10px);
-      padding: 15px 10px 20px 10px;
-      border-radius: 20px 20px 0 0;
+      padding: 12px 10px 16px 10px;
+      border-radius: 18px 18px 0 0;
       border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .footer-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       text-transform: uppercase;
     }
 
     .footer-subtitle {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #e5e7eb;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .social-buttons {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
     }
 
     .social-btn {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       text-decoration: none;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
@@ -335,7 +310,7 @@
       white-space: nowrap;
     }
 
-    /* Estilos del Reproductor de Video Integrado */
+    /* Reproductor de Video Integrado */
     .video-wrapper {
       display: none;
       margin-bottom: 15px;
@@ -397,16 +372,11 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior -->
+      <!-- Barra Superior limpia sin el botón EN VIVO -->
       <div class="top-bar">
-        <div class="live-badge">
-          <div class="pulse-dot"></div>
-          <span>En Vivo</span>
-        </div>
-
         <div class="top-actions">
           <!-- Temporizador -->
-          <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador de apagado">
+          <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
             <i class="fa-solid fa-clock"></i>
             <span id="timerLabel">Off</span>
           </button>
@@ -434,20 +404,20 @@
         </div>
       </div>
 
-      <!-- Versículo Bíblico Diario -->
-      <div class="verse-card">
-        <div class="verse-text" id="verseText"></div>
-        <div class="verse-ref" id="verseRef"></div>
-      </div>
-
-      <!-- Reproductor -->
+      <!-- Reproductor y Versículo abajo -->
       <div class="player-container">
+        <!-- Versículo Bíblico Diario ubicado aquí para dejar despejado el logo del fondo -->
+        <div class="verse-card">
+          <div class="verse-text" id="verseText"></div>
+          <div class="verse-ref" id="verseRef"></div>
+        </div>
+
         <button class="btn-play" id="playBtn" onclick="toggleAudio()">
           <i class="fa-solid fa-play" id="playIcon"></i>
         </button>
 
         <div class="volume-container">
-          <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.9rem;"></i>
+          <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.85rem;"></i>
           <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
         </div>
       </div>
@@ -653,7 +623,7 @@
     }
 
     function playAudio() {
-      closeEmbeddedVideo(); // Detiene cualquier video de YouTube que esté sonando
+      closeEmbeddedVideo();
 
       isUserPaused = false;
       playIcon.className = 'fa-solid fa-spinner fa-spin';
@@ -720,7 +690,6 @@
       }, 300);
     }
 
-    /* MANEJADORES DE RECUPERACIÓN AUTOMÁTICA EN SEGUNDO PLANO */
     audio.addEventListener('pause', () => {
       if (!isUserPaused && !isReconnecting) {
         updateMediaSessionState('paused');
@@ -745,9 +714,8 @@
       if (!isUserPaused) forceReconnect();
     });
 
-    /* Funciones para Prédicas con Reproductor Integrado */
     function playEmbeddedVideo(videoId, title) {
-      pauseAudio(); // Pausa automáticamente la radio en vivo
+      pauseAudio();
 
       const wrapper = document.getElementById('videoWrapper');
       const player = document.getElementById('ytIframePlayer');
@@ -757,7 +725,6 @@
       player.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
       wrapper.style.display = 'block';
 
-      // Desplaza el modal suavemente hacia arriba para enfocar el video
       document.getElementById('modalPodcastsContent').scrollTop = 0;
     }
 
@@ -779,7 +746,6 @@
       toggleModal('podcastsModal', false);
     }
 
-    /* Temporizador de apagado */
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
       else if (timerMinutes === 15) timerMinutes = 30;
@@ -801,7 +767,6 @@
       }
     }
 
-    /* Controles de volumen */
     function setVolume(val) {
       audio.volume = val;
       volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
