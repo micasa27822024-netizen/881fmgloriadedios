@@ -211,23 +211,7 @@
     .oracion  { background-color: #f59e0b; }
     .youtube   { background-color: #ff0000; }
     .compartir { background-color: #8b5cf6; }
-
-    /* Estilo integrado para el botón Cast abajo al lado de compartir */
-    google-cast-launcher {
-      --disconnected-color: #ffffff;
-      --connected-color: #f59e0b;
-      width: 36px;
-      height: 36px;
-      background: #3b82f6;
-      border-radius: 50%;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
-      transition: transform 0.2s;
-    }
-    google-cast-launcher:hover { transform: scale(1.1); }
+    .cast-btn  { background-color: #3b82f6; }
 
     /* Modales */
     .modal {
@@ -359,8 +343,10 @@
               <i class="fa-solid fa-share-nodes"></i>
             </button>
 
-            <!-- Botón Transmitir a TV (Google Cast) integrado abajo al lado de compartir -->
-            <google-cast-launcher id="castbutton" title="Transmitir a Smart TV"></google-cast-launcher>
+            <!-- Botón Transmitir a TV idéntico en tamaño y formato -->
+            <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
+              <i class="fa-solid fa-tv"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -592,32 +578,40 @@
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
-        cast.framework.CastContext.getInstance().setOptions({
-          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGINAL_URL
-        });
+        try {
+          cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGINAL_URL
+          });
+        } catch(e) {}
+      }
+    };
 
-        const context = cast.framework.CastContext.getInstance();
-        context.addEventListener(
-          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-          (event) => {
-            if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
+    function triggerCast() {
+      try {
+        if (typeof cast !== 'undefined' && cast.framework) {
+          const context = cast.framework.CastContext.getInstance();
+          context.requestSession().then(() => {
+            const session = context.getCurrentSession();
+            if (session) {
               pauseAudio();
-              const castSession = context.getCurrentSession();
               const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
-              
               mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
               mediaInfo.metadata.title = 'Radio 88.1 FM';
               mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
               mediaInfo.metadata.images = [{ url: window.location.origin + window.location.pathname.replace('index.html', '') + 'fondo.jpg' }];
-
-              const request = new chrome.cast.media.LoadRequest(mediaInfo);
-              castSession.loadMedia(request);
+              session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
             }
-          }
-        );
+          }).catch(err => {
+            alert("No se encontró ningún dispositivo Smart TV / Chromecast disponible en la red Wi-Fi.");
+          });
+        } else {
+          alert("La función de transmisión requiere Google Chrome o un navegador compatible con Chromecast.");
+        }
+      } catch (e) {
+        alert("Para transmitir, asegúrate de estar conectado a la misma red Wi-Fi que tu Smart TV.");
       }
-    };
+    }
 
     function setupMediaSession() {
       if ('mediaSession' in navigator) {
