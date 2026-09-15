@@ -113,7 +113,7 @@
 
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
-      width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; gap: 6px;
     }
 
     /* Versículo Diario */
@@ -127,98 +127,33 @@
     .verse-text { font-size: 0.72rem; font-style: italic; color: #f3f4f6; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .verse-ref { font-size: 0.65rem; font-weight: 700; color: #f59e0b; margin-top: 1px; }
 
-    /* Contenedor adaptado para el Widget Oficial de Zeno.fm con Metadatos en Vivo */
+    /* Contenedor Zeno.fm con recorte estricto para ocultar las tiendas (Apple/Play Store) */
     .zeno-embed-container {
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(245, 158, 11, 0.4);
-      border-radius: 10px;
+      border-radius: 12px;
       width: 100%;
+      max-width: 340px;
+      height: 82px;
       overflow: hidden;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
 
     .zeno-embed-container iframe {
-      width: 100%;
-      height: 85px;
+      position: absolute;
+      width: 460px;
+      height: 95px;
       border: none;
       background: transparent;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
-
-    /* Fila de Reproducción Alternativa / Opcional (o controles personalizados) */
-    .player-row {
-      display: flex; align-items: center; justify-content: space-between; width: 100%;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);
-      padding: 6px 14px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .status-badge {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; color: #e5e7eb; min-width: 85px;
-    }
-
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-      background-color: #6b7280; box-shadow: 0 0 6px rgba(107, 114, 128, 0.6);
-      transition: background-color 0.3s, box-shadow 0.3s;
-    }
-
-    .status-dot.online {
-      background-color: #22c55e; box-shadow: 0 0 10px #22c55e;
-      animation: blinkPulse 2s infinite ease-in-out;
-    }
-
-    .status-dot.reconnecting {
-      background-color: #f59e0b; box-shadow: 0 0 10px #f59e0b;
-      animation: blinkFast 0.8s infinite ease-in-out;
-    }
-
-    .status-dot.offline { background-color: #ef4444; box-shadow: 0 0 6px #ef4444; }
-
-    @keyframes blinkPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    @keyframes blinkFast {
-      0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
-    }
-
-    .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
-
-    .btn-play {
-      position: relative; z-index: 2; width: 50px; height: 50px; border-radius: 50%;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      border: 2.5px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-      color: white; font-size: 1.3rem; display: flex; justify-content: center; align-items: center;
-      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.3s; padding-left: 3px;
-    }
-
-    .btn-play.playing {
-      padding-left: 0; background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
-    }
-
-    .btn-play.playing::before, .btn-play.playing::after {
-      content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-      border-radius: 50%; border: 2px solid rgba(239, 68, 68, 0.7); z-index: -1;
-      animation: pulseWave 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-
-    .btn-play.playing::after { animation-delay: 0.6s; }
-
-    @keyframes pulseWave {
-      0% { transform: scale(0.95); opacity: 0.9; }
-      100% { transform: scale(1.45); opacity: 0; }
-    }
-
-    .volume-container { display: flex; align-items: center; gap: 5px; min-width: 85px; justify-content: flex-end; }
-    .volume-slider { -webkit-appearance: none; width: 55px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.4); outline: none; }
-    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; }
 
     /* Redes Sociales y Compartir */
     .footer-section {
@@ -324,34 +259,15 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Versículo Diario (Arriba) -->
+        <!-- Versículo Diario -->
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Widget Oficial de Zeno.fm con Metadatos en Vivo Integrado -->
+        <!-- Widget Zeno.fm con diseño limpio recortado (sin rastros de Play Store / Apple) -->
         <div class="zeno-embed-container">
-          <iframe src="https://zeno.fm/player/radio-cristiana-fm-gloria-de-dios-88-1mhz" width="300" height="90" frameborder="0" scrolling="no"></iframe>
-        </div>
-
-        <!-- Fila de Reproductor Alternativo / Controles Opcionales (Ocultos o funcionales de respaldo) -->
-        <div class="player-row" style="display: none;">
-          <div class="status-badge">
-            <span class="status-dot offline" id="statusDot"></span>
-            <span id="statusText">EN PAUSA</span>
-          </div>
-
-          <div class="btn-play-wrapper">
-            <button class="btn-play" id="playBtn" onclick="toggleAudio()">
-              <i class="fa-solid fa-play" id="playIcon"></i>
-            </button>
-          </div>
-
-          <div class="volume-container">
-            <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.85rem;"></i>
-            <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
-          </div>
+          <iframe src="https://zeno.fm/player/radio-cristiana-fm-gloria-de-dios-88-1mhz" frameborder="0" scrolling="no"></iframe>
         </div>
 
         <div class="footer-section">
@@ -389,7 +305,6 @@
   </div>
 
   <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
-  <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -595,17 +510,8 @@
       }
     }
 
-    const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
-    const audio = document.getElementById('radioStream');
-    const silentAudio = document.getElementById('silentAudio');
-    const volSlider = document.getElementById('volSlider');
-    const volIcon = document.getElementById('volIcon');
-
     let timerTimeout = null;
     let timerMinutes = 0;
-    let isUserPaused = true;
-    let isReconnecting = false;
-    let wakeLock = null;
     let castSession = null;
 
     window.__onGCastApiAvailable = function(isAvailable) {
@@ -650,7 +556,7 @@
             context.requestSession().then(() => {
               const session = context.getCurrentSession();
               if (session) {
-                const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
+                const mediaInfo = new chrome.cast.media.MediaInfo("https://stream.zeno.fm/ggq0ed8yus8uv.mp3", 'audio/mp3');
                 mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
                 mediaInfo.metadata.title = 'Radio 88.1 FM';
                 mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
@@ -660,7 +566,7 @@
                 session.loadMedia(request);
               }
             }).catch(err => {
-              console.log("Sesión de Cast cancelada o sin dispositivos cercanos.");
+              console.log("Sesión de Cast cancelada.");
             });
           }
         } else {
@@ -701,7 +607,7 @@
 
     function closeEmbeddedVideo() {
       const wrapper = document.getElementById('videoWrapper');
-      const player = document.getElementById('ytIframePlayer');
+      const player = document.getElementById('ytIframeIndicator') || document.getElementById('ytIframePlayer');
       if (wrapper && player) {
         player.src = '';
         wrapper.style.display = 'none';
@@ -735,15 +641,6 @@
       } else {
         label.innerText = 'Off';
       }
-    }
-
-    function setVolume(val) {
-      audio.volume = val;
-      volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
-    }
-
-    function toggleMute() {
-      if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
   </script>
 </body>
