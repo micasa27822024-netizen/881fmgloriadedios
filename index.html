@@ -127,7 +127,7 @@
     .verse-text { font-size: 0.72rem; font-style: italic; color: #f3f4f6; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .verse-ref { font-size: 0.65rem; font-weight: 700; color: #f59e0b; margin-top: 1px; }
 
-    /* Tarjeta de Canción / Artista en Vivo */
+    /* Tarjeta de Canción / Artista en Vivo (Zeno.fm) */
     .song-card {
       background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(8px);
@@ -321,15 +321,10 @@
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Tarjeta de Canción / Artista en Vivo -->
+        <!-- Tarjeta de Canción / Artista en Vivo (Directo de Zeno Metadata) -->
         <div class="song-card">
           <i class="fa-solid fa-music"></i>
-          <div class="song-info" id="songInfoText">Radio 88.1 FM - Transmitiendo en vivo</div>
-        </div>
-
-        <!-- WIDGET OFICIAL DE ZENO.FM (Oculto pero activo para sincronizar metadatos automáticamente) -->
-        <div style="display:none; width:0; height:0; overflow:hidden;">
-          <iframe id="zenoPlayerFrame" src="https://zeno.fm/player/ggq0ed8yus8uv" scrolling="no"></iframe>
+          <div class="song-info" id="songInfoText">Sintonizando transmisión en vivo...</div>
         </div>
 
         <div class="player-row">
@@ -705,41 +700,45 @@
     }
     setDailyVerse();
 
-    // --- ACTUALIZADOR DE METADATOS VÍA CANAL CORS SEGURO (ZENO EMBED) ---
-    // Como el reproductor oficial dentro del iframe oculto se conecta directamente a Zeno sin restricciones CORS,
-    // usamos una técnica de respaldo inteligente consultando el servidor proxy público de metadatos RSS/JSON.
-  function fetchZenoMetadata() {
-    fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv')
-      .then(res => res.json())
-      .then(data => {
-        let songTitle = "";
-        
-        // Zeno.fm devuelve el título directamente como string o dentro de un objeto
-        if (typeof data === 'string') {
-          songTitle = data;
-        } else if (data && data.title) {
-          songTitle = data.title;
-        }
+    // --- CONSULTAR METADATOS EXACTOS DE ZENO.FM ---
+    function fetchZenoMetadata() {
+      // Consultamos el JSON directo del mount point de tu radio en Zeno
+      fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
+        .then(res => res.json())
+        .then(data => {
+          // Verificamos si Zeno devolvió el título de la canción actual
+          if (data && data.title && data.title.trim() !== "" && data.title !== "Radio Cristiana Fm Gloria de Dios 88.1mhz") {
+            document.getElementById('songInfoText').innerText = data.title;
+            setupMediaSession(data.title);
+          } else {
+            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+          }
+        })
+        .catch(err => {
+          // Si falla la API principal, intentamos con el widget alternativo
+          fetchWidgetMetadata();
+        });
+    }
 
-        const songTextElement = document.getElementById('songInfoText');
-        if (songTitle && songTitle.trim() !== "") {
-          songTextElement.innerText = songTitle;
-          setupMediaSession(songTitle);
-        } else {
-          songTextElement.innerText = "Radio Cristiana Fm Gloria de Dios 88.1";
-        }
-      })
-      .catch(err => {
-        console.warn("No se pudieron obtener los metadatos:", err);
-      });
-  }
+    function fetchWidgetMetadata() {
+      fetch('https://api.zeno.fm/stations/agxzfnplbm8tc3JkaG5seG50Z0N5SnBnY1Btb0RjeTlDeTlkZXNJZktpQkJwbW84c3RhdGlvbnNyQAsSBlN0YXRpb24GICR1cmwD/widget')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.title && data.title.trim() !== "") {
+            document.getElementById('songInfoText').innerText = data.title;
+            setupMediaSession(data.title);
+          } else {
+            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+          }
+        })
+        .catch(err => {
+          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+        });
+    }
 
-  // Actualizar cada 8 segundos
-  setInterval(fetchZenoMetadata, 8000);
-  fetchZenoMetadata();
-    // Actualizar al cargar y cada 10 segundos
-    updateSongMetadata();
-    setInterval(updateSongMetadata, 10000);
+    // Consulta los metadatos cada 6 segundos
+    setInterval(fetchZenoMetadata, 6000);
+    fetchZenoMetadata();
 
     const workerBlob = new Blob([`
       let interval = null;
