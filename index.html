@@ -54,7 +54,7 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR CORREGIDA --- */
+    /* --- BARRA SUPERIOR EN 1 FILA --- */
     .top-bar {
       width: 100%; 
       display: flex; 
@@ -68,14 +68,14 @@
       gap: 5px; 
       justify-content: flex-start; 
       align-items: center; 
-      flex-wrap: nowrap; /* Evita que salte a dos filas */
-      overflow-x: auto; /* Permite desplazamiento lateral si la pantalla es muy estrecha */
+      flex-wrap: nowrap;
+      overflow-x: auto;
       max-width: 100%;
       padding: 4px 2px;
       -webkit-overflow-scrolling: touch;
     }
 
-    /* Ocultar barra de scroll estética */
+    /* Ocultar barra de scroll */
     .top-actions::-webkit-scrollbar { display: none; }
     .top-actions { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -96,7 +96,7 @@
       text-decoration: none;
       gap: 4px; 
       white-space: nowrap; 
-      flex-shrink: 0; /* Evita que los botones se deformen */
+      flex-shrink: 0;
       transition: transform 0.2s, background 0.2s;
     }
 
@@ -347,9 +347,10 @@
             <span>App</span>
           </button>
 
-          <!-- Botón de Compartir PWA -->
+          <!-- Botón de Compartir PWA con texto -->
           <button class="btn-top" onclick="shareWebsite()" title="Compartir App">
             <i class="fa-solid fa-share-nodes"></i>
+            <span>Compartir</span>
           </button>
         </div>
       </div>
