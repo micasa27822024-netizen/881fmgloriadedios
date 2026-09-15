@@ -702,36 +702,40 @@
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
  // --- CONSULTAR METADATOS CON MANEJO DE TIMEOUT ---
-  function fetchZenoMetadata() {
-      // Intentamos consultar a través de un servicio JSONP o una ruta limpia sin bloqueo de corsproxy viejo
-      const apiUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv');
+// --- CONSULTAR METADATOS DE ZENO CON MANEJO DE ERRORES Y RESPALDO ---
+    function fetchZenoMetadata() {
+      // Usamos un proxy alternativo ultra liviano (CORS Anywhere / ThingProxy o AllOrigins directo)
+      const targetUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
+      const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
 
-      fetch(apiUrl, { cache: 'no-store' })
+      fetch(proxyUrl, { cache: 'no-store' })
         .then(response => {
-          if (!response.ok) throw new Error('Error al conectar');
+          if (!response.ok) throw new Error('Network error');
           return response.json();
         })
         .then(data => {
-          const songTextElement = document.getElementById('songInfoText');
-          if (data && data.title) {
-            songTextElement.innerText = data.title;
-            setupMediaSession(data.title);
-          } else {
-            songTextElement.innerText = "Radio 88.1 FM - Transmitiendo en vivo";
+          // AllOrigins envuelve la respuesta en un objeto .contents (en formato string JSON)
+          if (data && data.contents) {
+            const parsedData = JSON.parse(data.contents);
+            const songTextElement = document.getElementById('songInfoText');
+            
+            if (parsedData && parsedData.title) {
+              songTextElement.innerText = parsedData.title;
+              setupMediaSession(parsedData.title);
+            } else {
+              songTextElement.innerText = "Radio 88.1 FM - Transmitiendo en vivo";
+            }
           }
         })
-        .catch(() => {
-          // Si el servicio externo falla momentáneamente, mantenemos el reproductor limpio
-          // y probamos leyendo la etiqueta del stream de audio si estuviera disponible
-          const audioEl = document.querySelector('audio');
-          if (!audioEl.paused) {
-            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - En Vivo";
-          }
+        .catch(err => {
+          // Si el proxy sufre un timeout (522) o error, mantenemos el reproductor funcionando
+          // sin mostrar errores molestos en la interfaz.
+          console.log("Reintentando conexión de metadatos...");
         });
     }
 
-    // Actualizar cada 8 segundos para que el cliente vea los cambios de canciones en tiempo real
-    setInterval(fetchZenoMetadata, 8000);
+    // Consultar cada 10 segundos
+    setInterval(fetchZenoMetadata, 10000);
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
