@@ -701,28 +701,38 @@
     setDailyVerse();
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
-   function fetchZenoMetadata() {
+ // --- CONSULTAR METADATOS CON MANEJO DE TIMEOUT ---
+    function fetchZenoMetadata() {
       const zenoApiUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
-      const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(zenoApiUrl);
+      // Usamos otro proxy alternativo o respaldo directo con control de error silencioso
+      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(zenoApiUrl);
 
-      fetch(proxyUrl, { cache: 'no-store' })
-        .then(res => res.json())
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // Si tarda más de 4s, corta para no trabar
+
+      fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' })
+        .then(res => {
+          clearTimeout(timeoutId);
+          if (!res.ok) throw new Error('Network response was not ok');
+          return res.json();
+        })
         .then(data => {
           const songTextElement = document.getElementById('songInfoText');
           if (data && data.title) {
             songTextElement.innerText = data.title;
             setupMediaSession(data.title);
           } else {
-            songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+            songTextElement.innerText = "Radio 88.1 FM - Transmitiendo en vivo";
           }
         })
         .catch(err => {
-          console.warn("Sintonizando transmisión en vivo...", err);
+          // Si el proxy falla, mantenemos el texto institucional de la radio sin romper la app
+          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
         });
     }
 
-    // Consulta los metadatos cada 6 segundos
-    setInterval(fetchZenoMetadata, 6000);
+    // Consultar cada 10 segundos para evitar saturar el proxy
+    setInterval(fetchZenoMetadata, 10000);
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
