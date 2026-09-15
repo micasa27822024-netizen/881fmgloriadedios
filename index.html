@@ -139,77 +139,27 @@
     .song-card i { color: #f59e0b; font-size: 0.8rem; animation: pulseWave 2s infinite; }
     .song-info { font-size: 0.75rem; font-weight: 600; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Fila de Reproducción */
-    .player-row {
-      display: flex; align-items: center; justify-content: space-between; width: 100%;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);
-      padding: 6px 14px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .status-badge {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; color: #e5e7eb; min-width: 85px;
-    }
-
-    .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-      background-color: #6b7280; box-shadow: 0 0 6px rgba(107, 114, 128, 0.6);
-      transition: background-color 0.3s, box-shadow 0.3s;
-    }
-
-    .status-dot.online {
-      background-color: #22c55e; box-shadow: 0 0 10px #22c55e;
-      animation: blinkPulse 2s infinite ease-in-out;
-    }
-
-    .status-dot.reconnecting {
-      background-color: #f59e0b; box-shadow: 0 0 10px #f59e0b;
-      animation: blinkFast 0.8s infinite ease-in-out;
-    }
-
-    .status-dot.offline { background-color: #ef4444; box-shadow: 0 0 6px #ef4444; }
-
-    @keyframes blinkPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    @keyframes blinkFast {
-      0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
-    }
-
-    .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
-
-    .btn-play {
-      position: relative; z-index: 2; width: 50px; height: 50px; border-radius: 50%;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      border: 2.5px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-      color: white; font-size: 1.3rem; display: flex; justify-content: center; align-items: center;
-      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.3s; padding-left: 3px;
-    }
-
-    .btn-play.playing {
-      padding-left: 0; background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
-    }
-
-    .btn-play.playing::before, .btn-play.playing::after {
-      content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-      border-radius: 50%; border: 2px solid rgba(239, 68, 68, 0.7); z-index: -1;
-      animation: pulseWave 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-
-    .btn-play.playing::after { animation-delay: 0.6s; }
-
     @keyframes pulseWave {
       0% { transform: scale(0.95); opacity: 0.9; }
       100% { transform: scale(1.45); opacity: 0; }
     }
 
-    .volume-container { display: flex; align-items: center; gap: 5px; min-width: 85px; justify-content: flex-end; }
-    .volume-slider { -webkit-appearance: none; width: 55px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.4); outline: none; }
-    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; }
+    /* Contenedor del Reproductor Iframe */
+    .player-iframe-container {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .cuadroBordeado {
+      border-radius: 12px;
+      width: 100%;
+      display: block;
+    }
 
     /* Redes Sociales y Compartir */
     .footer-section {
@@ -286,11 +236,6 @@
       <!-- Barra Superior limpia -->
       <div class="top-bar">
         <div class="top-actions">
-          <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
-            <i class="fa-solid fa-clock"></i>
-            <span id="timerLabel">Off</span>
-          </button>
-
           <button class="btn-top" onclick="toggleModal('scheduleModal', true)" title="Programación">
             <i class="fa-solid fa-radio"></i>
             <span>Radio</span>
@@ -327,22 +272,9 @@
           <div class="song-info" id="songInfoText">Sintonizando transmisión en vivo...</div>
         </div>
 
-        <div class="player-row">
-          <div class="status-badge">
-            <span class="status-dot offline" id="statusDot"></span>
-            <span id="statusText">EN PAUSA</span>
-          </div>
-
-          <div class="btn-play-wrapper">
-            <button class="btn-play" id="playBtn" onclick="toggleAudio()">
-              <i class="fa-solid fa-play" id="playIcon"></i>
-            </button>
-          </div>
-
-          <div class="volume-container">
-            <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.85rem;"></i>
-            <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
-          </div>
+        <!-- REPRODUCTOR HTML5 (IFRAME) -->
+        <div class="player-iframe-container">
+          <iframe name="contenedorPlayer" class="cuadroBordeado" allow="autoplay" width="100%" height="110px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="0" scrolling="no" src="https://cp.usastreams.com/pr2g/APPlayerRadioHTML5.aspx?stream=https://stream.zeno.fm/ggq0ed8yus8uv&fondo=05&formato=mpeg&color=14&titulo=2&autoStart=1&vol=5&tipo=12&nombre=Radio+FM+TOP40&server=https://stream10.usastreams.com:10998/status.xslCHUMILLASmount=/"></iframe>
         </div>
 
         <div class="footer-section">
@@ -378,9 +310,6 @@
       </div>
     </div>
   </div>
-
-  <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
-  <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -536,7 +465,7 @@
       </div>
 
       <div style="margin-top: 15px; text-align: center;">
-        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" onclick="pauseAudio()" style="color: #9ca3af; font-size: 0.78rem; text-decoration: underline;">
+        <a href="https://www.youtube.com/@iglesiamontedesantidad6232/streams" target="_blank" style="color: #9ca3af; font-size: 0.78rem; text-decoration: underline;">
           <i class="fa-brands fa-youtube"></i> Abrir canal completo en YouTube
         </a>
       </div>
@@ -586,21 +515,6 @@
       }
     }
 
-    const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
-    const audio = document.getElementById('radioStream');
-    const silentAudio = document.getElementById('silentAudio');
-    const playBtn = document.getElementById('playBtn');
-    const playIcon = document.getElementById('playIcon');
-    const volSlider = document.getElementById('volSlider');
-    const volIcon = document.getElementById('volIcon');
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
-
-    let timerTimeout = null;
-    let timerMinutes = 0;
-    let isUserPaused = true;
-    let isReconnecting = false;
-    let wakeLock = null;
     let castSession = null;
 
     window.__onGCastApiAvailable = function(isAvailable) {
@@ -645,8 +559,7 @@
             context.requestSession().then(() => {
               const session = context.getCurrentSession();
               if (session) {
-                pauseAudio();
-                const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
+                const mediaInfo = new chrome.cast.media.MediaInfo("https://stream.zeno.fm/ggq0ed8yus8uv.mp3", 'audio/mp3');
                 mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
                 mediaInfo.metadata.title = 'Radio 88.1 FM';
                 mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
@@ -666,22 +579,6 @@
         alert("Asegurate de estar conectado a la misma red Wi-Fi que tu Smart TV.");
       }
     }
-
-    function setupMediaSession(songTitle = 'Radio 88.1 FM') {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: songTitle,
-          artist: 'Gloria de Dios',
-          album: '88.1 FM En Vivo',
-          artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
-        });
-        navigator.mediaSession.setActionHandler('play', () => { playAudio(); });
-        navigator.mediaSession.setActionHandler('pause', () => { pauseAudio(); });
-        navigator.mediaSession.setActionHandler('stop', () => { pauseAudio(); });
-      }
-    }
-
-    setupMediaSession();
 
     // --- VERSÍCULO DIARIO ---
     const verses = [
@@ -720,7 +617,6 @@
           const songTextElement = document.getElementById('songInfoText');
           if (songTitle && songTitle.trim() !== "" && !songTitle.startsWith("<")) {
             songTextElement.innerText = songTitle;
-            setupMediaSession(songTitle);
           } else {
             songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
           }
@@ -731,144 +627,10 @@
       });
     }
 
-    // Consulta los metadatos cada 5 segundos
     setInterval(fetchZenoMetadata, 5000);
     fetchZenoMetadata();
 
-    const workerBlob = new Blob([`
-      let interval = null;
-      self.onmessage = function(e) {
-        if (e.data === 'start') {
-          if (!interval) {
-            interval = setInterval(function() { self.postMessage('check'); }, 3000);
-          }
-        } else if (e.data === 'stop') {
-          if (interval) { clearInterval(interval); interval = null; }
-        }
-      };
-    `], { type: 'application/javascript' });
-
-    const keepAliveWorker = new Worker(URL.createObjectURL(workerBlob));
-    keepAliveWorker.onmessage = function(e) {
-      if (e.data === 'check' && !isUserPaused) {
-        if (audio.paused || audio.readyState < 2) { forceReconnect(); }
-      }
-    };
-
-    function updateStatus(state, text) {
-      statusDot.className = 'status-dot ' + state;
-      statusText.innerText = text;
-    }
-
-    async function requestWakeLock() {
-      try {
-        if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); }
-      } catch (err) {}
-    }
-
-    function releaseWakeLock() {
-      if (wakeLock !== null) {
-        wakeLock.release().then(() => { wakeLock = null; });
-      }
-    }
-
-    function updateMediaSessionState(state) {
-      if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = state; }
-    }
-
-    function playAudio() {
-      closeEmbeddedVideo();
-
-      isUserPaused = false;
-      playIcon.className = 'fa-solid fa-spinner fa-spin';
-      updateStatus('reconnecting', 'CONECTANDO');
-      
-      silentAudio.play().catch(() => {});
-      requestWakeLock();
-
-      audio.src = streamUrl + "?t=" + new Date().getTime();
-      
-      audio.play().then(() => {
-        playBtn.classList.add('playing');
-        playIcon.className = 'fa-solid fa-pause';
-        updateStatus('online', 'EN LÍNEA');
-        setupMediaSession();
-        updateMediaSessionState('playing');
-        keepAliveWorker.postMessage('start');
-      }).catch(() => {
-        if (!isUserPaused) {
-          updateStatus('reconnecting', 'REINTENTANDO');
-          setTimeout(playAudio, 2000);
-        } else {
-          pauseAudio();
-        }
-      });
-    }
-
-    function pauseAudio() {
-      isUserPaused = true;
-      keepAliveWorker.postMessage('stop');
-      releaseWakeLock();
-
-      audio.pause();
-      silentAudio.pause();
-      audio.removeAttribute('src');
-      audio.load();
-
-      playBtn.classList.remove('playing');
-      playIcon.className = 'fa-solid fa-play';
-      updateStatus('offline', 'EN PAUSA');
-      updateMediaSessionState('paused');
-    }
-
-    function toggleAudio() {
-      if (audio.paused || isUserPaused) { playAudio(); } else { pauseAudio(); }
-    }
-
-    function forceReconnect() {
-      if (isUserPaused || isReconnecting) return;
-      isReconnecting = true;
-      playIcon.className = 'fa-solid fa-spinner fa-spin';
-      updateStatus('reconnecting', 'RECONECTANDO');
-
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
-
-      setTimeout(() => {
-        if (!isUserPaused) {
-          audio.src = streamUrl + "?t=" + new Date().getTime();
-          audio.play().then(() => {
-            playBtn.classList.add('playing');
-            playIcon.className = 'fa-solid fa-pause';
-            updateStatus('online', 'EN LÍNEA');
-            updateMediaSessionState('playing');
-          }).catch(() => {
-            if (!isUserPaused) setTimeout(forceReconnect, 2000);
-          }).finally(() => { isReconnecting = false; });
-        } else { isReconnecting = false; }
-      }, 300);
-    }
-
-    audio.addEventListener('waiting', () => { if (!isUserPaused) { playIcon.className = 'fa-solid fa-spinner fa-spin'; updateStatus('reconnecting', 'BUFFERING'); } });
-    audio.addEventListener('playing', () => { if (!isUserPaused) { playBtn.classList.add('playing'); playIcon.className = 'fa-solid fa-pause'; updateStatus('online', 'EN LÍNEA'); } });
-    audio.addEventListener('pause', () => { if (!isUserPaused && !isReconnecting) { updateMediaSessionState('paused'); updateStatus('reconnecting', 'RECONECTANDO'); setTimeout(() => { if (!isUserPaused) forceReconnect(); }, 1000); } });
-    audio.addEventListener('ended', () => { if (!isUserPaused) forceReconnect(); });
-    audio.addEventListener('stalled', () => { if (!isUserPaused) forceReconnect(); });
-    audio.addEventListener('error', () => { if (!isUserPaused) forceReconnect(); });
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && !isUserPaused) {
-        requestWakeLock();
-        if (audio.paused || audio.readyState < 2) { forceReconnect(); }
-      }
-    });
-
-    window.addEventListener('online', () => { if (!isUserPaused) forceReconnect(); });
-    window.addEventListener('offline', () => { if (!isUserPaused) updateStatus('offline', 'SIN RED'); });
-
     function playEmbeddedVideo(videoId, title) {
-      pauseAudio();
       const wrapper = document.getElementById('videoWrapper');
       const player = document.getElementById('ytIframePlayer');
       const titleDisplay = document.getElementById('videoTitleDisplay');
@@ -895,36 +657,6 @@
     function closePodcastsModal() {
       closeEmbeddedVideo();
       toggleModal('podcastsModal', false);
-    }
-
-    function cycleTimer() {
-      if (timerMinutes === 0) timerMinutes = 15;
-      else if (timerMinutes === 15) timerMinutes = 30;
-      else if (timerMinutes === 30) timerMinutes = 60;
-      else timerMinutes = 0;
-
-      clearTimeout(timerTimeout);
-      const label = document.getElementById('timerLabel');
-
-      if (timerMinutes > 0) {
-        label.innerText = timerMinutes + 'm';
-        timerTimeout = setTimeout(() => {
-          if (!isUserPaused) pauseAudio();
-          timerMinutes = 0;
-          label.innerText = 'Off';
-        }, timerMinutes * 60 * 1000);
-      } else {
-        label.innerText = 'Off';
-      }
-    }
-
-    function setVolume(val) {
-      audio.volume = val;
-      volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
-    }
-
-    function toggleMute() {
-      if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
   </script>
 </body>
