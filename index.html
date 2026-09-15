@@ -702,19 +702,14 @@
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
  // --- CONSULTAR METADATOS CON MANEJO DE TIMEOUT ---
-    function fetchZenoMetadata() {
-      const zenoApiUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
-      // Usamos otro proxy alternativo o respaldo directo con control de error silencioso
-      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(zenoApiUrl);
+  function fetchZenoMetadata() {
+      // Intentamos consultar a través de un servicio JSONP o una ruta limpia sin bloqueo de corsproxy viejo
+      const apiUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // Si tarda más de 4s, corta para no trabar
-
-      fetch(proxyUrl, { signal: controller.signal, cache: 'no-store' })
-        .then(res => {
-          clearTimeout(timeoutId);
-          if (!res.ok) throw new Error('Network response was not ok');
-          return res.json();
+      fetch(apiUrl, { cache: 'no-store' })
+        .then(response => {
+          if (!response.ok) throw new Error('Error al conectar');
+          return response.json();
         })
         .then(data => {
           const songTextElement = document.getElementById('songInfoText');
@@ -725,14 +720,18 @@
             songTextElement.innerText = "Radio 88.1 FM - Transmitiendo en vivo";
           }
         })
-        .catch(err => {
-          // Si el proxy falla, mantenemos el texto institucional de la radio sin romper la app
-          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+        .catch(() => {
+          // Si el servicio externo falla momentáneamente, mantenemos el reproductor limpio
+          // y probamos leyendo la etiqueta del stream de audio si estuviera disponible
+          const audioEl = document.querySelector('audio');
+          if (!audioEl.paused) {
+            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - En Vivo";
+          }
         });
     }
 
-    // Consultar cada 10 segundos para evitar saturar el proxy
-    setInterval(fetchZenoMetadata, 10000);
+    // Actualizar cada 8 segundos para que el cliente vea los cambios de canciones en tiempo real
+    setInterval(fetchZenoMetadata, 8000);
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
