@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radio 88.1 FM - Gloria de Dios</title>
 
-  <!-- Enlace al Manifest y Metas PWA -->
+  <!-- Manifest PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f59e0b">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,7 +36,7 @@
       top: 0; left: 0; width: 100%; height: 100%;
       background: url('fondo.jpg') no-repeat center center/cover;
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-      padding: 8px 10px;
+      padding: 6px 8px;
     }
 
     @media (min-width: 768px) {
@@ -45,7 +45,7 @@
 
     .overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.85) 100%);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.85) 100%);
       z-index: 1; pointer-events: none;
     }
 
@@ -54,47 +54,52 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR DESPEJADA --- */
+    /* --- BARRA SUPERIOR COMPACTA Y DELGADA --- */
     .top-bar {
       width: 100%; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
-      padding-top: 4px;
+      padding-top: 2px;
     }
 
     .top-actions {
       display: flex; 
-      gap: 6px; 
+      gap: 4px; 
       justify-content: center; 
       align-items: center; 
       flex-wrap: nowrap;
       max-width: 100%;
-      padding: 2px;
+      padding: 0 2px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
+
+    .top-actions::-webkit-scrollbar { display: none; }
+    .top-actions { -ms-overflow-style: none; scrollbar-width: none; }
 
     .btn-top {
       background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: white; 
-      height: 34px; 
-      padding: 0 10px; 
-      border-radius: 17px;
-      display: flex; 
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #ffffff; 
+      height: 30px; 
+      padding: 0 8px; 
+      border-radius: 15px;
+      display: inline-flex; 
       justify-content: center; 
       align-items: center;
-      font-size: 0.75rem; 
+      font-size: 0.70rem; 
       font-weight: 600; 
       cursor: pointer; 
       text-decoration: none;
-      gap: 5px; 
+      gap: 4px; 
       white-space: nowrap; 
       flex-shrink: 0;
-      transition: transform 0.2s, background 0.2s;
+      transition: transform 0.15s, background 0.15s;
     }
 
-    .btn-top:hover { transform: scale(1.05); background: rgba(0, 0, 0, 0.75); }
+    .btn-top:hover { transform: scale(1.03); background: rgba(0, 0, 0, 0.75); }
 
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
@@ -112,14 +117,13 @@
     .verse-text { font-size: 0.75rem; font-style: italic; color: #f3f4f6; line-height: 1.2; }
     .verse-ref { font-size: 0.68rem; font-weight: 700; color: #f59e0b; margin-top: 2px; }
 
-    /* Fila de Reproducción: Estado + Play + Volumen */
+    /* Fila de Reproducción */
     .player-row {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
       background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);
       padding: 6px 14px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    /* Indicador LED de Estado */
     .status-badge {
       display: flex; align-items: center; gap: 5px;
       font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; color: #e5e7eb; min-width: 85px;
@@ -152,7 +156,6 @@
       0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
     }
 
-    /* Botón Play */
     .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
 
     .btn-play {
@@ -182,7 +185,6 @@
       100% { transform: scale(1.45); opacity: 0; }
     }
 
-    /* Slider de Volumen */
     .volume-container { display: flex; align-items: center; gap: 5px; min-width: 85px; justify-content: flex-end; }
     .volume-slider { -webkit-appearance: none; width: 55px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.4); outline: none; }
     .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; }
@@ -204,7 +206,7 @@
     .whatsapp { background-color: #25d366; }
     .oracion  { background-color: #f59e0b; }
     .youtube   { background-color: #ff0000; }
-    .compartir { background-color: #8b5cf6; } /* Color Violeta / Compartir destacado */
+    .compartir { background-color: #8b5cf6; }
 
     /* Modales */
     .modal {
@@ -225,75 +227,19 @@
     .schedule-days { font-size: 0.75rem; color: #9ca3af; }
     .schedule-time { font-size: 0.85rem; font-weight: 700; color: #f59e0b; white-space: nowrap; }
 
-    /* Estilos Modal Reuniones Iglesia */
-    .reuniones-header-box {
-      text-align: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .subtitulo-iglesia {
-      font-size: 0.7rem;
-      letter-spacing: 1.5px;
-      color: #38bdf8;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-    .reuniones-header-box h2 {
-      margin: 2px 0;
-      color: #ffffff;
-      font-size: 1.4rem;
-      font-style: italic;
-    }
-    .reunion-row {
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 10px 14px;
-      margin-bottom: 10px;
-      gap: 12px;
-    }
-    .reunion-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid #38bdf8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #38bdf8;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-    .reunion-details {
-      display: flex;
-      flex-direction: column;
-    }
-    .reunion-time-tag {
-      display: flex;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: 800;
-    }
+    .reuniones-header-box { text-align: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .subtitulo-iglesia { font-size: 0.7rem; letter-spacing: 1.5px; color: #38bdf8; font-weight: 700; text-transform: uppercase; }
+    .reuniones-header-box h2 { margin: 2px 0; color: #ffffff; font-size: 1.4rem; font-style: italic; }
+    .reunion-row { display: flex; align-items: center; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; gap: 12px; }
+    .reunion-icon-box { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #38bdf8; display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.1rem; flex-shrink: 0; }
+    .reunion-details { display: flex; flex-direction: column; }
+    .reunion-time-tag { display: flex; gap: 6px; font-size: 0.8rem; font-weight: 800; }
     .reunion-time-tag .day { color: #ffffff; }
     .reunion-time-tag .hour { color: #38bdf8; }
-    .reunion-name {
-      color: #e2e8f0;
-      font-size: 0.95rem;
-      font-weight: 600;
-    }
-    .reunion-row.domingo {
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    .reunion-row.domingo .reunion-icon-box {
-      border-color: #f59e0b;
-      color: #f59e0b;
-    }
-    .reunion-row.domingo .hour {
-      color: #f59e0b;
-    }
+    .reunion-name { color: #e2e8f0; font-size: 0.95rem; font-weight: 600; }
+    .reunion-row.domingo { border-color: rgba(245, 158, 11, 0.4); }
+    .reunion-row.domingo .reunion-icon-box { border-color: #f59e0b; color: #f59e0b; }
+    .reunion-row.domingo .hour { color: #f59e0b; }
 
     .video-wrapper { display: none; margin-bottom: 15px; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(245, 158, 11, 0.4); }
     .video-title-bar { background: #1f2937; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; color: #f59e0b; display: flex; justify-content: space-between; align-items: center; }
@@ -326,18 +272,17 @@
             <span>Radio</span>
           </button>
 
-          <button class="btn-top" onclick="toggleModal('reunionesModal', true)" title="Reuniones de la Iglesia">
+          <button class="btn-top" onclick="toggleModal('reunionesModal', true)" title="Reuniones">
             <i class="fa-solid fa-church" style="color: #38bdf8;"></i>
             <span>Reuniones</span>
           </button>
 
-          <button class="btn-top" onclick="toggleModal('podcastsModal', true)" title="Prédicas y Transmisiones">
+          <button class="btn-top" onclick="toggleModal('podcastsModal', true)" title="Prédicas">
             <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i>
             <span>Prédicas</span>
           </button>
 
-          <!-- Botón de Instalar App PWA -->
-          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App PWA">
+          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App">
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
@@ -346,35 +291,29 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Versículo del día -->
         <div class="verse-card">
           <div class="verse-text" id="verseText"></div>
           <div class="verse-ref" id="verseRef"></div>
         </div>
 
-        <!-- Fila Única de Control de Audio -->
         <div class="player-row">
-          <!-- LED Estado -->
           <div class="status-badge">
             <span class="status-dot offline" id="statusDot"></span>
             <span id="statusText">EN PAUSA</span>
           </div>
 
-          <!-- Botón Play principal -->
           <div class="btn-play-wrapper">
             <button class="btn-play" id="playBtn" onclick="toggleAudio()">
               <i class="fa-solid fa-play" id="playIcon"></i>
             </button>
           </div>
 
-          <!-- Control Volumen -->
           <div class="volume-container">
             <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.85rem;"></i>
             <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
           </div>
         </div>
 
-        <!-- Pie de página con Redes Sociales y Compartir App -->
         <div class="footer-section">
           <div class="footer-title">Contacto & Redes Sociales</div>
           <div class="social-buttons">
@@ -394,7 +333,6 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
-            <!-- Botón de Compartir en la misma barra inferior -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
@@ -404,12 +342,10 @@
     </div>
   </div>
 
-  <!-- Audio de Streaming Principal -->
   <audio id="radioStream" preload="none"></audio>
-  <!-- Audio Silencioso -->
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
-  <!-- Modal Programación Radio -->
+  <!-- Modales -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -443,7 +379,6 @@
     </div>
   </div>
 
-  <!-- Modal Reuniones de la Iglesia -->
   <div class="modal" id="reunionesModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -457,60 +392,39 @@
       </div>
 
       <div class="reunion-row">
-        <div class="reunion-icon-box">
-          <i class="fa-solid fa-hands-praying"></i>
-        </div>
+        <div class="reunion-icon-box"><i class="fa-solid fa-hands-praying"></i></div>
         <div class="reunion-details">
-          <div class="reunion-time-tag">
-            <span class="day">MARTES</span>
-            <span class="hour">20:00 HS</span>
-          </div>
+          <div class="reunion-time-tag"><span class="day">MARTES</span><span class="hour">20:00 HS</span></div>
           <span class="reunion-name">Oración por las Familias</span>
         </div>
       </div>
 
       <div class="reunion-row">
-        <div class="reunion-icon-box">
-          <i class="fa-solid fa-book-bible"></i>
-        </div>
+        <div class="reunion-icon-box"><i class="fa-solid fa-book-bible"></i></div>
         <div class="reunion-details">
-          <div class="reunion-time-tag">
-            <span class="day">JUEVES</span>
-            <span class="hour">20:00 HS</span>
-          </div>
+          <div class="reunion-time-tag"><span class="day">JUEVES</span><span class="hour">20:00 HS</span></div>
           <span class="reunion-name">Discipulado</span>
         </div>
       </div>
 
       <div class="reunion-row">
-        <div class="reunion-icon-box">
-          <i class="fa-solid fa-dove"></i>
-        </div>
+        <div class="reunion-icon-box"><i class="fa-solid fa-dove"></i></div>
         <div class="reunion-details">
-          <div class="reunion-time-tag">
-            <span class="day">SÁBADO</span>
-            <span class="hour">20:00 HS</span>
-          </div>
+          <div class="reunion-time-tag"><span class="day">SÁBADO</span><span class="hour">20:00 HS</span></div>
           <span class="reunion-name">Noche de Liberación y Milagros</span>
         </div>
       </div>
 
       <div class="reunion-row domingo">
-        <div class="reunion-icon-box">
-          <i class="fa-solid fa-users"></i>
-        </div>
+        <div class="reunion-icon-box"><i class="fa-solid fa-users"></i></div>
         <div class="reunion-details">
-          <div class="reunion-time-tag">
-            <span class="day">DOMINGO</span>
-            <span class="hour">10:30 HS</span>
-          </div>
+          <div class="reunion-time-tag"><span class="day">DOMINGO</span><span class="hour">10:30 HS</span></div>
           <span class="reunion-name">Reunión General</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Prédicas -->
   <div class="modal" id="podcastsModal">
     <div class="modal-content" id="modalPodcastsContent">
       <div class="modal-header">
@@ -593,13 +507,11 @@
   </div>
 
   <script>
-    /* --- INSTALACIÓN NATIVA PWA --- */
     let deferredPrompt = null;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      console.log('Capturado evento de instalación PWA');
     });
 
     function installPWA() {
@@ -607,30 +519,21 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            console.log('App PWA instalada por el usuario');
+            console.log('App instalada');
           }
           deferredPrompt = null;
         });
       } else {
-        alert(
-          "Para instalar la Web App (PWA) directamente en tu dispositivo:\n\n" +
-          "• En Computadora / Chrome: Hace clic en el icono de 'Instalar' (pantalla con flecha hacia abajo) que aparece en la barra de direcciones arriba a la derecha.\n\n" +
-          "• En Celular / Android: Toca el menú de 3 puntos (arriba a la derecha) y selecciona 'Agregar a la pantalla principal' o 'Instalar aplicación'.\n\n" +
-          "• En iPhone / Safari: Toca el botón 'Compartir' y selecciona 'Agregar al inicio'."
-        );
+        alert("Para instalar la App:\n• En Chrome: Menú de 3 puntos -> 'Agregar a la pantalla principal' / 'Instalar app'.\n• En Safari: 'Compartir' -> 'Agregar al inicio'.");
       }
     }
 
-    /* Registro del Service Worker PWA */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker listo para PWA:', reg))
-          .catch(err => console.error('Error Service Worker:', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
       });
     }
 
-    /* --- FUNCIÓN COMPARTIR PWA --- */
     function shareWebsite() {
       const shareData = {
         title: 'Radio 88.1 FM - Gloria de Dios',
@@ -639,14 +542,13 @@
       };
 
       if (navigator.share) {
-        navigator.share(shareData).catch(err => console.log('Error al compartir', err));
+        navigator.share(shareData).catch(err => console.log(err));
       } else {
         navigator.clipboard.writeText(window.location.href);
-        alert('¡Enlace copiado al portapapeles!');
+        alert('¡Enlace copiado!');
       }
     }
 
-    /* --- REPRODUCTOR DE AUDIO --- */
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
     const audio = document.getElementById('radioStream');
     const silentAudio = document.getElementById('silentAudio');
@@ -663,20 +565,33 @@
     let isReconnecting = false;
     let wakeLock = null;
 
+    // Configuración de MediaSession multimedia para prevenir notificación 'Silenciada'
+    function setupMediaSession() {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: 'Radio 88.1 FM',
+          artist: 'Gloria de Dios',
+          album: 'En el aire... bendiciendo tu vida',
+          artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
+        });
+        navigator.mediaSession.setActionHandler('play', () => { playAudio(); });
+        navigator.mediaSession.setActionHandler('pause', () => { pauseAudio(); });
+        navigator.mediaSession.setActionHandler('stop', () => { pauseAudio(); });
+      }
+    }
+
+    // Inicializar MediaSession preventivo
+    setupMediaSession();
+
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
         if (e.data === 'start') {
           if (!interval) {
-            interval = setInterval(function() {
-              self.postMessage('check');
-            }, 3000);
+            interval = setInterval(function() { self.postMessage('check'); }, 3000);
           }
         } else if (e.data === 'stop') {
-          if (interval) {
-            clearInterval(interval);
-            interval = null;
-          }
+          if (interval) { clearInterval(interval); interval = null; }
         }
       };
     `], { type: 'application/javascript' });
@@ -684,9 +599,7 @@
     const keepAliveWorker = new Worker(URL.createObjectURL(workerBlob));
     keepAliveWorker.onmessage = function(e) {
       if (e.data === 'check' && !isUserPaused) {
-        if (audio.paused || audio.readyState < 2) {
-          forceReconnect();
-        }
+        if (audio.paused || audio.readyState < 2) { forceReconnect(); }
       }
     };
 
@@ -713,9 +626,7 @@
 
     async function requestWakeLock() {
       try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
+        if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); }
       } catch (err) {}
     }
 
@@ -725,24 +636,8 @@
       }
     }
 
-    function setupMediaSession() {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: 'Radio 88.1 FM',
-          artist: 'Gloria de Dios',
-          album: 'En el aire... bendiciendo tu vida',
-          artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
-        });
-        navigator.mediaSession.setActionHandler('play', () => { playAudio(); });
-        navigator.mediaSession.setActionHandler('pause', () => { pauseAudio(); });
-        navigator.mediaSession.setActionHandler('stop', () => { pauseAudio(); });
-      }
-    }
-
     function updateMediaSessionState(state) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = state;
-      }
+      if ('mediaSession' in navigator) { navigator.mediaSession.playbackState = state; }
     }
 
     function playAudio() {
@@ -764,7 +659,7 @@
         setupMediaSession();
         updateMediaSessionState('playing');
         keepAliveWorker.postMessage('start');
-      }).catch(error => {
+      }).catch(() => {
         if (!isUserPaused) {
           updateStatus('reconnecting', 'REINTENTANDO');
           setTimeout(playAudio, 2000);
@@ -791,11 +686,7 @@
     }
 
     function toggleAudio() {
-      if (audio.paused || isUserPaused) {
-        playAudio();
-      } else {
-        pauseAudio();
-      }
+      if (audio.paused || isUserPaused) { playAudio(); } else { pauseAudio(); }
     }
 
     function forceReconnect() {
@@ -818,39 +709,14 @@
             updateMediaSessionState('playing');
           }).catch(() => {
             if (!isUserPaused) setTimeout(forceReconnect, 2000);
-          }).finally(() => {
-            isReconnecting = false;
-          });
-        } else {
-          isReconnecting = false;
-        }
+          }).finally(() => { isReconnecting = false; });
+        } else { isReconnecting = false; }
       }, 300);
     }
 
-    /* Eventos Audio */
-    audio.addEventListener('waiting', () => {
-      if (!isUserPaused) {
-        playIcon.className = 'fa-solid fa-spinner fa-spin';
-        updateStatus('reconnecting', 'BUFFERING');
-      }
-    });
-
-    audio.addEventListener('playing', () => {
-      if (!isUserPaused) {
-        playBtn.classList.add('playing');
-        playIcon.className = 'fa-solid fa-pause';
-        updateStatus('online', 'EN LÍNEA');
-      }
-    });
-
-    audio.addEventListener('pause', () => {
-      if (!isUserPaused && !isReconnecting) {
-        updateMediaSessionState('paused');
-        updateStatus('reconnecting', 'RECONECTANDO');
-        setTimeout(() => { if (!isUserPaused) forceReconnect(); }, 1000);
-      }
-    });
-
+    audio.addEventListener('waiting', () => { if (!isUserPaused) { playIcon.className = 'fa-solid fa-spinner fa-spin'; updateStatus('reconnecting', 'BUFFERING'); } });
+    audio.addEventListener('playing', () => { if (!isUserPaused) { playBtn.classList.add('playing'); playIcon.className = 'fa-solid fa-pause'; updateStatus('online', 'EN LÍNEA'); } });
+    audio.addEventListener('pause', () => { if (!isUserPaused && !isReconnecting) { updateMediaSessionState('paused'); updateStatus('reconnecting', 'RECONECTANDO'); setTimeout(() => { if (!isUserPaused) forceReconnect(); }, 1000); } });
     audio.addEventListener('ended', () => { if (!isUserPaused) forceReconnect(); });
     audio.addEventListener('stalled', () => { if (!isUserPaused) forceReconnect(); });
     audio.addEventListener('error', () => { if (!isUserPaused) forceReconnect(); });
@@ -858,16 +724,13 @@
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden && !isUserPaused) {
         requestWakeLock();
-        if (audio.paused || audio.readyState < 2) {
-          forceReconnect();
-        }
+        if (audio.paused || audio.readyState < 2) { forceReconnect(); }
       }
     });
 
     window.addEventListener('online', () => { if (!isUserPaused) forceReconnect(); });
     window.addEventListener('offline', () => { if (!isUserPaused) updateStatus('offline', 'SIN RED'); });
 
-    /* Modales y YouTube */
     function playEmbeddedVideo(videoId, title) {
       pauseAudio();
       const wrapper = document.getElementById('videoWrapper');
@@ -898,7 +761,6 @@
       toggleModal('podcastsModal', false);
     }
 
-    /* Temporizador */
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
       else if (timerMinutes === 15) timerMinutes = 30;
@@ -920,18 +782,13 @@
       }
     }
 
-    /* Volumen */
     function setVolume(val) {
       audio.volume = val;
       volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
     }
 
     function toggleMute() {
-      if (audio.volume > 0) {
-        volSlider.value = 0; setVolume(0);
-      } else {
-        volSlider.value = 1; setVolume(1);
-      }
+      if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
   </script>
 </body>
