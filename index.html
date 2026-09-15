@@ -238,13 +238,14 @@
             <span>Prédicas</span>
           </button>
 
-          <!-- Botón de App visible de manera permanente -->
-          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App">
+          <!-- Botón de App PWA nativa -->
+          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App PWA">
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
 
-          <button class="btn-top" onclick="shareWebsite()" title="Compartir">
+          <!-- Botón de Compartir PWA -->
+          <button class="btn-top" onclick="shareWebsite()" title="Compartir App">
             <i class="fa-solid fa-share-nodes"></i>
           </button>
         </div>
@@ -307,7 +308,7 @@
 
   <!-- Audio de Streaming Principal -->
   <audio id="radioStream" preload="none"></audio>
-  <!-- Audio Silencioso para mantener el hilo de sonido activo en Android/iOS -->
+  <!-- Audio Silencioso -->
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modal Programación -->
@@ -427,13 +428,13 @@
   </div>
 
   <script>
-    /* --- LÓGICA HÍBRIDA PWA + DESCARGA DIRECTA --- */
+    /* --- INSTALACIÓN NATIva PWA --- */
     let deferredPrompt = null;
-    const fallbackAppUrl = "https://www.appcreator24.com/app4188732-4ujkte";
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
+      console.log('Capturado evento de instalación PWA');
     });
 
     function installPWA() {
@@ -441,26 +442,47 @@
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
-            console.log('App PWA instalada exitosamente');
+            console.log('App PWA instalada por el usuario');
           }
           deferredPrompt = null;
         });
       } else {
-        window.open(fallbackAppUrl, '_blank');
+        alert(
+          "Para instalar la Web App (PWA) directamente en tu dispositivo:\n\n" +
+          "• En Computadora / Chrome: Hace clic en el icono de 'Instalar' (pantalla con flecha hacia abajo) que aparece en la barra de direcciones arriba a la derecha.\n\n" +
+          "• En Celular / Android: Toca el menú de 3 puntos (arriba a la derecha) y selecciona 'Agregar a la pantalla principal' o 'Instalar aplicación'.\n\n" +
+          "• En iPhone / Safari: Toca el botón 'Compartir' y selecciona 'Agregar al inicio'."
+        );
       }
     }
 
+    /* Registro del Service Worker PWA */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker PWA ok:', reg))
-          .catch(err => console.error('Service Worker error:', err));
+          .then(reg => console.log('Service Worker listo para PWA:', reg))
+          .catch(err => console.error('Error Service Worker:', err));
       });
     }
 
-    /* --- LÓGICA DEL REPRODUCTOR Y RECURSOS DE AUDIO --- */
+    /* --- FUNCIÓN COMPARTIR PWA --- */
+    function shareWebsite() {
+      const shareData = {
+        title: 'Radio 88.1 FM - Gloria de Dios',
+        text: '¡Instalá la App PWA y escuchá Radio 88.1 FM Gloria de Dios en vivo!',
+        url: window.location.href
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData).catch(err => console.log('Error al compartir', err));
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('¡Enlace de la App PWA copiado al portapapeles!');
+      }
+    }
+
+    /* --- REPRODUCTOR DE AUDIO --- */
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
-    const shareUrl = "https://mirasa77827024-netizen.github.io/88.1fm-gloriadedios/";
     const audio = document.getElementById('radioStream');
     const silentAudio = document.getElementById('silentAudio');
     const playBtn = document.getElementById('playBtn');
@@ -476,7 +498,6 @@
     let isReconnecting = false;
     let wakeLock = null;
 
-    // Web Worker embebido para mantener vivo el temporizador
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
@@ -525,7 +546,6 @@
       statusText.innerText = text;
     }
 
-    /* Solicitud de WakeLock */
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -746,15 +766,6 @@
         volSlider.value = 0; setVolume(0);
       } else {
         volSlider.value = 1; setVolume(1);
-      }
-    }
-
-    function shareWebsite() {
-      if (navigator.share) {
-        navigator.share({ title: 'Radio 88.1 FM', text: '¡Escuchá la radio en vivo!', url: shareUrl });
-      } else {
-        navigator.clipboard.writeText(shareUrl);
-        alert('¡Enlace copiado!');
       }
     }
   </script>
