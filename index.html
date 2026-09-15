@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radio 88.1 FM - Gloria de Dios</title>
 
-  <!-- Meta etiquetas para PWA e Instalación Móvil -->
+  <!-- Enlace al Manifest y Metas PWA -->
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f59e0b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -237,9 +238,11 @@
             <span>Prédicas</span>
           </button>
 
-          <a href="https://www.appcreator24.com/app4188732-4ujkte" target="_blank" class="btn-top" title="Descargar App">
-            <i class="fa-solid fa-mobile-screen-button"></i>
-          </a>
+          <!-- Botón PWA dinámico reemplazando el link externo de la app -->
+          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App PWA" style="display: none;">
+            <i class="fa-solid fa-download"></i>
+            <span>Instalar App</span>
+          </button>
 
           <button class="btn-top" onclick="shareWebsite()" title="Compartir">
             <i class="fa-solid fa-share-nodes"></i>
@@ -424,52 +427,39 @@
   </div>
 
   <script>
-    /* --- CONFIGURACIÓN E INICIALIZACIÓN PWA (Manifest + ServiceWorker automáticos) --- */
-    (function initPWA() {
-      const manifestObj = {
-        name: "Radio 88.1 FM - Gloria de Dios",
-        short_name: "Radio 88.1",
-        description: "Radio en vivo 88.1 FM Gloria de Dios",
-        start_url: "./",
-        display: "standalone",
-        background_color: "#000000",
-        theme_color: "#f59e0b",
-        icons: [
-          { src: "fondo.jpg", sizes: "192x192", type: "image/jpeg" },
-          { src: "fondo.jpg", sizes: "512x512", type: "image/jpeg" }
-        ]
-      };
+    /* --- CAPTURA Y MANEJO DE INSTALACIÓN PWA --- */
+    let deferredPrompt;
+    const installBtn = document.getElementById('pwaInstallBtn');
 
-      const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
-      const manifestURL = URL.createObjectURL(manifestBlob);
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = manifestURL;
-      document.head.appendChild(link);
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.style.display = 'flex';
+    });
 
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-          self.addEventListener('install', e => self.skipWaiting());
-          self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-          self.addEventListener('fetch', e => {
-            if (e.request.url.includes('zeno.fm')) return;
-            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-          });
-        `;
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        const swURL = URL.createObjectURL(swBlob);
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('El usuario aceptó la instalación.');
+        }
+        deferredPrompt = null;
+        if (installBtn) installBtn.style.display = 'none';
+      });
+    }
 
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register(swURL)
-            .then(reg => console.log('ServiceWorker PWA registrado correctamente.'))
-            .catch(err => console.error('Error registrando ServiceWorker:', err));
-        });
-      }
-    })();
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker registrado correctamente'))
+          .catch(err => console.error('Error al registrar Service Worker:', err));
+      });
+    }
 
     /* --- LÓGICA DEL REPRODUCTOR Y RECURSOS DE AUDIO --- */
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
-    const shareUrl = "https://www.appcreator24.com/app4188732-4ujkte";
+    const shareUrl = "https://mirasa77827024-netizen.github.io/88.1fm-gloriadedios/";
     const audio = document.getElementById('radioStream');
     const silentAudio = document.getElementById('silentAudio');
     const playBtn = document.getElementById('playBtn');
