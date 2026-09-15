@@ -238,10 +238,10 @@
             <span>Prédicas</span>
           </button>
 
-          <!-- Botón PWA dinámico reemplazando el link externo de la app -->
-          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App PWA" style="display: none;">
-            <i class="fa-solid fa-download"></i>
-            <span>Instalar App</span>
+          <!-- Botón de App visible de manera permanente -->
+          <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            <span>App</span>
           </button>
 
           <button class="btn-top" onclick="shareWebsite()" title="Compartir">
@@ -427,33 +427,34 @@
   </div>
 
   <script>
-    /* --- CAPTURA Y MANEJO DE INSTALACIÓN PWA --- */
-    let deferredPrompt;
-    const installBtn = document.getElementById('pwaInstallBtn');
+    /* --- LÓGICA HÍBRIDA PWA + DESCARGA DIRECTA --- */
+    let deferredPrompt = null;
+    const fallbackAppUrl = "https://www.appcreator24.com/app4188732-4ujkte";
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      if (installBtn) installBtn.style.display = 'flex';
     });
 
     function installPWA() {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('El usuario aceptó la instalación.');
-        }
-        deferredPrompt = null;
-        if (installBtn) installBtn.style.display = 'none';
-      });
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('App PWA instalada exitosamente');
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        window.open(fallbackAppUrl, '_blank');
+      }
     }
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registrado correctamente'))
-          .catch(err => console.error('Error al registrar Service Worker:', err));
+          .then(reg => console.log('Service Worker PWA ok:', reg))
+          .catch(err => console.error('Service Worker error:', err));
       });
     }
 
@@ -524,7 +525,7 @@
       statusText.innerText = text;
     }
 
-    /* Solicitud de WakeLock (evita suspensión del sistema) */
+    /* Solicitud de WakeLock */
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -641,7 +642,7 @@
       }, 300);
     }
 
-    /* Manejo de eventos del elemento audio */
+    /* Eventos Audio */
     audio.addEventListener('waiting', () => {
       if (!isUserPaused) {
         playIcon.className = 'fa-solid fa-spinner fa-spin';
