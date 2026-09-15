@@ -390,7 +390,7 @@
         </div>
       </div>
 
-      <audio id="radioStream" src="https://stream.zeno.fm/ggq0ed8yus8uv.mp3" type="audio/mpeg" preload="none"></audio>
+      <audio id="radioStream" preload="none"></audio>
 
       <!-- Pie de página -->
       <div class="footer-section">
@@ -463,6 +463,8 @@
 
     let timerTimeout = null;
     let timerMinutes = 0;
+    let isUserPaused = true; // Permite saber si el usuario decidió pausar o fue el sistema
+    let isReconnecting = false;
 
     // Colección de versículos para rotación diaria
     const verses = [
@@ -472,7 +474,6 @@
       { text: '"Clama a mí, y yo te responderé, y te enseñaré cosas grandes..."', ref: "Jeremías 33:3" }
     ];
 
-    // Lógica para establecer el versículo del día (se actualiza cada 24 horas a medianoche)
     function setDailyVerse() {
       const now = new Date();
       const currentDay = Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
@@ -482,7 +483,6 @@
       document.getElementById('verseRef').innerText = verses[verseIndex].ref;
     }
 
-    // Inicializar versículo diario
     setDailyVerse();
 
     function setupMediaSession() {
@@ -494,31 +494,113 @@
           artwork: [{ src: 'fondo.jpg', sizes: '512x512', type: 'image/jpeg' }]
         });
 
-        navigator.mediaSession.setActionHandler('play', () => { if (audio.paused) toggleAudio(); });
-        navigator.mediaSession.setActionHandler('pause', () => { if (!audio.paused) toggleAudio(); });
+        navigator.mediaSession.setActionHandler('play', () => { playAudio(); });
+        navigator.mediaSession.setActionHandler('pause', () => { pauseAudio(); });
+        navigator.mediaSession.setActionHandler('stop', () => { pauseAudio(); });
       }
     }
 
-    function toggleAudio() {
-      if (audio.paused) {
-        playIcon.className = 'fa-solid fa-spinner fa-spin';
-        audio.src = streamUrl + "?t=" + new Date().getTime();
-        audio.play().then(() => {
-          playBtn.classList.add('playing');
-          playIcon.className = 'fa-solid fa-pause';
-          setupMediaSession();
-        }).catch(error => {
-          playIcon.className = 'fa-solid fa-play';
-          playBtn.classList.remove('playing');
-          alert("No se pudo conectar con el servidor.");
-        });
-      } else {
-        audio.pause();
-        audio.removeAttribute('src');
-        playBtn.classList.remove('playing');
-        playIcon.className = 'fa-solid fa-play';
+    function updateMediaSessionState(state) {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = state;
       }
     }
+
+    function playAudio() {
+      isUserPaused = false;
+      playIcon.className = 'fa-solid fa-spinner fa-spin';
+      audio.src = streamUrl + "?t=" + new Date().getTime();
+      
+      audio.play().then(() => {
+        playBtn.classList.add('playing');
+        playIcon.className = 'fa-solid fa-pause';
+        setupMediaSession();
+        updateMediaSessionState('playing');
+      }).catch(error => {
+        if (!isUserPaused) {
+          setTimeout(playAudio, 1500); // Reintenta silenciosamente en caso de fallo de red
+        } else {
+          playIcon.className = 'fa-solid fa-play';
+          playBtn.classList.remove('playing');
+          updateMediaSessionState('paused');
+        }
+      });
+    }
+
+    function pauseAudio() {
+      isUserPaused = true;
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      playBtn.classList.remove('playing');
+      playIcon.className = 'fa-solid fa-play';
+      updateMediaSessionState('paused');
+    }
+
+    function toggleAudio() {
+      if (audio.paused || isUserPaused) {
+        playAudio();
+      } else {
+        pauseAudio();
+      }
+    }
+
+    function forceReconnect() {
+      if (isUserPaused || isReconnecting) return;
+      isReconnecting = true;
+      playIcon.className = 'fa-solid fa-spinner fa-spin';
+
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+
+      setTimeout(() => {
+        if (!isUserPaused) {
+          audio.src = streamUrl + "?t=" + new Date().getTime();
+          audio.play().then(() => {
+            playBtn.classList.add('playing');
+            playIcon.className = 'fa-solid fa-pause';
+            updateMediaSessionState('playing');
+          }).catch(() => {
+            if (!isUserPaused) setTimeout(forceReconnect, 2000);
+          }).finally(() => {
+            isReconnecting = false;
+          });
+        } else {
+          isReconnecting = false;
+        }
+      }, 300);
+    }
+
+    /* MANEJADORES DE RECUPERACIÓN AUTOMÁTICA DE SEGUNDO PLANO */
+
+    // 1. Detectar si el sistema interrumpió el audio (ej. reprodujeron audio en WhatsApp)
+    audio.addEventListener('pause', () => {
+      if (!isUserPaused && !isReconnecting) {
+        updateMediaSessionState('paused');
+        setTimeout(() => {
+          if (!isUserPaused) forceReconnect();
+        }, 1000);
+      }
+    });
+
+    // 2. Detectar corte de conexión o congelamiento del socket
+    audio.addEventListener('stalled', () => { if (!isUserPaused) forceReconnect(); });
+    audio.addEventListener('error', () => { if (!isUserPaused) forceReconnect(); });
+
+    // 3. Detectar cuando el usuario vuelve a la app o desbloquea el teléfono
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !isUserPaused) {
+        if (audio.paused || audio.readyState < 2) {
+          forceReconnect();
+        }
+      }
+    });
+
+    // 4. Detectar cuando vuelve el internet tras una pérdida de señal
+    window.addEventListener('online', () => {
+      if (!isUserPaused) forceReconnect();
+    });
 
     /* Temporizador de apagado */
     function cycleTimer() {
@@ -533,7 +615,7 @@
       if (timerMinutes > 0) {
         label.innerText = timerMinutes + 'm';
         timerTimeout = setTimeout(() => {
-          if (!audio.paused) toggleAudio();
+          if (!isUserPaused) pauseAudio();
           timerMinutes = 0;
           label.innerText = 'Off';
         }, timerMinutes * 60 * 1000);
