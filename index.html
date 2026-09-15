@@ -321,7 +321,7 @@
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Tarjeta de Canción / Artista en Vivo (Con endpoint directo de Zeno) -->
+        <!-- Tarjeta de Canción / Artista en Vivo (Directo de Zeno Metadata) -->
         <div class="song-card">
           <i class="fa-solid fa-music"></i>
           <div class="song-info" id="songInfoText">Sintonizando transmisión en vivo...</div>
@@ -700,43 +700,43 @@
     }
     setDailyVerse();
 
-    // --- CONSULTAR METADATOS DE ZENO.FM (Actualizado con endpoint directo) ---
+    // --- CONSULTAR METADATOS EXACTOS DE ZENO.FM ---
     function fetchZenoMetadata() {
-      // Usamos el endpoint oficial de Zeno para extraer el título de la pista actual en tiempo real
-      fetch('https://api.zeno.fm/stations/agxzfnplbm8tc3JkaG5seG50Z0N5SnBnY1Btb0RjeTlDeTlkZXNJZktpQkJwbW84c3RhdGlvbnNyQAsSBlN0YXRpb24GICR1cmwD/widget')
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.title) {
-            document.getElementById('songInfoText').innerText = data.title;
-            setupMediaSession(data.title);
-          } else {
-            // Si el widget no trae el título directo, intentamos con el stream general
-            fetchBackupMetadata();
-          }
-        })
-        .catch(err => {
-          fetchBackupMetadata();
-        });
-    }
-
-    function fetchBackupMetadata() {
+      // Usamos el endpoint directo del mount point de Zeno que provee los metadatos en formato JSON
       fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
         .then(res => res.json())
         .then(data => {
-          if (data && data.title && data.title !== "Radio Cristiana Fm Gloria de Dios 88.1mhz") {
+          if (data && data.title && data.title.trim() !== "" && data.title !== "Radio Cristiana Fm Gloria de Dios 88.1mhz") {
             document.getElementById('songInfoText').innerText = data.title;
             setupMediaSession(data.title);
           } else {
-            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Transmitiendo en vivo";
+            // Si el mount point está limpio, probamos con el widget alternativo de Zeno
+            fetchWidgetMetadata();
           }
         })
         .catch(err => {
-          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Transmitiendo en vivo";
+          fetchWidgetMetadata();
         });
     }
 
-    // Consulta los metadatos cada 8 segundos
-    setInterval(fetchZenoMetadata, 8000);
+    function fetchWidgetMetadata() {
+      fetch('https://api.zeno.fm/stations/agxzfnplbm8tc3JkaG5seG50Z0N5SnBnY1Btb0RjeTlDeTlkZXNJZktpQkJwbW84c3RhdGlvbnNyQAsSBlN0YXRpb24GICR1cmwD/widget')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.title && data.title.trim() !== "") {
+            document.getElementById('songInfoText').innerText = data.title;
+            setupMediaSession(data.title);
+          } else {
+            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+          }
+        })
+        .catch(err => {
+          document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
+        });
+    }
+
+    // Consulta los metadatos cada 6 segundos
+    setInterval(fetchZenoMetadata, 6000);
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
