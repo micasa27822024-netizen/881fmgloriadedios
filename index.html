@@ -104,23 +104,6 @@
 
     .btn-top:hover { transform: scale(1.03); background: rgba(0, 0, 0, 0.75); }
 
-    /* Estilizado del Botón Google Cast */
-    google-cast-launcher {
-      --disconnected-color: #ffffff;
-      --connected-color: #f59e0b;
-      width: 30px;
-      height: 30px;
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 15px;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
       width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -216,7 +199,8 @@
     }
 
     .footer-title { font-size: 0.7rem; font-weight: 700; color: #e5e7eb; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .social-buttons { display: flex; justify-content: center; gap: 10px; }
+    .social-buttons { display: flex; justify-content: center; gap: 10px; align-items: center; }
+    
     .social-btn {
       width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
       color: white; font-size: 1rem; text-decoration: none; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; border: none; cursor: pointer;
@@ -227,6 +211,23 @@
     .oracion  { background-color: #f59e0b; }
     .youtube   { background-color: #ff0000; }
     .compartir { background-color: #8b5cf6; }
+
+    /* Estilo integrado para el botón Cast abajo al lado de compartir */
+    google-cast-launcher {
+      --disconnected-color: #ffffff;
+      --connected-color: #f59e0b;
+      width: 36px;
+      height: 36px;
+      background: #3b82f6;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      transition: transform 0.2s;
+    }
+    google-cast-launcher:hover { transform: scale(1.1); }
 
     /* Modales */
     .modal {
@@ -279,7 +280,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior -->
+      <!-- Barra Superior limpia y sin botones molestos -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -306,9 +307,6 @@
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
-
-          <!-- Botón Transmitir a TV (Google Cast) -->
-          <google-cast-launcher id="castbutton" title="Transmitir a Smart TV"></google-cast-launcher>
         </div>
       </div>
 
@@ -356,10 +354,13 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
-            <!-- Botón Compartir App ubicado junto a las redes sociales -->
+            <!-- Botón Compartir App -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
+
+            <!-- Botón Transmitir a TV (Google Cast) integrado abajo al lado de compartir -->
+            <google-cast-launcher id="castbutton" title="Transmitir a Smart TV"></google-cast-launcher>
           </div>
         </div>
       </div>
