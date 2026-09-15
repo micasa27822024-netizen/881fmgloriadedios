@@ -356,6 +356,7 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
+            <!-- Botón Compartir App ubicado junto a las redes sociales -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
@@ -568,7 +569,7 @@
         navigator.share(shareData).catch(err => console.log(err));
       } else {
         navigator.clipboard.writeText(window.location.href);
-        alert('¡Enlace copiado!');
+        alert('¡Enlace copiado al portapapeles!');
       }
     }
 
@@ -588,7 +589,6 @@
     let isReconnecting = false;
     let wakeLock = null;
 
-    // Lógica para Google Cast SDK
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
         cast.framework.CastContext.getInstance().setOptions({
@@ -601,7 +601,7 @@
           cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
           (event) => {
             if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
-              pauseAudio(); // Pausar audio local cuando se conecte a la Smart TV
+              pauseAudio();
               const castSession = context.getCurrentSession();
               const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
               
@@ -618,7 +618,6 @@
       }
     };
 
-    // Configuración de MediaSession multimedia para prevenir notificación 'Silenciada'
     function setupMediaSession() {
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -633,7 +632,6 @@
       }
     }
 
-    // Inicializar MediaSession preventivo
     setupMediaSession();
 
     const workerBlob = new Blob([`
