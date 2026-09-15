@@ -702,19 +702,20 @@
 
     // --- CONSULTAR METADATOS EXACTOS DE ZENO.FM ---
     function fetchZenoMetadata() {
-      // Usamos el endpoint directo del mount point de Zeno que provee los metadatos en formato JSON
+      // Consultamos el JSON directo del mount point de tu radio en Zeno
       fetch('https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv?t=' + new Date().getTime())
         .then(res => res.json())
         .then(data => {
+          // Verificamos si Zeno devolvió el título de la canción actual
           if (data && data.title && data.title.trim() !== "" && data.title !== "Radio Cristiana Fm Gloria de Dios 88.1mhz") {
             document.getElementById('songInfoText').innerText = data.title;
             setupMediaSession(data.title);
           } else {
-            // Si el mount point está limpio, probamos con el widget alternativo de Zeno
-            fetchWidgetMetadata();
+            document.getElementById('songInfoText').innerText = "Radio 88.1 FM - Gloria de Dios";
           }
         })
         .catch(err => {
+          // Si falla la API principal, intentamos con el widget alternativo
           fetchWidgetMetadata();
         });
     }
