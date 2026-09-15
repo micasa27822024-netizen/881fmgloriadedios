@@ -701,9 +701,9 @@
     setDailyVerse();
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
-    function fetchZenoMetadata() {
+   function fetchZenoMetadata() {
       const zenoApiUrl = 'https://api.zeno.fm/mounts/metadata/ggq0ed8yus8uv';
-      const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(zenoApiUrl + '?t=' + new Date().getTime());
+      const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(zenoApiUrl);
 
       fetch(proxyUrl, { cache: 'no-store' })
         .then(res => res.json())
@@ -717,12 +717,12 @@
           }
         })
         .catch(err => {
-          console.warn("Actualizando metadatos de Zeno...", err);
+          console.warn("Sintonizando transmisión en vivo...", err);
         });
     }
 
-    // Consulta los metadatos cada 5 segundos
-    setInterval(fetchZenoMetadata, 5000);
+    // Consulta los metadatos cada 6 segundos
+    setInterval(fetchZenoMetadata, 6000);
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
