@@ -16,6 +16,9 @@
   <!-- Iconos FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Script Oficial Google Cast SDK -->
+  <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -100,6 +103,23 @@
     }
 
     .btn-top:hover { transform: scale(1.03); background: rgba(0, 0, 0, 0.75); }
+
+    /* Estilizado del Botón Google Cast */
+    google-cast-launcher {
+      --disconnected-color: #ffffff;
+      --connected-color: #f59e0b;
+      width: 30px;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 15px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
@@ -286,6 +306,9 @@
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
+
+          <!-- Botón Transmitir a TV (Google Cast) -->
+          <google-cast-launcher id="castbutton" title="Transmitir a Smart TV"></google-cast-launcher>
         </div>
       </div>
 
@@ -342,7 +365,7 @@
     </div>
   </div>
 
-  <audio id="radioStream" preload="none"></audio>
+  <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modales -->
@@ -564,6 +587,36 @@
     let isUserPaused = true;
     let isReconnecting = false;
     let wakeLock = null;
+
+    // Lógica para Google Cast SDK
+    window.__onGCastApiAvailable = function(isAvailable) {
+      if (isAvailable) {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGINAL_URL
+        });
+
+        const context = cast.framework.CastContext.getInstance();
+        context.addEventListener(
+          cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+          (event) => {
+            if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
+              pauseAudio(); // Pausar audio local cuando se conecte a la Smart TV
+              const castSession = context.getCurrentSession();
+              const mediaInfo = new chrome.cast.media.MediaInfo(streamUrl, 'audio/mp3');
+              
+              mediaInfo.metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+              mediaInfo.metadata.title = 'Radio 88.1 FM';
+              mediaInfo.metadata.subtitle = 'Gloria de Dios - En vivo';
+              mediaInfo.metadata.images = [{ url: window.location.origin + window.location.pathname.replace('index.html', '') + 'fondo.jpg' }];
+
+              const request = new chrome.cast.media.LoadRequest(mediaInfo);
+              castSession.loadMedia(request);
+            }
+          }
+        );
+      }
+    };
 
     // Configuración de MediaSession multimedia para prevenir notificación 'Silenciada'
     function setupMediaSession() {
