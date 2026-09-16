@@ -702,24 +702,28 @@
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
 function fetchZenoMetadata() {
+  // Tu ID real de Zeno 
   const streamId = "391d8c8yus8uv"; 
   
-  // URL de la API JSON pública de Zeno (la que devuelve los datos en texto plano)
-  const zenoApiUrl = `https://api.zeno.fm/mounts/metadata/${streamId}`;
+  // URL oficial y correcta de la API JSON de Zeno
+  const zenoUrl = `https://api.zeno.fm/mounts/metadata/${streamId}`;
   
-  // Usamos un proxy CORS seguro para evitar bloqueos del navegador
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(zenoApiUrl)}`;
+  // Proxy seguro compatible con HTTPS (GitHub Pages) para evitar bloqueos
+  const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(zenoUrl);
 
   fetch(proxyUrl, { cache: 'no-store' })
     .then(response => {
-      if (!response.ok) throw new Error('Error en la respuesta del proxy');
+      if (!response.ok) throw new Error('Error en la respuesta del servidor');
       return response.json();
     })
     .then(data => {
-      // AllOrigins devuelve el contenido dentro de .contents
+      // Como AllOrigins envuelve el JSON dentro de 'contents', lo parseamos
       const jsonContent = JSON.parse(data.contents);
+      
+      // El elemento que contiene el texto de tu canción en el reproductor negro
       const songTextElement = document.getElementById('songInfoText');
       
+      // Zeno entrega streamTitle con el formato Artista - Canción
       let tituloCancion = jsonContent.streamTitle || "";
 
       if (!tituloCancion && jsonContent.currentSong) {
@@ -727,26 +731,30 @@ function fetchZenoMetadata() {
         tituloCancion = `${artista} - ${jsonContent.currentSong}`;
       }
 
-      if (tituloCancion && tituloCancion.trim() !== "") {
-        if (songTextElement) {
+      // Si la API devolvió texto válido, lo mostramos
+      if (songTextElement) {
+        if (tituloCancion && tituloCancion.trim() !== "") {
           songTextElement.innerText = tituloCancion;
-        }
-        
-        if (typeof setupMediaSession === 'function') {
-          setupMediaSession(tituloCancion);
-        }
-      } else {
-        if (songTextElement) {
-          songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+          
+          // Ejecutamos tu sesión de multimedia si está activa en tu web
+          if (typeof setupMediaSession === 'function') {
+            setupMediaSession(tituloCancion);
+          }
+        } else {
+          songTextElement.innerText = "Radio Cristiana 88.1 FM - Gloria de Dios";
         }
       }
     })
     .catch(err => {
-      console.log("Error leyendo metadatos de Zeno: ", err);
+      console.log("Error leyendo metadatos: ", err);
+      const songTextElement = document.getElementById('songInfoText');
+      if (songTextElement && (songTextElement.innerText.includes("Sintonizando") || songTextElement.innerText.includes("Cargando"))) {
+        songTextElement.innerText = "Radio Cristiana 88.1 FM - Gloria de Dios";
+      }
     });
 }
 
-// Consultar cada 15 segundos para actualizar la canción sin saturar
+// Consultar cada 15 segundos para mantener actualizado el título sin saturar
 setInterval(fetchZenoMetadata, 15000);
 
 // Ejecutar inmediatamente al cargar la página
