@@ -64,13 +64,13 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR CORREGIDA PARA EVITAR CORTES --- */
+    /* --- BARRA SUPERIOR AJUSTADA PARA EVITAR SUPERPOSICIÓN CON LA CRUZ --- */
     .top-bar {
       width: 100%; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
-      padding: 4px 8px;
+      padding: 12px 8px 4px 8px; /* Margen superior aumentado para despejar la cruz */
     }
 
     .top-actions {
@@ -323,7 +323,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior con márgenes protegidos y diseño flexible -->
+      <!-- Barra Superior con espacio seguro para la cruz -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
