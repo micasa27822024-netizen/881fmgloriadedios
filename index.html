@@ -46,7 +46,7 @@
       top: 0; left: 0; width: 100%; height: 100%;
       background: url('fondo.jpg') no-repeat center center/cover;
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-      padding: 6px 8px;
+      padding: 8px 10px;
     }
 
     @media (min-width: 768px) {
@@ -75,7 +75,7 @@
 
     .top-actions {
       display: flex; 
-      gap: 4px; 
+      gap: 6px; 
       justify-content: center; 
       align-items: center; 
       flex-wrap: nowrap;
@@ -93,17 +93,17 @@
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #ffffff; 
-      height: 30px; 
-      padding: 0 8px; 
-      border-radius: 15px;
+      height: 32px; 
+      padding: 0 10px; 
+      border-radius: 16px;
       display: inline-flex; 
       justify-content: center; 
       align-items: center;
-      font-size: 0.70rem; 
+      font-size: 0.75rem; 
       font-weight: 600; 
       cursor: pointer; 
       text-decoration: none;
-      gap: 4px; 
+      gap: 5px; 
       white-space: nowrap; 
       flex-shrink: 0;
       transition: transform 0.15s, background 0.15s;
@@ -113,52 +113,70 @@
 
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
-      width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
 
-    /* Versículo Diario */
+    /* Versículo Diario (Letras más grandes y claras) */
     .verse-card {
-      background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 10px; padding: 4px 10px; text-align: center; width: 100%;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px; padding: 8px 14px; text-align: center; width: 100%;
     }
 
-    .verse-text { font-size: 0.72rem; font-style: italic; color: #f3f4f6; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .verse-ref { font-size: 0.65rem; font-weight: 700; color: #f59e0b; margin-top: 1px; }
+    .verse-text { font-size: 0.95rem; font-style: italic; color: #fdfdfd; line-height: 1.35; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+    .verse-ref { font-size: 0.75rem; font-weight: 700; color: #f59e0b; margin-top: 3px; letter-spacing: 0.5px; }
 
-    /* Tarjeta de Canción / Artista en Vivo (Zeno.fm) */
+    /* Tarjeta de Canción / Artista en Vivo (Con Nota Musical Animada más grande) */
     .song-card {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      border-radius: 10px; padding: 5px 12px; text-align: center; width: 100%;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 12px; padding: 8px 14px; text-align: center; width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
     }
 
-    .song-card i { color: #f59e0b; font-size: 0.8rem; animation: pulseWave 2s infinite; }
-    .song-info { font-size: 0.75rem; font-weight: 600; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .song-card i { 
+      color: #f59e0b; 
+      font-size: 1.3rem; 
+      animation: musicalBounce 1.2s infinite alternate ease-in-out; 
+    }
+
+    .song-info { 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      color: #ffffff; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    @keyframes musicalBounce {
+      0% { transform: scale(1) translateY(0); color: #f59e0b; }
+      100% { transform: scale(1.25) translateY(-2px); color: #fbbf24; text-shadow: 0 0 12px #f59e0b; }
+    }
 
     /* Fila de Reproducción */
     .player-row {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px);
-      padding: 6px 14px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(12px);
+      padding: 8px 16px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
     .status-badge {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; color: #e5e7eb; min-width: 85px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px; color: #e5e7eb; min-width: 90px;
     }
 
     .status-dot {
-      width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+      width: 9px; height: 9px; border-radius: 50%; display: inline-block;
       background-color: #6b7280; box-shadow: 0 0 6px rgba(107, 114, 128, 0.6);
       transition: background-color 0.3s, box-shadow 0.3s;
     }
 
     .status-dot.online {
-      background-color: #22c55e; box-shadow: 0 0 10px #22c55e;
+      background-color: #22c55e; box-shadow: 0 0 12px #22c55e;
       animation: blinkPulse 2s infinite ease-in-out;
     }
 
@@ -180,51 +198,52 @@
 
     .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
 
+    /* Botón de Play con Animación Espectacular */
     .btn-play {
-      position: relative; z-index: 2; width: 50px; height: 50px; border-radius: 50%;
+      position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 50%;
       background: linear-gradient(135deg, #f59e0b, #d97706);
-      border: 2.5px solid rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
-      color: white; font-size: 1.3rem; display: flex; justify-content: center; align-items: center;
-      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background 0.3s; padding-left: 3px;
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      color: white; font-size: 1.5rem; display: flex; justify-content: center; align-items: center;
+      cursor: pointer; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s; padding-left: 4px;
+    }
+
+    .btn-play:hover {
+      transform: scale(1.12);
+      box-shadow: 0 0 35px rgba(245, 158, 11, 1), inset 0 0 20px rgba(255, 255, 255, 0.6);
     }
 
     .btn-play.playing {
-      padding-left: 0; background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.7);
+      padding-left: 0; 
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.4);
+      animation: playPulseGlow 2s infinite ease-in-out;
     }
 
-    .btn-play.playing::before, .btn-play.playing::after {
-      content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px;
-      border-radius: 50%; border: 2px solid rgba(239, 68, 68, 0.7); z-index: -1;
-      animation: pulseWave 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    @keyframes playPulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.8), 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(239, 68, 68, 1), 0 0 0 16px rgba(239, 68, 68, 0); }
     }
 
-    .btn-play.playing::after { animation-delay: 0.6s; }
-
-    @keyframes pulseWave {
-      0% { transform: scale(0.95); opacity: 0.9; }
-      100% { transform: scale(1.45); opacity: 0; }
-    }
-
-    .volume-container { display: flex; align-items: center; gap: 5px; min-width: 85px; justify-content: flex-end; }
-    .volume-slider { -webkit-appearance: none; width: 55px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.4); outline: none; }
-    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #ffffff; cursor: pointer; }
+    .volume-container { display: flex; align-items: center; gap: 6px; min-width: 90px; justify-content: flex-end; }
+    .volume-slider { -webkit-appearance: none; width: 60px; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.4); outline: none; }
+    .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #ffffff; cursor: pointer; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 
     /* Redes Sociales y Compartir */
     .footer-section {
       width: 100%; text-align: center; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
-      padding: 6px 10px 8px 10px; border-radius: 14px 14px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 8px 12px 10px 12px; border-radius: 16px 16px 0 0; border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .footer-title { font-size: 0.7rem; font-weight: 700; color: #e5e7eb; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .footer-title { font-size: 0.72rem; font-weight: 700; color: #e5e7eb; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
     .social-buttons { display: flex; justify-content: center; gap: 10px; align-items: center; }
     
     .social-btn {
-      width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
-      color: white; font-size: 1rem; text-decoration: none; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; border: none; cursor: pointer;
+      width: 38px; height: 38px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+      color: white; font-size: 1.05rem; text-decoration: none; box-shadow: 0 3px 8px rgba(0,0,0,0.4); transition: transform 0.2s; border: none; cursor: pointer;
     }
-    .social-btn:hover { transform: scale(1.1); }
+    .social-btn:hover { transform: scale(1.12); }
     .facebook { background-color: #1877f2; }
     .whatsapp { background-color: #25d366; }
     .oracion  { background-color: #f59e0b; }
@@ -340,7 +359,7 @@
           </div>
 
           <div class="volume-container">
-            <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.85rem;"></i>
+            <i class="fa-solid fa-volume-high" id="volIcon" onclick="toggleMute()" style="cursor:pointer; font-size: 0.9rem;"></i>
             <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="1" oninput="setVolume(this.value)">
           </div>
         </div>
@@ -379,7 +398,8 @@
     </div>
   </div>
 
-  <audio id="radioStream" crossorigin="anonymous" preload="none"></audio>
+  <!-- Audio principal con preload="auto" para evitar microcortes -->
+  <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
   <!-- Modales -->
@@ -683,78 +703,94 @@
 
     setupMediaSession();
 
-    // --- VERSÍCULO DIARIO ---
+    // --- VERSÍCULO DIARIO ROTATIVO DE 365 DÍAS ---
     const verses = [
-      { text: '"El Señor es mi pastor; nada me faltará."', ref: "Salmos 23:1" },
-      { text: '"Todo lo puedo en Cristo que me fortalece."', ref: "Filipenses 4:13" },
-      { text: '"Porque yo sé los pensamientos que tengo acerca de vosotros..."', ref: "Jeremías 29:11" },
-      { text: '"Clama a mí, y yo te responderé, y te enseñaré cosas grandes..."', ref: "Jeremías 33:3" }
+      { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
+      { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
+      { text: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.", ref: "Jeremías 29:11" },
+      { text: "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces.", ref: "Jeremías 33:3" },
+      { text: "Jehová es mi fortaleza y mi escudo; en él confió mi corazón, y fui ayudado.", ref: "Salmos 28:7" },
+      { text: "Lámpara es a mis pies tu palabra, y lumbrera a mi camino.", ref: "Salmos 119:105" },
+      { text: "Confía en Jehová con todo tu corazón, y no te apoyes en tu propia prudencia.", ref: "Proverbios 3:5" },
+      { text: "Echa sobre Jehová tu carga, y él te sustentará; no dejará para siempre caído al justo.", ref: "Salmos 55:22" },
+      { text: "Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.", ref: "Mateo 6:33" },
+      { text: "Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.", ref: "Filipenses 4:6" },
+      { text: "Jehová está en medio de ti, poderoso; él salvará; se gozará sobre ti con alegría, callará de amor, se gozará sobre ti con cánticos.", ref: "Sofonías 3:17" },
+      { text: "El ladrón no viene sino para hurtar y matar y destruir; yo he venido para que tengan vida, y para que la tengan en abundancia.", ref: "Juan 10:10" },
+      { text: "Mas los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se fatigarán; caminarán, y no se cansarán.", ref: "Isaías 40:31" },
+      { text: "Paz os dejo, mi paz os doy; yo os la doy como el mundo la da. No se turbe vuestro corazón, ni tenga miedo.", ref: "Juan 14:27" },
+      { text: "Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.", ref: "Josué 1:9" },
+      { text: "Alegráos en la esperanza, sed pacientes en la tribulación, constantes en la oración.", ref: "Romanos 12:12" },
+      { text: "Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.", ref: "Juan 3:16" },
+      { text: "Encomienda a Jehová tus obras, y tus pensamientos serán afirmados.", ref: "Proverbios 16:3" },
+      { text: "Dios es nuestro amparo y fortaleza, nuestro pronto auxilio en las tribulaciones.", ref: "Salmos 46:1" },
+      { text: "Aunque pase por el valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo.", ref: "Salmos 23:4" },
+      { text: "El amor es paciente, es bondadoso. El amor no es envidioso ni jactancioso ni orgulloso.", ref: "1 Corintios 13:4" },
+      { text: "Cercano está Jehová a los quebrantados de corazón; y salva a los contritos de espíritu.", ref: "Salmos 34:18" },
+      { text: "F Pew a Jehová tu esperanza, y él te sustentará.", ref: "Salmos 37:5" },
+      { text: "Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe.", ref: "Gálatas 5:22" },
+      { text: "Jehová es mi luz y mi salvación; ¿a quién temeré?", ref: "Salmos 27:1" },
+      { text: "Invocame en el día de la angustia; te libraré, y tú me honrarás.", ref: "Salmos 50:15" },
+      { text: "Buscad a Jehová mientras puede ser hallado, llamad en tanto que está cercano.", ref: "Isaías 55:6" }
     ];
 
     function setDailyVerse() {
       const now = new Date();
-      const currentDay = Math.floor(now.getTime() / (1000 * 60 * 60 * 24));
-      const verseIndex = currentDay % verses.length;
-      document.getElementById('verseText').innerText = verses[verseIndex].text;
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      const dayOfYear = Math.floor(diff / oneDay);
+      
+      const verseIndex = dayOfYear % verses.length;
+      document.getElementById('verseText').innerText = '"' + verses[verseIndex].text + '"';
       document.getElementById('verseRef').innerText = verses[verseIndex].ref;
     }
     setDailyVerse();
 
-    // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
-function fetchZenoMetadata() {
-  // Tu ID real de Zeno extraído de la configuración de tu stream
-  const streamId = "391d8c8yus8uv"; 
-  
-  // Ruta oficial obligatoria de Zeno con soporte SSE (/subscribe/)
-  const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
+    // --- CONSULTAR METADATOS DE ZENO.FM (EVENT SOURCE) ---
+    function fetchZenoMetadata() {
+      const streamId = "391d8c8yus8uv"; 
+      const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
+      const songTextElement = document.getElementById('songInfoText');
 
-  const songTextElement = document.getElementById('songInfoText');
+      const eventSource = new EventSource(zenoUrl);
 
-  // Usamos EventSource para mantener la conexión en tiempo real sin saturar
-  const eventSource = new EventSource(zenoUrl);
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          let tituloCancion = data.streamTitle || "";
 
-  eventSource.onmessage = function(event) {
-    try {
-      const data = JSON.parse(event.data);
-      
-      // Zeno entrega 'streamTitle' con el formato completo
-      let tituloCancion = data.streamTitle || "";
+          if (!tituloCancion && data.currentSong) {
+            const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
+            tituloCancion = `${artista} - ${data.currentSong}`;
+          }
 
-      if (!tituloCancion && data.currentSong) {
-        const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-        tituloCancion = `${artista} - ${data.currentSong}`;
-      }
-
-      // Si la API devolvió texto válido, lo mostramos
-      if (tituloCancion && tituloCancion.trim() !== "") {
-        if (songTextElement) {
-          songTextElement.innerText = tituloCancion;
+          if (tituloCancion && tituloCancion.trim() !== "") {
+            if (songTextElement) {
+              songTextElement.innerText = tituloCancion;
+            }
+            if (typeof setupMediaSession === 'function') {
+              setupMediaSession(tituloCancion);
+            }
+          } else {
+            if (songTextElement) {
+              songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+            }
+          }
+        } catch (e) {
+          console.log("Error parseando los datos de Zeno: ", e);
         }
-        
-        // Ejecutamos tu sesión de multimedia si está activa en tu web
-        if (typeof setupMediaSession === 'function') {
-          setupMediaSession(tituloCancion);
-        }
-      } else {
-        if (songTextElement) {
+      };
+
+      eventSource.onerror = function(err) {
+        console.log("Conexión SSE pausada o reconectando...", err);
+        if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
           songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
         }
-      }
-    } catch (e) {
-      console.log("Error parseando los datos de Zeno: ", e);
+      };
     }
-  };
 
-  eventSource.onerror = function(err) {
-    console.log("Conexión SSE pausada o reconectando...", err);
-    if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
-      songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
-    }
-  };
-}
-
-// Ejecutar inmediatamente al cargar la página
-fetchZenoMetadata();
+    fetchZenoMetadata();
 
     const workerBlob = new Blob([`
       let interval = null;
