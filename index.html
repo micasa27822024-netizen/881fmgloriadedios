@@ -46,7 +46,7 @@
       top: 0; left: 0; width: 100%; height: 100%;
       background: url('fondo.jpg') no-repeat center center/cover;
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-      padding: 8px 10px;
+      padding: 8px 12px;
     }
 
     @media (min-width: 768px) {
@@ -64,7 +64,7 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR COMPACTA Y DELGADA --- */
+    /* --- BARRA SUPERIOR COMPACTA CON PADDING LATERAL AMPLIADO --- */
     .top-bar {
       width: 100%; 
       display: flex; 
@@ -79,8 +79,9 @@
       justify-content: center; 
       align-items: center; 
       flex-wrap: nowrap;
-      max-width: 100%;
-      padding: 0 2px;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 12px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -116,7 +117,7 @@
       width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
 
-    /* Versículo Diario (Letras más grandes y claras) */
+    /* Versículo Diario */
     .verse-card {
       background: rgba(0, 0, 0, 0.65);
       backdrop-filter: blur(10px);
@@ -328,7 +329,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior limpia -->
+      <!-- Barra Superior con márgenes laterales protegidos -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -734,7 +735,6 @@
 
     setupMediaSession();
 
-    // --- VERSÍCULO DIARIO ROTATIVO DE 365 DÍAS ---
     const verses = [
       { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
       { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
@@ -758,7 +758,7 @@
       { text: "Aunque pase por el valle de sombra de muerte, no temeré mal alguno, porque tú estarás conmigo.", ref: "Salmos 23:4" },
       { text: "El amor es paciente, es bondadoso. El amor no es envidioso ni jactancioso ni orgulloso.", ref: "1 Corintios 13:4" },
       { text: "Cercano está Jehová a los quebrantados de corazón; y salva a los contritos de espíritu.", ref: "Salmos 34:18" },
-      { text: "F Pew a Jehová tu esperanza, y él te sustentará.", ref: "Salmos 37:5" },
+      { text: "Pon en Jehová tu esperanza, y él te sustentará.", ref: "Salmos 37:5" },
       { text: "Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe.", ref: "Gálatas 5:22" },
       { text: "Jehová es mi luz y mi salvación; ¿a quién temeré?", ref: "Salmos 27:1" },
       { text: "Invocame en el día de la angustia; te libraré, y tú me honrarás.", ref: "Salmos 50:15" },
@@ -778,7 +778,6 @@
     }
     setDailyVerse();
 
-    // --- CONSULTAR METADATOS DE ZENO.FM (EVENT SOURCE) ---
     function fetchZenoMetadata() {
       const streamId = "391d8c8yus8uv"; 
       const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
@@ -814,7 +813,6 @@
       };
 
       eventSource.onerror = function(err) {
-        console.log("Conexión SSE pausada o reconectando...", err);
         if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
           songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
         }
