@@ -702,36 +702,36 @@
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
 function fetchZenoMetadata() {
-  // Tu ID real de Zeno extraído de la configuración de tu stream
   const streamId = "391d8c8yus8uv"; 
   
-  // Ruta oficial obligatoria de Zeno con soporte SSE (/subscribe/)
-  const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
+  // URL de la API JSON pública de Zeno (la que devuelve los datos en texto plano)
+  const zenoApiUrl = `https://api.zeno.fm/mounts/metadata/${streamId}`;
+  
+  // Usamos un proxy CORS seguro para evitar bloqueos del navegador
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(zenoApiUrl)}`;
 
-  const songTextElement = document.getElementById('songInfoText');
-
-  // Usamos EventSource para mantener la conexión en tiempo real sin saturar
-  const eventSource = new EventSource(zenoUrl);
-
-  eventSource.onmessage = function(event) {
-    try {
-      const data = JSON.parse(event.data);
+  fetch(proxyUrl, { cache: 'no-store' })
+    .then(response => {
+      if (!response.ok) throw new Error('Error en la respuesta del proxy');
+      return response.json();
+    })
+    .then(data => {
+      // AllOrigins devuelve el contenido dentro de .contents
+      const jsonContent = JSON.parse(data.contents);
+      const songTextElement = document.getElementById('songInfoText');
       
-      // Zeno entrega 'streamTitle' con el formato completo
-      let tituloCancion = data.streamTitle || "";
+      let tituloCancion = jsonContent.streamTitle || "";
 
-      if (!tituloCancion && data.currentSong) {
-        const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-        tituloCancion = `${artista} - ${data.currentSong}`;
+      if (!tituloCancion && jsonContent.currentSong) {
+        const artista = jsonContent.currentArtist || "Radio Cristiana 88.1 FM";
+        tituloCancion = `${artista} - ${jsonContent.currentSong}`;
       }
 
-      // Si la API devolvió texto válido, lo mostramos
       if (tituloCancion && tituloCancion.trim() !== "") {
         if (songTextElement) {
           songTextElement.innerText = tituloCancion;
         }
         
-        // Ejecutamos tu sesión de multimedia si está activa en tu web
         if (typeof setupMediaSession === 'function') {
           setupMediaSession(tituloCancion);
         }
@@ -740,18 +740,14 @@ function fetchZenoMetadata() {
           songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
         }
       }
-    } catch (e) {
-      console.log("Error parseando los datos de Zeno: ", e);
-    }
-  };
-
-  eventSource.onerror = function(err) {
-    console.log("Conexión SSE pausada o reconectando...", err);
-    if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
-      songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
-    }
-  };
+    })
+    .catch(err => {
+      console.log("Error leyendo metadatos de Zeno: ", err);
+    });
 }
+
+// Consultar cada 15 segundos para actualizar la canción sin saturar
+setInterval(fetchZenoMetadata, 15000);
 
 // Ejecutar inmediatamente al cargar la página
 fetchZenoMetadata();
