@@ -703,23 +703,24 @@
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
 function fetchZenoMetadata() {
   const streamId = "391d8c8yus8uv"; 
-  // Agregando la palabra subscribe como indicas
-  const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
   
-  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(zenoUrl)}`;
+  // 1. CORRECCIÓN: Rutas en texto plano fijo para asegurar compatibilidad total
+  const zenoUrl = 'https://api.zeno.fm/mounts/metadata/subscribe/' + streamId;
+  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(zenoUrl);
 
   fetch(proxyUrl, { cache: 'no-store' })
     .then(response => {
       if (!response.ok) throw new Error('Error en la respuesta del servidor');
-      return response.text(); // Lo leemos como texto plano primero por si viene en formato de evento
+      return response.text(); 
     })
     .then(rawText => {
       const songTextElement = document.getElementById('songInfoText');
       let tituloCancion = "";
 
       try {
-        // Limpiamos el texto por si el proxy o Zeno mandan prefijos de eventos (ej: "data: {...}")
         let cleanText = rawText;
+        
+        // 2. Tu lógica de limpieza (Excelente solución para los eventos de Zeno)
         if (rawText.includes("data:")) {
           cleanText = rawText.split("data:")[1].split("\n")[0];
         }
@@ -729,7 +730,8 @@ function fetchZenoMetadata() {
 
         if (!tituloCancion && data.currentSong) {
           const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-          tituloCancion = `${artista} - ${data.currentSong}`;
+          // 3. CORRECCIÓN: Concatenación clásica sin comillas invertidas conflictivas
+          tituloCancion = artista + " - " + data.currentSong;
         }
       } catch (e) {
         console.log("No se pudo parsear como JSON directo, intentando texto plano", e);
@@ -761,6 +763,7 @@ setInterval(fetchZenoMetadata, 15000);
 
 // Ejecutar al cargar la página
 fetchZenoMetadata();
+
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
