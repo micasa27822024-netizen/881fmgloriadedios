@@ -365,9 +365,11 @@
     .btn-rec.recording { animation: pulseRec 1s infinite alternate; background: #dc2626; }
     @keyframes pulseRec { 0% { transform: scale(1); } 100% { transform: scale(1.1); box-shadow: 0 0 25px #ef4444; } }
     .btn-action-voice {
-      background: #25d366; color: #fff; border: none; padding: 8px 16px; border-radius: 20px;
-      font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #25d366, #128c7e); color: #fff; border: none; padding: 10px 18px; border-radius: 20px;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: transform 0.2s;
     }
+    .btn-action-voice:hover { transform: scale(1.03); }
     .timer-display { font-size: 1.1rem; font-weight: 700; color: #f59e0b; margin-bottom: 8px; }
   </style>
 </head>
@@ -520,7 +522,7 @@
           <audio id="audioPlayback" controls style="width: 100%; height: 35px; margin-bottom: 10px;"></audio>
           <br>
           <button class="btn-action-voice" onclick="sendVoiceNoteToWhatsApp()">
-            <i class="fa-brands fa-whatsapp"></i> Enviar Saludo por WhatsApp
+            <i class="fa-brands fa-whatsapp"></i> Enviar mensaje de voz
           </button>
         </div>
       </div>
@@ -748,7 +750,7 @@
     let wakeLock = null;
     let castSession = null;
 
-    // --- LÓGICA DE GRABACIÓN Y ENVÍO A RENDER Y CLOUDINARY ---
+    // --- LÓGICA DE GRABACIÓN Y ENVÍO DIRECTO A CLOUDINARY ---
     let mediaRecorder;
     let audioChunks = [];
     let recordedAudioBlob = null;
@@ -826,56 +828,44 @@
       }
 
       const btnWhatsApp = document.querySelector('.btn-action-voice');
-      btnWhatsApp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Subiendo a la nube...`;
+      btnWhatsApp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Subiendo audio...`;
       btnWhatsApp.disabled = true;
 
       try {
-        // 1. Convertir el Blob de audio a Base64
-        const base64Audio = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(recordedAudioBlob);
-        });
+        // 1. Preparar FormData para Cloudinary
+        const formData = new FormData();
+        formData.append('file', recordedAudioBlob, 'saludo.webm');
+        formData.append('upload_preset', 'saludos_radio');
 
-        // 2. Enviar al backend en Render
-        const response = await fetch('https://tu-backend-en-render.onrender.com/enviar-audio', {
+        const cloudName = 'porjzftqc';
+
+        // 2. Subir directamente a Cloudinary mediante la API pública
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            nombre: nameVal || "Anónimo",
-            ubicacion: locVal || "Desconocida",
-            audioBase64: base64Audio
-          })
+          body: formData
         });
 
         const data = await response.json();
 
-        if (data.success) {
-          alert("¡Audio guardado con éxito en la nube!");
-
-          // 3. Abrir WhatsApp para avisar al operador
+        if (data.secure_url) {
+          const audioUrl = data.secure_url;
+          
+          // 3. Abrir WhatsApp con la información y el enlace directo del audio
           const whatsappNumber = "5493416948385";
-          const textMsg = `*🎙️ Nuevo Saludo de Voz*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}`;
+          const textMsg = `*🎙️ Nuevo Mensaje de Voz*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}%0A*🔗 Escucharlo:* ${encodeURIComponent(audioUrl)}`;
+          
           window.open(`https://wa.me/${whatsappNumber}?text=${textMsg}`, '_blank');
-
-          // Descarga de respaldo local opcional
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(recordedAudioBlob);
-          a.download = `saludo_${nameVal.replace(/\s+/g, '_')}.webm`;
-          a.click();
+          alert("¡Mensaje de voz enviado con éxito!");
 
         } else {
-          alert("Hubo un error al subir el audio: " + data.error);
+          throw new Error(data.error?.message || "Error al subir a Cloudinary");
         }
 
       } catch (error) {
         console.error("Error:", error);
-        alert("No se pudo conectar con el servidor de Render.");
+        alert("No se pudo subir el audio. Verificá tu conexión.");
       } finally {
-        btnWhatsApp.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar Saludo por WhatsApp`;
+        btnWhatsApp.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar mensaje de voz`;
         btnWhatsApp.disabled = false;
       }
     }
