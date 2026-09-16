@@ -64,13 +64,13 @@
       display: flex; flex-direction: column; justify-content: space-between; align-items: center;
     }
 
-    /* --- BARRA SUPERIOR COMPACTA CON PADDING LATERAL AMPLIADO --- */
+    /* --- BARRA SUPERIOR CORREGIDA PARA EVITAR CORTES --- */
     .top-bar {
       width: 100%; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
-      padding-top: 2px;
+      padding: 4px 8px;
     }
 
     .top-actions {
@@ -78,16 +78,10 @@
       gap: 6px; 
       justify-content: center; 
       align-items: center; 
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       width: 100%;
-      max-width: 480px;
-      padding: 0 12px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+      max-width: 520px;
     }
-
-    .top-actions::-webkit-scrollbar { display: none; }
-    .top-actions { -ms-overflow-style: none; scrollbar-width: none; }
 
     .btn-top {
       background: rgba(0, 0, 0, 0.55);
@@ -329,7 +323,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior con márgenes laterales protegidos -->
+      <!-- Barra Superior con márgenes protegidos y diseño flexible -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
