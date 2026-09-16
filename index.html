@@ -702,66 +702,58 @@
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
 function fetchZenoMetadata() {
+  // Tu ID real de Zeno extraído de la configuración de tu stream
   const streamId = "391d8c8yus8uv"; 
   
-  // 1. CORRECCIÓN: Rutas en texto plano fijo para asegurar compatibilidad total
-  const zenoUrl = 'https://api.zeno.fm/mounts/metadata/subscribe/' + streamId;
-  const proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(zenoUrl);
+  // Ruta oficial obligatoria de Zeno con soporte SSE (/subscribe/)
+  const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
 
-  fetch(proxyUrl, { cache: 'no-store' })
-    .then(response => {
-      if (!response.ok) throw new Error('Error en la respuesta del servidor');
-      return response.text(); 
-    })
-    .then(rawText => {
-      const songTextElement = document.getElementById('songInfoText');
-      let tituloCancion = "";
+  const songTextElement = document.getElementById('songInfoText');
 
-      try {
-        let cleanText = rawText;
-        
-        // 2. Tu lógica de limpieza (Excelente solución para los eventos de Zeno)
-        if (rawText.includes("data:")) {
-          cleanText = rawText.split("data:")[1].split("\n")[0];
-        }
-        
-        const data = JSON.parse(cleanText);
-        tituloCancion = data.streamTitle || "";
+  // Usamos EventSource para mantener la conexión en tiempo real sin saturar
+  const eventSource = new EventSource(zenoUrl);
 
-        if (!tituloCancion && data.currentSong) {
-          const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-          // 3. CORRECCIÓN: Concatenación clásica sin comillas invertidas conflictivas
-          tituloCancion = artista + " - " + data.currentSong;
-        }
-      } catch (e) {
-        console.log("No se pudo parsear como JSON directo, intentando texto plano", e);
+  eventSource.onmessage = function(event) {
+    try {
+      const data = JSON.parse(event.data);
+      
+      // Zeno entrega 'streamTitle' con el formato completo
+      let tituloCancion = data.streamTitle || "";
+
+      if (!tituloCancion && data.currentSong) {
+        const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
+        tituloCancion = `${artista} - ${data.currentSong}`;
       }
 
-      if (songTextElement) {
-        if (tituloCancion && tituloCancion.trim() !== "") {
+      // Si la API devolvió texto válido, lo mostramos
+      if (tituloCancion && tituloCancion.trim() !== "") {
+        if (songTextElement) {
           songTextElement.innerText = tituloCancion;
-          
-          if (typeof setupMediaSession === 'function') {
-            setupMediaSession(tituloCancion);
-          }
-        } else {
-          songTextElement.innerText = "Radio Cristiana 88.1 FM - Gloria de Dios";
+        }
+        
+        // Ejecutamos tu sesión de multimedia si está activa en tu web
+        if (typeof setupMediaSession === 'function') {
+          setupMediaSession(tituloCancion);
+        }
+      } else {
+        if (songTextElement) {
+          songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
         }
       }
-    })
-    .catch(err => {
-      console.log("Error leyendo metadatos: ", err);
-      const songTextElement = document.getElementById('songInfoText');
-      if (songTextElement) {
-        songTextElement.innerText = "Radio Cristiana 88.1 FM - Gloria de Dios";
-      }
-    });
+    } catch (e) {
+      console.log("Error parseando los datos de Zeno: ", e);
+    }
+  };
+
+  eventSource.onerror = function(err) {
+    console.log("Conexión SSE pausada o reconectando...", err);
+    if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
+      songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+    }
+  };
 }
 
-// Consultar cada 15 segundos
-setInterval(fetchZenoMetadata, 15000);
-
-// Ejecutar al cargar la página
+// Ejecutar inmediatamente al cargar la página
 fetchZenoMetadata();
 
     const workerBlob = new Blob([`
