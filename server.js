@@ -46,7 +46,11 @@ app.post('/enviar-audio', async (req, res) => {
 
         buzonaudios.unshift(nuevoAudio); // Lo ponemos al principio de la lista
 
-        res.status(200).json({ success: true, message: "Audio guardado con éxito en la nube" });
+        res.status(200).json({ 
+    success: true, 
+    message: "Audio guardado con éxito en la nube", 
+    url: resultadoUpload.secure_url // <--- Esto le devuelve la URL a la web
+});
     } catch (error) {
         console.error("Error al subir a Cloudinary:", error);
         res.status(500).json({ success: false, error: error.message });
