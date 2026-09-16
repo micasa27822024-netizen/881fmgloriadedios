@@ -701,56 +701,60 @@
     setDailyVerse();
 
     // --- CONSULTAR METADATOS DE ZENO.FM CON PROXY CORS ESTABLE ---
-function initZenoMetadata() {
-  // 1. Tu ID real de Zeno (extraído de tu captura anterior)
+function fetchZenoMetadata() {
+  // Tu ID real de Zeno extraído de la configuración de tu stream
   const streamId = "391d8c8yus8uv"; 
-  const urlAPI = `https://zeno.fm{streamId}`;
+  
+  // Ruta oficial obligatoria de Zeno con soporte SSE (/subscribe/)
+  const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
 
-  // 2. Conectamos directamente a Zeno usando EventSource (Evita usar proxies)
-  const eventSource = new EventSource(urlAPI);
   const songTextElement = document.getElementById('songInfoText');
 
-  // 3. Este evento se activa automáticamente cada vez que ZaraRadio cambia de canción
+  // Usamos EventSource para mantener la conexión en tiempo real sin saturar
+  const eventSource = new EventSource(zenoUrl);
+
   eventSource.onmessage = function(event) {
     try {
       const data = JSON.parse(event.data);
       
-      // Zeno entrega los datos dentro de 'streamTitle' o por separado
-      let tituloCompleto = data.streamTitle || "";
+      // Zeno entrega 'streamTitle' con el formato completo
+      let tituloCancion = data.streamTitle || "";
 
-      // Si viene vacío en streamTitle, lo armamos con artista y canción
-      if (!tituloCompleto && data.currentSong) {
+      if (!tituloCancion && data.currentSong) {
         const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-        tituloCompleto = `${artista} - ${data.currentSong}`;
+        tituloCancion = `${artista} - ${data.currentSong}`;
       }
 
-      // Si encontramos texto válido, lo pintamos en tu reproductor web
-      if (tituloCompleto.trim()) {
-        songTextElement.innerText = tituloCompleto;
+      // Si la API devolvió texto válido, lo mostramos
+      if (tituloCancion && tituloCancion.trim() !== "") {
+        if (songTextElement) {
+          songTextElement.innerText = tituloCancion;
+        }
         
-        // Ejecutamos tu función de MediaSession si existe en tu web
-        if (typeof setupMediaSession === "function") {
-          setupMediaSession(tituloCompleto);
+        // Ejecutamos tu sesión de multimedia si está activa en tu web
+        if (typeof setupMediaSession === 'function') {
+          setupMediaSession(tituloCancion);
         }
       } else {
-        songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+        if (songTextElement) {
+          songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+        }
       }
-
-    } catch (err) {
-      console.error("Error al procesar los datos de música:", err);
-      songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+    } catch (e) {
+      console.log("Error parseando los datos de Zeno: ", e);
     }
   };
 
-  // 4. Si la conexión se cae por parpadeos de internet, se reconecta sola
   eventSource.onerror = function(err) {
-    console.warn("Reconectando con el servidor de metadatos de Zeno...");
+    console.log("Conexión SSE pausada o reconectando...", err);
+    if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
+      songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+    }
   };
 }
 
-// Arrancamos la escucha en tiempo real al cargar la página
-initZenoMetadata();
-
+// Ejecutar inmediatamente al cargar la página
+fetchZenoMetadata();
     const workerBlob = new Blob([`
       let interval = null;
       self.onmessage = function(e) {
