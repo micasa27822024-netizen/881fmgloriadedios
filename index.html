@@ -427,7 +427,7 @@
         <div class="stats-reactions-row">
           <div class="listeners-badge" title="Oyentes conectados en vivo">
             <i class="fa-solid fa-headphones"></i>
-            <span id="listenersCount">1 Oyente</span>
+            <span id="listenersCount">Cargando...</span>
           </div>
           <div class="reactions-container">
             <button class="btn-reaction" onclick="sendReaction('❤️', event)" title="Me gusta / Amén">
@@ -869,46 +869,50 @@
     }
     setDailyVerse();
 
-  function fetchZenoMetadata() {
+    // --- FUNCIÓN DE ZENO.FM CORREGIDA Y DINÁMICA ---
+    function fetchZenoMetadata() {
       const streamId = "391d8c8yus8uv"; // Tu ID de Zeno
-      const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
+      const zenoUrl = `https://api.zeno.fm/mounts/metadata/${streamId}`;
       const songTextElement = document.getElementById('songInfoText');
       const listenersElement = document.getElementById('listenersCount');
 
-      const eventSource = new EventSource(zenoUrl);
-
-      eventSource.onmessage = function(event) {
-        try {
-          const data = JSON.parse(event.data);
-          let tituloCancion = data.streamTitle || "";
-
-          if (!tituloCancion && data.currentSong) {
-            const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-            tituloCancion = `${artista} - ${data.currentSong}`;
-          }
-
-          if (tituloCancion && tituloCancion.trim() !== "") {
-            if (songTextElement) {
-              songTextElement.innerText = tituloCancion;
+      function actualizarDatos() {
+        fetch(zenoUrl)
+          .then(response => {
+            if (!response.ok) throw new Error("Error al obtener datos");
+            return response.json();
+          })
+          .then(data => {
+            // Actualizar canción y artista
+            let tituloCancion = data.streamTitle || "";
+            if (!tituloCancion && data.currentSong) {
+              const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
+              tituloCancion = `${artista} - ${data.currentSong}`;
             }
-            if (typeof setupMediaSession === 'function') {
-              setupMediaSession(tituloCancion);
+
+            if (tituloCancion && tituloCancion.trim() !== "") {
+              if (songTextElement) {
+                songTextElement.innerText = tituloCancion;
+              }
+              if (typeof setupMediaSession === 'function') {
+                setupMediaSession(tituloCancion);
+              }
             }
-          }
 
-          // --- AQUÍ SE ACTUALIZAN LOS OYENTES EN VIVO ---
-          if (data.listeners !== undefined && listenersElement) {
-            const num = data.listeners;
-            listenersElement.innerText = num + (num === 1 ? " Oyente" : " Oyentes");
-          }
-        } catch (e) {
-          console.log("Error parseando los datos de Zeno: ", e);
-        }
-      };
+            // Actualizar número de oyentes reales en vivo
+            if (data.listeners !== undefined && listenersElement) {
+              const num = data.listeners;
+              listenersElement.innerText = num === 1 ? "1 Oyente" : `${num} Oyentes`;
+            }
+          })
+          .catch(err => {
+            console.log("No se pudieron actualizar los datos de Zeno:", err);
+          });
+      }
 
-      eventSource.onerror = function(err) {
-        console.log("Error en la conexión con Zeno API");
-      };
+      // Ejecutar de inmediato al cargar y luego cada 10 segundos
+      actualizarDatos();
+      setInterval(actualizarDatos, 10000);
     }
 
     // Ejecutar al cargar la página
