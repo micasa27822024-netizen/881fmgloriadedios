@@ -409,19 +409,19 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Botón Estético Saludo de Voz (Arriba de la palabra diaria) -->
+        <!-- Botón Estético Saludo de Voz -->
         <button class="btn-voice-trigger" onclick="toggleModal('voiceModal', true)">
           <i class="fa-solid fa-microphone-lines"></i>
           <span>Enviar Saludo de Voz al Aire</span>
         </button>
 
-        <!-- Versículo Diario (Arriba) -->
+        <!-- Versículo Diario -->
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado -->
+        <!-- Tarjeta de Canción / Artista en Vivo con Ecualizador -->
         <div class="song-card">
           <div class="equalizer">
             <div class="eq-bar"></div>
@@ -469,12 +469,10 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
-            <!-- Botón Compartir App -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
 
-            <!-- Botón Transmitir a TV -->
             <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
               <i class="fa-solid fa-tv"></i>
             </button>
@@ -484,7 +482,7 @@
     </div>
   </div>
 
-  <!-- Audio principal con preload="auto" para evitar microcortes -->
+  <!-- Audio principal y silencioso -->
   <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
@@ -527,7 +525,7 @@
     </div>
   </div>
 
-  <!-- Modales -->
+  <!-- Modal Programación -->
   <div class="modal" id="scheduleModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -561,6 +559,7 @@
     </div>
   </div>
 
+  <!-- Modal Reuniones -->
   <div class="modal" id="reunionesModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -607,6 +606,7 @@
     </div>
   </div>
 
+  <!-- Modal Prédicas -->
   <div class="modal" id="podcastsModal">
     <div class="modal-content" id="modalPodcastsContent">
       <div class="modal-header">
@@ -800,7 +800,7 @@
             let mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
             let secs = (secondsElapsed % 60).toString().padStart(2, '0');
             document.getElementById('recTimer').innerText = `${mins}:${secs}`;
-            if (secondsElapsed >= 60) { toggleRecording(); } // Límite de 1 min
+            if (secondsElapsed >= 60) { toggleRecording(); }
           }, 1000);
 
         } catch (err) {
@@ -823,11 +823,8 @@
       const whatsappNumber = "5493416948385";
       const textMsg = `*🎙️ Nuevo Saludo de Voz Recibido*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}%0A*(El usuario adjuntará o enviará su archivo de audio generado desde la app)*`;
 
-      // Como los enlaces web de WhatsApp no pueden adjuntar archivos binarios de forma automática por seguridad del sistema operativo, 
-      // abrimos el chat con los datos listos y guiamos al usuario para compartir el audio grabado.
       window.open(`https://wa.me/${whatsappNumber}?text=${textMsg}`, '_blank');
       
-      // Opcional: Descargar archivo localmente para que lo puedan adjuntar al toque en el chat si desean
       if (recordedAudioBlob) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(recordedAudioBlob);
@@ -961,7 +958,8 @@
     setDailyVerse();
 
     function fetchZenoMetadata() {
-      const streamId = "391d8c8yus8uv"; 
+      // Stream mount point ID actualizado correctamente
+      const streamId = "ggq0ed8yus8uv"; 
       const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
       const songTextElement = document.getElementById('songInfoText');
 
