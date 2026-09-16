@@ -818,7 +818,7 @@
       }
     }
 
-   async function sendVoiceNoteToWhatsApp() {
+  async function sendVoiceNoteToWhatsApp() {
   const nameVal = document.getElementById('voiceName').value.trim();
   const locVal = document.getElementById('voiceLocation').value.trim();
   
@@ -838,8 +838,8 @@
 
     const cloudName = 'porjzftqc';
 
-    // Usamos /auto/upload para que acepte archivos de audio sin restricciones
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+    // Cambiamos a /raw/upload para que Cloudinary guarde cualquier archivo sin restricciones de preset
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
       method: 'POST',
       body: formData
     });
@@ -862,7 +862,7 @@
 
   } catch (error) {
     console.error("Error en la subida:", error);
-    alert("No se pudo subir el audio. Revisa la consola (F12) para ver el mensaje exacto de Cloudinary.");
+    alert("Error al subir. Asegúrate de que tu Cloud Name sea exacto ('porjzftqc') y que el preset 'saludos_radio' esté guardado.");
   } finally {
     btnWhatsApp.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar mensaje de voz`;
     btnWhatsApp.disabled = false;
