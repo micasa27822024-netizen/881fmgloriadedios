@@ -75,10 +75,10 @@
 
     .top-actions {
       display: flex; 
-      gap: 3px; 
+      gap: 3px; /* Espaciado ultra compacto entre botones */
       justify-content: center; 
       align-items: center; 
-      flex-wrap: nowrap; 
+      flex-wrap: nowrap; /* Impide que bajen a otra línea */
       width: 100%;
       max-width: 100%;
     }
@@ -89,12 +89,12 @@
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #ffffff; 
       height: 30px; 
-      padding: 0 5px; 
+      padding: 0 5px; /* Padding ajustado para que entren los 5 holgados */
       border-radius: 15px;
       display: inline-flex; 
       justify-content: center; 
       align-items: center;
-      font-size: 0.68rem; 
+      font-size: 0.68rem; /* Tamaño de fuente optimizado */
       font-weight: 600; 
       cursor: pointer; 
       text-decoration: none;
@@ -122,70 +122,6 @@
     .verse-text { font-size: 0.95rem; font-style: italic; color: #fdfdfd; line-height: 1.35; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
     .verse-ref { font-size: 0.75rem; font-weight: 700; color: #f59e0b; margin-top: 3px; letter-spacing: 0.5px; }
 
-    /* Contador de Oyentes Zeno y Reacciones Flotantes */
-    .stats-reactions-row {
-      display: flex;
-      width: 100%;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .listeners-badge {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      border-radius: 10px;
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .reactions-container {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-reaction {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fff;
-      border-radius: 10px;
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: transform 0.15s, background 0.15s;
-    }
-
-    .btn-reaction:hover {
-      transform: scale(1.05);
-      background: rgba(245, 158, 11, 0.2);
-    }
-
-    /* Animación de corazones/manitos flotantes en pantalla */
-    .floating-reaction {
-      position: fixed;
-      bottom: 120px;
-      font-size: 1.5rem;
-      pointer-events: none;
-      z-index: 9999;
-      animation: floatUp 1.8s ease-out forwards;
-    }
-
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(0.6); opacity: 1; }
-      100% { transform: translateY(-220px) scale(1.3); opacity: 0; }
-    }
-
     /* Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado */
     .song-card {
       background: rgba(0, 0, 0, 0.82);
@@ -202,6 +138,7 @@
       box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
     }
 
+    /* Ecualizador de ondas musicales de lujo */
     .equalizer {
       display: flex;
       align-items: flex-end;
@@ -282,6 +219,7 @@
 
     .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
 
+    /* Botón de Play con Animación Espectacular */
     .btn-play {
       position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 50%;
       background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -385,7 +323,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior -->
+      <!-- Barra Superior con botones en una sola fila protegida -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -417,26 +355,10 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Versículo Diario -->
+        <!-- Versículo Diario (Arriba) -->
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
-        </div>
-
-        <!-- Fila de Oyentes Zeno & Reacciones en vivo -->
-        <div class="stats-reactions-row">
-          <div class="listeners-badge" title="Oyentes conectados en vivo">
-            <i class="fa-solid fa-headphones"></i>
-            <span id="listenersCount">Cargando...</span>
-          </div>
-          <div class="reactions-container">
-            <button class="btn-reaction" onclick="sendReaction('❤️', event)" title="Me gusta / Amén">
-              ❤️ <span id="countHeart">0</span>
-            </button>
-            <button class="btn-reaction" onclick="sendReaction('👏', event)" title="Gloria a Dios">
-              👏 <span id="countClap">0</span>
-            </button>
-          </div>
         </div>
 
         <!-- Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado -->
@@ -727,25 +649,6 @@
     let wakeLock = null;
     let castSession = null;
 
-    // Contadores de reacciones locales
-    let reactionCounts = { '❤️': 0, '👏': 0 };
-
-    function sendReaction(emoji, event) {
-      reactionCounts[emoji]++;
-      if (emoji === '❤️') document.getElementById('countHeart').innerText = reactionCounts[emoji];
-      if (emoji === '👏') document.getElementById('countClap').innerText = reactionCounts[emoji];
-
-      // Animación de burbuja flotante en pantalla
-      const btnRect = event.currentTarget.getBoundingClientRect();
-      const el = document.createElement('div');
-      el.className = 'floating-reaction';
-      el.innerText = emoji;
-      el.style.left = (btnRect.left + btnRect.width / 2 - 10) + 'px';
-      el.style.bottom = '100px';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1800);
-    }
-
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
         try {
@@ -869,53 +772,47 @@
     }
     setDailyVerse();
 
-    // --- FUNCIÓN DE ZENO.FM CORREGIDA Y DINÁMICA ---
     function fetchZenoMetadata() {
-      const streamId = "391d8c8yus8uv"; // Tu ID de Zeno
-      const zenoUrl = `https://api.zeno.fm/mounts/metadata/${streamId}`;
+      const streamId = "391d8c8yus8uv"; 
+      const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
       const songTextElement = document.getElementById('songInfoText');
-      const listenersElement = document.getElementById('listenersCount');
 
-      function actualizarDatos() {
-        fetch(zenoUrl)
-          .then(response => {
-            if (!response.ok) throw new Error("Error al obtener datos");
-            return response.json();
-          })
-          .then(data => {
-            // Actualizar canción y artista
-            let tituloCancion = data.streamTitle || "";
-            if (!tituloCancion && data.currentSong) {
-              const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
-              tituloCancion = `${artista} - ${data.currentSong}`;
+      const eventSource = new EventSource(zenoUrl);
+
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          let tituloCancion = data.streamTitle || "";
+
+          if (!tituloCancion && data.currentSong) {
+            const artista = data.currentArtist || "Radio Cristiana 88.1 FM";
+            tituloCancion = `${artista} - ${data.currentSong}`;
+          }
+
+          if (tituloCancion && tituloCancion.trim() !== "") {
+            if (songTextElement) {
+              songTextElement.innerText = tituloCancion;
             }
-
-            if (tituloCancion && tituloCancion.trim() !== "") {
-              if (songTextElement) {
-                songTextElement.innerText = tituloCancion;
-              }
-              if (typeof setupMediaSession === 'function') {
-                setupMediaSession(tituloCancion);
-              }
+            if (typeof setupMediaSession === 'function') {
+              setupMediaSession(tituloCancion);
             }
-
-            // Actualizar número de oyentes reales en vivo
-            if (data.listeners !== undefined && listenersElement) {
-              const num = data.listeners;
-              listenersElement.innerText = num === 1 ? "1 Oyente" : `${num} Oyentes`;
+          } else {
+            if (songTextElement) {
+              songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
             }
-          })
-          .catch(err => {
-            console.log("No se pudieron actualizar los datos de Zeno:", err);
-          });
-      }
+          }
+        } catch (e) {
+          console.log("Error parseando los datos de Zeno: ", e);
+        }
+      };
 
-      // Ejecutar de inmediato al cargar y luego cada 10 segundos
-      actualizarDatos();
-      setInterval(actualizarDatos, 10000);
+      eventSource.onerror = function(err) {
+        if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
+          songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+        }
+      };
     }
 
-    // Ejecutar al cargar la página
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
