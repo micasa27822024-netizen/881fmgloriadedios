@@ -869,8 +869,8 @@
     }
     setDailyVerse();
 
-    function fetchZenoMetadata() {
-      const streamId = "391d8c8yus8uv"; 
+  function fetchZenoMetadata() {
+      const streamId = "391d8c8yus8uv"; // Tu ID de Zeno
       const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
       const songTextElement = document.getElementById('songInfoText');
       const listenersElement = document.getElementById('listenersCount');
@@ -894,15 +894,12 @@
             if (typeof setupMediaSession === 'function') {
               setupMediaSession(tituloCancion);
             }
-          } else {
-            if (songTextElement) {
-              songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
-            }
           }
 
-          // Actualizar contador de oyentes oficial de Zeno si viene en la respuesta
+          // --- AQUÍ SE ACTUALIZAN LOS OYENTES EN VIVO ---
           if (data.listeners !== undefined && listenersElement) {
-            listenersElement.innerText = data.listeners + (data.listeners === 1 ? " Oyente" : " Oyentes");
+            const num = data.listeners;
+            listenersElement.innerText = num + (num === 1 ? " Oyente" : " Oyentes");
           }
         } catch (e) {
           console.log("Error parseando los datos de Zeno: ", e);
@@ -910,12 +907,11 @@
       };
 
       eventSource.onerror = function(err) {
-        if (songTextElement && songTextElement.innerText.includes("Sintonizando")) {
-          songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
-        }
+        console.log("Error en la conexión con Zeno API");
       };
     }
 
+    // Ejecutar al cargar la página
     fetchZenoMetadata();
 
     const workerBlob = new Blob([`
