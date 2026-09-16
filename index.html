@@ -818,57 +818,56 @@
       }
     }
 
-    async function sendVoiceNoteToWhatsApp() {
-      const nameVal = document.getElementById('voiceName').value.trim();
-      const locVal = document.getElementById('voiceLocation').value.trim();
+   async function sendVoiceNoteToWhatsApp() {
+  const nameVal = document.getElementById('voiceName').value.trim();
+  const locVal = document.getElementById('voiceLocation').value.trim();
+  
+  if (!recordedAudioBlob) {
+    alert("Primero tenés que grabar un saludo.");
+    return;
+  }
+
+  const btnWhatsApp = document.querySelector('.btn-action-voice');
+  btnWhatsApp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Subiendo audio...`;
+  btnWhatsApp.disabled = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', recordedAudioBlob, 'saludo.webm');
+    formData.append('upload_preset', 'saludos_radio');
+
+    const cloudName = 'porjzftqc';
+
+    // Usamos /auto/upload para que acepte archivos de audio sin restricciones
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.secure_url) {
+      const audioUrl = data.secure_url;
       
-      if (!recordedAudioBlob) {
-        alert("Primero tenés que grabar un saludo.");
-        return;
-      }
+      const whatsappNumber = "5493416948385";
+      const textMsg = `*🎙️ Nuevo Mensaje de Voz*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}%0A*🔗 Escucharlo:* ${encodeURIComponent(audioUrl)}`;
+      
+      window.open(`https://wa.me/${whatsappNumber}?text=${textMsg}`, '_blank');
+      alert("¡Mensaje de voz enviado con éxito!");
 
-      const btnWhatsApp = document.querySelector('.btn-action-voice');
-      btnWhatsApp.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Subiendo audio...`;
-      btnWhatsApp.disabled = true;
-
-      try {
-        // 1. Preparar FormData para Cloudinary
-        const formData = new FormData();
-        formData.append('file', recordedAudioBlob, 'saludo.webm');
-        formData.append('upload_preset', 'saludos_radio');
-
-        const cloudName = 'porjzftqc';
-
-        // 2. Subir directamente a Cloudinary mediante la API pública
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/video/upload`, {
-          method: 'POST',
-          body: formData
-        });
-
-        const data = await response.json();
-
-        if (data.secure_url) {
-          const audioUrl = data.secure_url;
-          
-          // 3. Abrir WhatsApp con la información y el enlace directo del audio
-          const whatsappNumber = "5493416948385";
-          const textMsg = `*🎙️ Nuevo Mensaje de Voz*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}%0A*🔗 Escucharlo:* ${encodeURIComponent(audioUrl)}`;
-          
-          window.open(`https://wa.me/${whatsappNumber}?text=${textMsg}`, '_blank');
-          alert("¡Mensaje de voz enviado con éxito!");
-
-        } else {
-          throw new Error(data.error?.message || "Error al subir a Cloudinary");
-        }
-
-      } catch (error) {
-        console.error("Error:", error);
-        alert("No se pudo subir el audio. Verificá tu conexión.");
-      } finally {
-        btnWhatsApp.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar mensaje de voz`;
-        btnWhatsApp.disabled = false;
-      }
+    } else {
+      console.error("Detalle del error de Cloudinary:", data);
+      throw new Error(data.error?.message || "Error al subir el archivo");
     }
+
+  } catch (error) {
+    console.error("Error en la subida:", error);
+    alert("No se pudo subir el audio. Revisa la consola (F12) para ver el mensaje exacto de Cloudinary.");
+  } finally {
+    btnWhatsApp.innerHTML = `<i class="fa-brands fa-whatsapp"></i> Enviar mensaje de voz`;
+    btnWhatsApp.disabled = false;
+  }
+}
     // ----------------------------------------------------
 
     window.__onGCastApiAvailable = function(isAvailable) {
