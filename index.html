@@ -111,6 +111,37 @@
       width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
 
+    /* Botón Estético Saludo de Voz (Arriba del versículo) */
+    .btn-voice-trigger {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      border-radius: 12px;
+      padding: 8px 14px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-voice-trigger:hover {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      transform: scale(1.01);
+    }
+
+    .btn-voice-trigger i {
+      color: #f59e0b;
+      font-size: 1rem;
+    }
+
     /* Versículo Diario */
     .verse-card {
       background: rgba(0, 0, 0, 0.65);
@@ -315,6 +346,29 @@
       border-radius: 20px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform 0.2s; white-space: nowrap;
     }
     .btn-play-video:hover { transform: scale(1.05); }
+
+    /* Estilos Modal Buzón de Voz */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.78rem; color: #9ca3af; margin-bottom: 4px; font-weight: 600; }
+    .form-input {
+      width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px; padding: 10px; color: #fff; font-size: 0.9rem; outline: none;
+    }
+    .form-input:focus { border-color: #f59e0b; }
+    .recorder-panel { text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .record-controls { display: flex; justify-content: center; gap: 10px; align-items: center; margin-top: 10px; }
+    .btn-rec {
+      background: #ef4444; color: #fff; border: none; width: 50px; height: 50px; border-radius: 50%;
+      font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6);
+      transition: transform 0.2s;
+    }
+    .btn-rec.recording { animation: pulseRec 1s infinite alternate; background: #dc2626; }
+    @keyframes pulseRec { 0% { transform: scale(1); } 100% { transform: scale(1.1); box-shadow: 0 0 25px #ef4444; } }
+    .btn-action-voice {
+      background: #25d366; color: #fff; border: none; padding: 8px 16px; border-radius: 20px;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .timer-display { font-size: 1.1rem; font-weight: 700; color: #f59e0b; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -355,7 +409,13 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Versículo Diario (Arriba) -->
+        <!-- Botón Estético Saludo de Voz -->
+        <button class="btn-voice-trigger" onclick="toggleModal('voiceModal', true)">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>Enviar Saludo de Voz al Aire</span>
+        </button>
+
+        <!-- Versículo Diario (Ubicado justo debajo del botón de saludo de voz) -->
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
@@ -427,6 +487,45 @@
   <!-- Audio principal con preload="auto" para evitar microcortes -->
   <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+
+  <!-- Modal Buzón de Notas de Voz -->
+  <div class="modal" id="voiceModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-microphone-lines"></i> Buzón de Saludos de Voz</h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('voiceModal', false)"></i>
+      </div>
+      
+      <div class="form-group">
+        <label>Tu Nombre / Familia:</label>
+        <input type="text" id="voiceName" class="form-input" placeholder="Ej: Carlos Gómez">
+      </div>
+
+      <div class="form-group">
+        <label>Ciudad / Provincia / País (¿De dónde nos escuchás?):</label>
+        <input type="text" id="voiceLocation" class="form-input" placeholder="Ej: Rosario, Santa Fe / Madrid, España">
+      </div>
+
+      <div class="recorder-panel">
+        <div class="timer-display" id="recTimer">00:00</div>
+        <div id="recStatusText" style="font-size: 0.8rem; color: #9ca3af; margin-bottom: 10px;">Presioná el micrófono para grabar tu saludo</div>
+        
+        <div class="record-controls">
+          <button class="btn-rec" id="recBtn" onclick="toggleRecording()" title="Grabar audio">
+            <i class="fa-solid fa-microphone" id="recIcon"></i>
+          </button>
+        </div>
+
+        <div id="audioPreviewContainer" style="margin-top: 15px; display: none;">
+          <audio id="audioPlayback" controls style="width: 100%; height: 35px; margin-bottom: 10px;"></audio>
+          <br>
+          <button class="btn-action-voice" onclick="sendVoiceNoteToWhatsApp()">
+            <i class="fa-brands fa-whatsapp"></i> Enviar Saludo por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -648,6 +747,92 @@
     let isReconnecting = false;
     let wakeLock = null;
     let castSession = null;
+
+    // --- LÓGICA DE GRABACIÓN DE NOTAS DE VOZ ---
+    let mediaRecorder;
+    let audioChunks = [];
+    let recordedAudioBlob = null;
+    let recordingTimer = null;
+    let secondsElapsed = 0;
+
+    async function toggleRecording() {
+      const nameVal = document.getElementById('voiceName').value.trim();
+      const locVal = document.getElementById('voiceLocation').value.trim();
+
+      if (!nameVal || !locVal) {
+        alert("Por favor, completá tu nombre y de dónde nos escuchás antes de grabar.");
+        return;
+      }
+
+      const recBtn = document.getElementById('recBtn');
+      const recIcon = document.getElementById('recIcon');
+      const recStatus = document.getElementById('recStatusText');
+      const previewContainer = document.getElementById('audioPreviewContainer');
+
+      if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(recordedAudioBlob);
+            const audioPlayback = document.getElementById('audioPlayback');
+            audioPlayback.src = audioUrl;
+            previewContainer.style.display = 'block';
+          };
+
+          mediaRecorder.start();
+          recBtn.classList.add('recording');
+          recIcon.className = "fa-solid fa-stop";
+          recStatus.innerText = "Grabando... (Tocar nuevamente para finalizar)";
+          previewContainer.style.display = 'none';
+
+          secondsElapsed = 0;
+          document.getElementById('recTimer').innerText = "00:00";
+          recordingTimer = setInterval(() => {
+            secondsElapsed++;
+            let mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            let secs = (secondsElapsed % 60).toString().padStart(2, '0');
+            document.getElementById('recTimer').innerText = `${mins}:${secs}`;
+            if (secondsElapsed >= 60) { toggleRecording(); } // Límite de 1 min
+          }, 1000);
+
+        } catch (err) {
+          alert("No se pudo acceder al micrófono. Verificá los permisos del navegador.");
+        }
+      } else {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        clearInterval(recordingTimer);
+        recBtn.classList.remove('recording');
+        recIcon.className = "fa-solid fa-microphone";
+        recStatus.innerText = "¡Grabación lista! Escuchala o enviala.";
+      }
+    }
+
+    function sendVoiceNoteToWhatsApp() {
+      const nameVal = document.getElementById('voiceName').value.trim();
+      const locVal = document.getElementById('voiceLocation').value.trim();
+      
+      const whatsappNumber = "5493416948385";
+      const textMsg = `*🎙️ Nuevo Saludo de Voz Recibido*%0A*👤 De:* ${encodeURIComponent(nameVal)}%0A*📍 Desde:* ${encodeURIComponent(locVal)}%0A*(El usuario adjuntará o enviará su archivo de audio generado desde la app)*`;
+
+      window.open(`https://wa.me/${whatsappNumber}?text=${textMsg}`, '_blank');
+      
+      if (recordedAudioBlob) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(recordedAudioBlob);
+        a.download = `saludo_${nameVal.replace(/\s+/g, '_')}.webm`;
+        a.click();
+      }
+    }
+    // -------------------------------------------
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
