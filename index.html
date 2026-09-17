@@ -1312,7 +1312,7 @@
       toggleModal('podcastsModal', false);
     }
 
-  /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE (API V3) --- */
+ /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE (API V3) --- */
 async function fetchYouTubeVideos() {
   const apiKey = "AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI";
   const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; 
@@ -1348,54 +1348,53 @@ async function fetchYouTubeVideos() {
       `;
     }
 
-   // Carga de las últimas transmisiones/videos pasados de YouTube
-try {
-  // 1. Obtener el ID exacto de la playlist de subidas del canal
-  const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`;
-  const channelRes = await fetch(channelUrl);
-  const channelData = await channelRes.json();
+    // 2. Obtener el ID de la playlist de subidas del canal
+    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`;
+    const channelRes = await fetch(channelUrl);
+    const channelData = await channelRes.json();
 
-  if (videosContainer) {
-    videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
+    if (videosContainer) {
+      videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
 
-    if (channelData.items && channelData.items.length > 0) {
-      const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+      if (channelData.items && channelData.items.length > 0) {
+        const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
-      // 2. Traer los últimos 4 videos de esa playlist
-      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
-      const playlistRes = await fetch(playlistUrl);
-      const playlistData = await playlistRes.json();
+        // 3. Traer los últimos 4 videos de esa playlist
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
+        const playlistRes = await fetch(playlistUrl);
+        const playlistData = await playlistRes.json();
 
-      if (playlistData.items && playlistData.items.length > 0) {
-        playlistData.items.forEach(item => {
-          const videoId = item.snippet.resourceId.videoId;
-          const title = item.snippet.title;
-          const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        if (playlistData.items && playlistData.items.length > 0) {
+          playlistData.items.forEach(item => {
+            const videoId = item.snippet.resourceId.videoId;
+            const title = item.snippet.title;
+            const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
-          const itemHtml = `
-            <div class="schedule-item">
-              <div class="schedule-info">
-                <span class="schedule-title">${title}</span>
-                <span class="schedule-days">Publicado el ${date}</span>
+            const itemHtml = `
+              <div class="schedule-item">
+                <div class="schedule-info">
+                  <span class="schedule-title">${title}</span>
+                  <span class="schedule-days">Publicado el ${date}</span>
+                </div>
+                <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
+                  <i class="fa-solid fa-play"></i> Ver aquí
+                </button>
               </div>
-              <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
-                <i class="fa-solid fa-play"></i> Ver aquí
-              </button>
-            </div>
-          `;
-          videosContainer.innerHTML += itemHtml;
-        });
+            `;
+            videosContainer.innerHTML += itemHtml;
+          });
+        } else {
+          videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
+        }
       } else {
-        videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
+        videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontró el canal de YouTube.</div>`;
       }
-    } else {
-      videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontró el canal de YouTube.</div>`;
     }
-  }
-} catch (err) {
-  console.error("Error al obtener las transmisiones: ", err);
-  if (videosContainer) {
-    videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se pudieron cargar los vídeos automáticos.</div>`;
+  } catch (err) {
+    console.error("Error al obtener las transmisiones: ", err);
+    if (videosContainer) {
+      videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se pudieron cargar los vídeos automáticos.</div>`;
+    }
   }
 }
     function cycleTimer() {
