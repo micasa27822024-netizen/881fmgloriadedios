@@ -200,6 +200,27 @@
       letter-spacing: 0.3px;
     }
 
+    /* Compartir la canción que está sonando en este momento. */
+    .share-current-song {
+      width: 100%;
+      min-height: 31px;
+      border: 1px solid rgba(37, 211, 102, 0.55);
+      border-radius: 12px;
+      background: rgba(37, 211, 102, 0.16);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      transition: transform 0.18s, background 0.18s;
+    }
+
+    .share-current-song i { color: #25d366; font-size: 0.95rem; }
+    .share-current-song:hover { transform: scale(1.015); background: rgba(37, 211, 102, 0.28); }
+
     /* Fila de Reproducción */
     .player-row {
       display: flex; align-items: center; justify-content: space-between; width: 100%;
@@ -399,6 +420,12 @@
           </div>
           <div class="song-info" id="songInfoText">Sintonizando transmisión en vivo...</div>
         </div>
+
+        <!-- Comparte por WhatsApp el título recibido desde Zeno. -->
+        <button class="share-current-song" type="button" onclick="shareCurrentSong()" title="Compartir canción actual por WhatsApp">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Compartir canción actual</span>
+        </button>
 
         <div class="player-row">
           <div class="status-badge">
@@ -658,6 +685,16 @@
         navigator.clipboard.writeText(window.location.href);
         alert('¡Enlace copiado al portapapeles!');
       }
+    }
+
+    function shareCurrentSong() {
+      const songInfo = document.getElementById('songInfoText');
+      const currentSong = songInfo && songInfo.innerText.trim() && !songInfo.innerText.includes('Sintonizando')
+        ? songInfo.innerText.trim()
+        : 'Radio 88.1 FM - Gloria de Dios en vivo';
+      const message = `🎵 Estoy escuchando: ${currentSong} en Radio 88.1 FM - Gloria de Dios. ¡Escuchala en vivo! ${window.location.href}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     }
 
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
