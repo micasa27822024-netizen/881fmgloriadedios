@@ -1348,24 +1348,29 @@ async function fetchYouTubeVideos() {
       `;
     }
 
-   // 2. Carga de los últimos vídeos usando el RSS Feed público de YouTube
-    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+   // Carga de las últimas transmisiones/videos pasados de YouTube
+try {
+  // 1. Obtener el ID exacto de la playlist de subidas del canal
+  const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`;
+  const channelRes = await fetch(channelUrl);
+  const channelData = await channelRes.json();
 
-    const videosResponse = await fetch(rssUrl);
-    const videosData = await videosResponse.json();
+  if (videosContainer) {
+    videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
 
-    if (videosContainer) {
-      videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
+    if (channelData.items && channelData.items.length > 0) {
+      const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
 
-      if (videosData.items && videosData.items.length > 0) {
-        // Tomamos los primeros 4 vídeos
-        const latestVideos = videosData.items.slice(0, 4);
+      // 2. Traer los últimos 4 videos de esa playlist
+      const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
+      const playlistRes = await fetch(playlistUrl);
+      const playlistData = await playlistRes.json();
 
-        latestVideos.forEach(item => {
-          // Extraemos el ID del vídeo desde el enlace
-          const videoId = item.link.split('v=')[1];
-          const title = item.title;
-          const date = new Date(item.pubDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+      if (playlistData.items && playlistData.items.length > 0) {
+        playlistData.items.forEach(item => {
+          const videoId = item.snippet.resourceId.videoId;
+          const title = item.snippet.title;
+          const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
           const itemHtml = `
             <div class="schedule-item">
@@ -1383,17 +1388,14 @@ async function fetchYouTubeVideos() {
       } else {
         videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
       }
+    } else {
+      videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontró el canal de YouTube.</div>`;
     }
-
-  } catch (err) {
-    console.error("Error al obtener las transmisiones: ", err);
-    if (videosContainer) {
-      videosContainer.innerHTML = `
-        <div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">
-          No se pudieron cargar los vídeos automáticos.
-        </div>
-      `;
-    }
+  }
+} catch (err) {
+  console.error("Error al obtener las transmisiones: ", err);
+  if (videosContainer) {
+    videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se pudieron cargar los vídeos automáticos.</div>`;
   }
 }
     function cycleTimer() {
