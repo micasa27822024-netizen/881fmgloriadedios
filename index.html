@@ -1312,74 +1312,83 @@
       toggleModal('podcastsModal', false);
     }
 
-    /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE --- */
-    function fetchYouTubeVideos() {
-      const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; // ID del canal @iglesiamontedesantidad6232
-      const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
-      const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+   /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE (API V3) --- */
+function fetchYouTubeVideos() {
+  const apiKey = "AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI";
+  const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; // ID del canal Iglesia Monte de Santidad
 
-      // 1. Detección automática de transmisión en vivo mediante verificación de imagen embed
-      const liveContainer = document.getElementById('liveStreamContainer');
-      const liveImg = new Image();
-      liveImg.src = `https://img.youtube.com/vi/live/hqdefault.jpg`;
-      liveImg.onload = function() {
-        if (liveImg.width !== 120) { // Si el ancho no es 120, hay un vivo activo
-          liveContainer.innerHTML = `
-            <div class="schedule-item live-item">
+  // 1. Detección de transmisión en vivo (utilizando la API oficial de YouTube)
+  const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${apiKey}`;
+  const liveContainer = document.getElementById('liveStreamContainer');
+
+  fetch(liveUrl)
+    .then(res => res.json())
+    .then(data => {
+      if (data.items && data.items.length > 0) {
+        const liveVideo = data.items[0];
+        const liveVideoId = liveVideo.id.videoId;
+        const liveTitle = liveVideo.snippet.title;
+
+        liveContainer.innerHTML = `
+          <div class="schedule-item live-item">
+            <div class="schedule-info">
+              <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
+              <span class="schedule-title">${liveTitle}</span>
+              <span class="schedule-days">Iglesia Monte de Santidad</span>
+            </div>
+            <button onclick="playEmbeddedVideo('${liveVideoId}', '${liveTitle.replace(/'/g, "\\'")}')" class="btn-play-video">
+              <i class="fa-solid fa-play"></i> Ver Vivo
+            </button>
+          </div>
+        `;
+      } else {
+        liveContainer.innerHTML = '';
+      }
+    })
+    .catch(err => {
+      console.error("Error al verificar transmisión en vivo: ", err);
+      liveContainer.innerHTML = '';
+    });
+
+  // 2. Carga de los últimos 4 vídeos / transmisiones pasadas
+  const videosUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=4&key=${apiKey}`;
+
+  fetch(videosUrl)
+    .then(response => response.json())
+    .then(data => {
+      if (data.items && data.items.length > 0) {
+        const container = document.getElementById('latestVideosContainer');
+        container.innerHTML = '';
+
+        data.items.forEach(item => {
+          const videoId = item.id.videoId;
+          const title = item.snippet.title;
+          const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+          const itemHtml = `
+            <div class="schedule-item">
               <div class="schedule-info">
-                <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
-                <span class="schedule-title">Transmisión en Directo</span>
-                <span class="schedule-days">Iglesia Monte de Santidad</span>
+                <span class="schedule-title">${title}</span>
+                <span class="schedule-days">Publicado el ${date}</span>
               </div>
-              <button onclick="playEmbeddedVideo('live', 'Transmisión en Vivo')" class="btn-play-video">
-                <i class="fa-solid fa-play"></i> Ver Vivo
+              <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'")}')" class="btn-play-video">
+                <i class="fa-solid fa-play"></i> Ver aquí
               </button>
             </div>
           `;
-        } else {
-          liveContainer.innerHTML = '';
-        }
-      };
-      liveImg.onerror = function() { liveContainer.innerHTML = ''; };
-
-      // 2. Carga automática de los últimos 4 vídeos publicados
-      fetch(rss2jsonUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'ok' && data.items && data.items.length > 0) {
-            const container = document.getElementById('latestVideosContainer');
-            container.innerHTML = '';
-
-            const items = data.items.slice(0, 4); // Tomar exactamente 4 transmisiones
-            items.forEach(item => {
-              const videoId = item.guid.replace('yt:video:', '');
-              const title = item.title;
-              const date = new Date(item.pubDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-
-              const itemHtml = `
-                <div class="schedule-item">
-                  <div class="schedule-info">
-                    <span class="schedule-title">${title}</span>
-                    <span class="schedule-days">Publicado el ${date}</span>
-                  </div>
-                  <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'")}')" class="btn-play-video">
-                    <i class="fa-solid fa-play"></i> Ver aquí
-                  </button>
-                </div>
-              `;
-              container.innerHTML += itemHtml;
-            });
-          }
-        })
-        .catch(err => {
-          console.error("Error al obtener las transmisiones: ", err);
-          document.getElementById('latestVideosContainer').innerHTML = `
-            <div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">
-              No se pudieron cargar los vídeos automáticos.
-            </div>
-          `;
+          container.innerHTML += itemHtml;
         });
-    }
+      }
+    })
+    .catch(err => {
+      console.error("Error al obtener las transmisiones: ", err);
+      document.getElementById('latestVideosContainer').innerHTML = `
+        <div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">
+          No se pudieron cargar los vídeos automáticos.
+        </div>
+      `;
+    });
+}
 
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
