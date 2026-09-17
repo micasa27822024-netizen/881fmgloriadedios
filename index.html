@@ -1348,8 +1348,10 @@ async function fetchYouTubeVideos() {
       `;
     }
 
-    // 2. Carga de los últimos 4 vídeos / transmisiones pasadas
-    const videosUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=4&key=${apiKey}`;
+    // 2. Carga de los últimos 4 vídeos usando el ID de la Playlist de Cargas (Uploads)
+    const uploadsPlaylistId = channelId.replace(/^UC/, "UU");
+    const videosUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
+    
     const videosResponse = await fetch(videosUrl);
     const videosData = await videosResponse.json();
 
@@ -1358,7 +1360,8 @@ async function fetchYouTubeVideos() {
 
       if (videosData.items && videosData.items.length > 0) {
         videosData.items.forEach(item => {
-          const videoId = item.id.videoId;
+          // Nota el cambio aquí: en playlistItems la propiedad es resourceId.videoId
+          const videoId = item.snippet.resourceId.videoId; 
           const title = item.snippet.title;
           const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
