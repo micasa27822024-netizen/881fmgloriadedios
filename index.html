@@ -1313,93 +1313,84 @@
     }
 
 async function fetchYouTubeVideos() {
-  const apiKey = "AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI";
-  const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; 
+    const apiKey = 'AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI';
+    const channelId = 'UC5I5zV1UOnkC048OaAnp_Sg';
+    const liveContainer = document.getElementById('liveStreamContainer');
+    const videosContainer = document.getElementById('latestVideosContainer');
 
-  const liveContainer = document.getElementById('liveStreamContainer');
-  const videosContainer = document.getElementById('latestVideosContainer');
+    if (liveContainer) liveContainer.innerHTML = '';
+    if (videosContainer) videosContainer.innerHTML = '';
 
-  if (liveContainer) liveContainer.innerHTML = '';
-
-  try {
-    // 1. Detección de transmisión en vivo (vía API oficial)
     try {
-      const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${apiKey}`;
-      const liveResponse = await fetch(liveUrl);
-      const liveData = await liveResponse.json();
+        // 1. Detección de transmisión en vivo (vía API oficial)
+        try {
+            const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${apiKey}`;
+            const liveResponse = await fetch(liveUrl);
+            const liveData = await liveResponse.json();
 
-      if (liveContainer && liveData.items && liveData.items.length > 0) {
-        const liveVideo = liveData.items[0];
-        const liveVideoId = liveVideo.id.videoId;
-        const liveTitle = liveVideo.snippet.title;
+            if (liveContainer && liveData.items && liveData.items.length > 0) {
+                const liveVideo = liveData.items[0];
+                const liveVideoId = liveVideo.id.videoId;
+                const liveTitle = liveVideo.snippet.title.replace(/"/g, '&quot;').replace(/'/g, "\\'");
 
-        liveContainer.innerHTML = `
-          <div class="schedule-item live-item">
-            <div class="schedule-info">
-              <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
-              <span class="schedule-title">${liveTitle}</span>
-              <span class="schedule-days">Iglesia Monte de Santidad</span>
-            </div>
-            <button onclick="playEmbeddedVideo('${liveVideoId}', '${liveTitle.replace(/'/g, "\\'")}')" class="btn-play-video">
-              <i class="fa-solid fa-play"></i> Ver Vivo
-            </button>
-          </div>
-        `;
-      }
-    } catch (e) {
-      console.warn("No se pudo verificar el vivo:", e);
-    }
-
-    // 2. Obtener videos subidos desde el RSS público parseado en JSON
-    const rssTarget = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
-    const feedUrl = `https://api.allorigins.win/get?url=${rssTarget}`;
-
-    const response = await fetch(feedUrl);
-    const data = await response.json();
-
-    if (videosContainer) {
-      videosContainer.innerHTML = '';
-
-      if (data.contents) {
-        // Parsear el XML devuelto
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(data.contents, "text/xml");
-        const entries = Array.from(xmlDoc.querySelectorAll("entry")).slice(0, 4);
-
-        if (entries.length > 0) {
-          entries.forEach(entry => {
-            const videoId = entry.querySelector("videoId")?.textContent || entry.querySelector("id")?.textContent.replace("yt:video:", "");
-            const title = entry.querySelector("title")?.textContent || "Sin título";
-            const published = entry.querySelector("published")?.textContent;
-            const date = published ? new Date(published).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
-
-            const itemHtml = `
-              <div class="schedule-item">
-                <div class="schedule-info">
-                  <span class="schedule-title">${title}</span>
-                  <span class="schedule-days">Publicado el ${date}</span>
-                </div>
-                <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
-                  <i class="fa-solid fa-play"></i> Ver aquí
-                </button>
-              </div>
-            `;
-            videosContainer.innerHTML += itemHtml;
-          });
-        } else {
-          videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
+                liveContainer.innerHTML = `
+                    <div class="schedule-item live-item">
+                        <div class="schedule-info">
+                            <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
+                            <span class="schedule-title">${liveVideo.snippet.title}</span>
+                            <span class="schedule-days">Iglesia Monte de Santidad</span>
+                        </div>
+                        <button onclick="playEmbeddedVideo('${liveVideoId}', '${liveTitle}')" class="btn-play-video">
+                            <i class="fa-solid fa-play"></i> Ver Vivo
+                        </button>
+                    </div>`;
+            }
+        } catch (e) {
+            console.warn('No se pudo verificar el vivo:', e);
         }
-      } else {
-        videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
-      }
+
+        // 2. Obtener videos subidos desde el RSS público parseado en JSON
+        const rssTarget = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
+        const feedUrl = `https://api.allorigins.win/get?url=${rssTarget}`;
+        const response = await fetch(feedUrl);
+        const data = await response.json();
+
+        if (videosContainer && data.contents) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+            const entries = Array.from(xmlDoc.querySelectorAll('entry')).slice(0, 4);
+
+            if (entries.length > 0) {
+                entries.forEach(entry => {
+                    const videoId = entry.querySelector('videoId')?.textContent || entry.querySelector('id')?.textContent.replace('yt:video:', '');
+                    const titleRaw = entry.querySelector('title')?.textContent || 'Sin título';
+                    const title = titleRaw.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                    const published = entry.querySelector('published')?.textContent;
+                    const date = published ? new Date(published).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+
+                    videosContainer.innerHTML += `
+                        <div class="schedule-item">
+                            <div class="schedule-info">
+                                <span class="schedule-title">${titleRaw}</span>
+                                <span class="schedule-days">Publicado el ${date}</span>
+                            </div>
+                            <button onclick="playEmbeddedVideo('${videoId}', '${title}')" class="btn-play-video">
+                                <i class="fa-solid fa-play"></i> Ver aquí
+                            </button>
+                        </div>`;
+                });
+            } else {
+                videosContainer.innerHTML = '<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>';
+            }
+        }
+    } catch (err) {
+        console.error('Error al obtener las transmisiones:', err);
+        if (videosContainer) {
+            videosContainer.innerHTML = '<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se pudieron cargar los vídeos automáticos.</div>';
+        }
     }
-  } catch (err) {
-    console.error("Error al obtener las transmisiones: ", err);
-    if (videosContainer) {
-      videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se pudieron cargar los vídeos automáticos.</div>`;
-    }
-  }
 }
+
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
       else if (timerMinutes === 15) timerMinutes = 30;
