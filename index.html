@@ -1312,19 +1312,17 @@
       toggleModal('podcastsModal', false);
     }
 
- /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE (API V3) --- */
-async function fetchYouTubeVideos() {
+ async function fetchYouTubeVideos() {
   const apiKey = "AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI";
   const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; 
 
   const liveContainer = document.getElementById('liveStreamContainer');
   const videosContainer = document.getElementById('latestVideosContainer');
 
-  // Limpiar contenedores
   if (liveContainer) liveContainer.innerHTML = '';
 
   try {
-    // 1. Detección de transmisión en vivo
+    // 1. Detección de vivo (API oficial)
     const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${apiKey}`;
     const liveResponse = await fetch(liveUrl);
     const liveData = await liveResponse.json();
@@ -1348,46 +1346,36 @@ async function fetchYouTubeVideos() {
       `;
     }
 
-    // 2. Obtener el ID de la playlist de subidas del canal
-    const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${apiKey}`;
-    const channelRes = await fetch(channelUrl);
-    const channelData = await channelRes.json();
+    // 2. Traer videos subidos vía Invidious API (sin restricciones de API Key)
+    const invidiousUrl = `https://inv.tux.pizza/api/v1/channels/${channelId}/videos`;
+    const videosResponse = await fetch(invidiousUrl);
+    const videosData = await videosResponse.json();
 
     if (videosContainer) {
-      videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
+      videosContainer.innerHTML = '';
 
-      if (channelData.items && channelData.items.length > 0) {
-        const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+      if (Array.isArray(videosData) && videosData.length > 0) {
+        // Tomamos los primeros 4 videos
+        videosData.slice(0, 4).forEach(item => {
+          const videoId = item.videoId;
+          const title = item.title;
+          const date = new Date(item.published * 1000).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
-        // 3. Traer los últimos 4 videos de esa playlist
-        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
-        const playlistRes = await fetch(playlistUrl);
-        const playlistData = await playlistRes.json();
-
-        if (playlistData.items && playlistData.items.length > 0) {
-          playlistData.items.forEach(item => {
-            const videoId = item.snippet.resourceId.videoId;
-            const title = item.snippet.title;
-            const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-
-            const itemHtml = `
-              <div class="schedule-item">
-                <div class="schedule-info">
-                  <span class="schedule-title">${title}</span>
-                  <span class="schedule-days">Publicado el ${date}</span>
-                </div>
-                <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
-                  <i class="fa-solid fa-play"></i> Ver aquí
-                </button>
+          const itemHtml = `
+            <div class="schedule-item">
+              <div class="schedule-info">
+                <span class="schedule-title">${title}</span>
+                <span class="schedule-days">Publicado el ${date}</span>
               </div>
-            `;
-            videosContainer.innerHTML += itemHtml;
-          });
-        } else {
-          videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
-        }
+              <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
+                <i class="fa-solid fa-play"></i> Ver aquí
+              </button>
+            </div>
+          `;
+          videosContainer.innerHTML += itemHtml;
+        });
       } else {
-        videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontró el canal de YouTube.</div>`;
+        videosContainer.innerHTML = `<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>`;
       }
     }
   } catch (err) {
