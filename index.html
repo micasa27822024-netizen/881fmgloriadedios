@@ -1348,22 +1348,24 @@ async function fetchYouTubeVideos() {
       `;
     }
 
-    // 2. Carga de los últimos 4 vídeos usando el ID de la Playlist de Cargas (Uploads)
-    const uploadsPlaylistId = channelId.replace(/^UC/, "UU");
-    const videosUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=4&key=${apiKey}`;
-    
-    const videosResponse = await fetch(videosUrl);
+   // 2. Carga de los últimos vídeos usando el RSS Feed público de YouTube
+    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+
+    const videosResponse = await fetch(rssUrl);
     const videosData = await videosResponse.json();
 
     if (videosContainer) {
       videosContainer.innerHTML = ''; // Limpiar mensaje "Cargando..."
 
       if (videosData.items && videosData.items.length > 0) {
-        videosData.items.forEach(item => {
-          // Nota el cambio aquí: en playlistItems la propiedad es resourceId.videoId
-          const videoId = item.snippet.resourceId.videoId; 
-          const title = item.snippet.title;
-          const date = new Date(item.snippet.publishedAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+        // Tomamos los primeros 4 vídeos
+        const latestVideos = videosData.items.slice(0, 4);
+
+        latestVideos.forEach(item => {
+          // Extraemos el ID del vídeo desde el enlace
+          const videoId = item.link.split('v=')[1];
+          const title = item.title;
+          const date = new Date(item.pubDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
           const itemHtml = `
             <div class="schedule-item">
@@ -1371,7 +1373,7 @@ async function fetchYouTubeVideos() {
                 <span class="schedule-title">${title}</span>
                 <span class="schedule-days">Publicado el ${date}</span>
               </div>
-              <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'")}')" class="btn-play-video">
+              <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" class="btn-play-video">
                 <i class="fa-solid fa-play"></i> Ver aquí
               </button>
             </div>
@@ -1394,7 +1396,6 @@ async function fetchYouTubeVideos() {
     }
   }
 }
-
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
       else if (timerMinutes === 15) timerMinutes = 30;
