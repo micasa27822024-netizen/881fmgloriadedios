@@ -110,6 +110,21 @@
     .verse-top-btn i { color: #f59e0b; }
     .verse-card { display: none; }
 
+    .share-verse-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border: 1px solid rgba(37, 211, 102, 0.6);
+      border-radius: 22px;
+      background: rgba(37, 211, 102, 0.18);
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .share-verse-btn i { color: #25d366; margin-right: 6px; }
+
     @media (max-width: 420px) {
       .top-actions { gap: 2px; }
       .btn-top.verse-top-btn { width: 30px; padding: 0; flex-shrink: 0; }
@@ -508,6 +523,9 @@
       </div>
       <p id="verseModalText" style="font-size: 1.05rem; font-style: italic; line-height: 1.55; text-align: center;"></p>
       <p id="verseModalRef" style="margin-top: 12px; color: #f59e0b; font-weight: 800; text-align: center;"></p>
+      <button class="share-verse-btn" type="button" onclick="shareDailyVerse()">
+        <i class="fa-brands fa-whatsapp"></i> Compartir versículo por WhatsApp
+      </button>
     </div>
   </div>
 
@@ -723,6 +741,15 @@
       const message = `🎵 Estoy escuchando: ${currentSong} en Radio 88.1 FM - Gloria de Dios. ¡Escuchala en vivo! ${window.location.href}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function shareDailyVerse() {
+      const verseText = document.getElementById('verseModalText');
+      const verseRef = document.getElementById('verseModalRef');
+      const text = verseText ? verseText.innerText.trim() : '';
+      const reference = verseRef ? verseRef.innerText.trim() : '';
+      const message = `📖 ${text}\n${reference}\n\nCompartido desde Radio 88.1 FM - Gloria de Dios. ${window.location.href}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
     }
 
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
