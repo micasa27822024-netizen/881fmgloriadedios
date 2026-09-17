@@ -106,31 +106,6 @@
 
     .btn-top:hover { transform: scale(1.03); background: rgba(0, 0, 0, 0.75); }
 
-    /* El versículo se abre desde la barra superior para dejar visible el logo. */
-    .verse-top-btn i { color: #f59e0b; }
-    .verse-card { display: none; }
-
-    .share-verse-btn {
-      width: 100%;
-      margin-top: 18px;
-      padding: 10px 14px;
-      border: 1px solid rgba(37, 211, 102, 0.6);
-      border-radius: 22px;
-      background: rgba(37, 211, 102, 0.18);
-      color: #ffffff;
-      cursor: pointer;
-      font-size: 0.84rem;
-      font-weight: 800;
-    }
-
-    .share-verse-btn i { color: #25d366; margin-right: 6px; }
-
-    @media (max-width: 420px) {
-      .top-actions { gap: 2px; }
-      .btn-top.verse-top-btn { width: 30px; padding: 0; flex-shrink: 0; }
-      .btn-top.verse-top-btn span { display: none; }
-    }
-
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
       width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -146,28 +121,6 @@
 
     .verse-text { font-size: 0.95rem; font-style: italic; color: #fdfdfd; line-height: 1.35; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
     .verse-ref { font-size: 0.75rem; font-weight: 700; color: #f59e0b; margin-top: 3px; letter-spacing: 0.5px; }
-
-    /* Programa actual: se calcula con el horario local de la radio. */
-    .live-program-card {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 12px;
-      border: 1px solid rgba(34, 197, 94, 0.52);
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.68);
-      backdrop-filter: blur(10px);
-      color: #ffffff;
-      text-align: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .live-program-card i { color: #22c55e; filter: drop-shadow(0 0 5px rgba(34, 197, 94, 0.8)); }
-    .live-program-card.is-off-air { border-color: rgba(156, 163, 175, 0.42); color: #e5e7eb; }
-    .live-program-card.is-off-air i { color: #f59e0b; filter: none; }
 
     /* Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado */
     .song-card {
@@ -224,27 +177,6 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.9);
       letter-spacing: 0.3px;
     }
-
-    /* Compartir la canción que está sonando en este momento. */
-    .share-current-song {
-      width: 100%;
-      min-height: 31px;
-      border: 1px solid rgba(37, 211, 102, 0.55);
-      border-radius: 12px;
-      background: rgba(37, 211, 102, 0.16);
-      color: #ffffff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      transition: transform 0.18s, background 0.18s;
-    }
-
-    .share-current-song i { color: #25d366; font-size: 0.95rem; }
-    .share-current-song:hover { transform: scale(1.015); background: rgba(37, 211, 102, 0.28); }
 
     /* Fila de Reproducción */
     .player-row {
@@ -418,12 +350,6 @@
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
-
-          <!-- Sexto botón: abre el versículo sin ocupar espacio sobre el logo. -->
-          <button class="btn-top verse-top-btn" onclick="openVerseModal()" title="Versículo diario">
-            <i class="fa-solid fa-book-bible"></i>
-            <span>Versículo</span>
-          </button>
         </div>
       </div>
 
@@ -433,12 +359,6 @@
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
-        </div>
-
-        <!-- Programa actual: se actualiza automáticamente según el día y la hora. -->
-        <div class="live-program-card" id="liveProgramCard" aria-live="polite">
-          <i class="fa-solid fa-tower-broadcast"></i>
-          <span id="liveProgramText">Consultando programación...</span>
         </div>
 
         <!-- Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado -->
@@ -451,12 +371,6 @@
           </div>
           <div class="song-info" id="songInfoText">Sintonizando transmisión en vivo...</div>
         </div>
-
-        <!-- Comparte por WhatsApp el título recibido desde Zeno. -->
-        <button class="share-current-song" type="button" onclick="shareCurrentSong()" title="Compartir canción actual por WhatsApp">
-          <i class="fa-brands fa-whatsapp"></i>
-          <span>Compartir canción actual</span>
-        </button>
 
         <div class="player-row">
           <div class="status-badge">
@@ -513,21 +427,6 @@
   <!-- Audio principal con preload="auto" para evitar microcortes -->
   <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
-
-  <!-- Versículo diario: se abre desde el botón de Biblia de la barra superior. -->
-  <div class="modal" id="verseModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-book-bible"></i> Versículo Diario</h3>
-        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('verseModal', false)"></i>
-      </div>
-      <p id="verseModalText" style="font-size: 1.05rem; font-style: italic; line-height: 1.55; text-align: center;"></p>
-      <p id="verseModalRef" style="margin-top: 12px; color: #f59e0b; font-weight: 800; text-align: center;"></p>
-      <button class="share-verse-btn" type="button" onclick="shareDailyVerse()">
-        <i class="fa-brands fa-whatsapp"></i> Compartir versículo por WhatsApp
-      </button>
-    </div>
-  </div>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -733,25 +632,6 @@
       }
     }
 
-    function shareCurrentSong() {
-      const songInfo = document.getElementById('songInfoText');
-      const currentSong = songInfo && songInfo.innerText.trim() && !songInfo.innerText.includes('Sintonizando')
-        ? songInfo.innerText.trim()
-        : 'Radio 88.1 FM - Gloria de Dios en vivo';
-      const message = `🎵 Estoy escuchando: ${currentSong} en Radio 88.1 FM - Gloria de Dios. ¡Escuchala en vivo! ${window.location.href}`;
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-    }
-
-    function shareDailyVerse() {
-      const verseText = document.getElementById('verseModalText');
-      const verseRef = document.getElementById('verseModalRef');
-      const text = verseText ? verseText.innerText.trim() : '';
-      const reference = verseRef ? verseRef.innerText.trim() : '';
-      const message = `📖 ${text}\n${reference}\n\nCompartido desde Radio 88.1 FM - Gloria de Dios. ${window.location.href}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-    }
-
     const streamUrl = "https://stream.zeno.fm/ggq0ed8yus8uv.mp3";
     const audio = document.getElementById('radioStream');
     const silentAudio = document.getElementById('silentAudio');
@@ -891,100 +771,6 @@
       document.getElementById('verseRef').innerText = verses[verseIndex].ref;
     }
     setDailyVerse();
-
-    function updateVerseModal() {
-      const verseText = document.getElementById('verseText');
-      const verseRef = document.getElementById('verseRef');
-      const modalText = document.getElementById('verseModalText');
-      const modalRef = document.getElementById('verseModalRef');
-      if (verseText && verseRef && modalText && modalRef) {
-        modalText.innerText = verseText.innerText;
-        modalRef.innerText = verseRef.innerText;
-      }
-    }
-
-    function openVerseModal() {
-      updateVerseModal();
-      toggleModal('verseModal', true);
-    }
-
-    updateVerseModal();
-
-    const radioTimeZone = 'America/Argentina/Buenos_Aires';
-    const programSchedule = [
-      { name: 'Caminando en Libertad', days: [1, 3, 5], start: '10:00', end: '12:00' },
-      { name: 'Transformando tu Vida', days: [4], start: '09:00', end: '11:00' },
-      { name: 'Conectados', days: [3], start: '18:00', end: '20:00' }
-    ];
-
-    function getRadioTime() {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: radioTimeZone,
-        weekday: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23'
-      }).formatToParts(new Date());
-      const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
-      const weekdayMap = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
-      return {
-        day: weekdayMap[values.weekday],
-        minutes: Number(values.hour) * 60 + Number(values.minute)
-      };
-    }
-
-    function timeToMinutes(time) {
-      const [hour, minute] = time.split(':').map(Number);
-      return hour * 60 + minute;
-    }
-
-    function getDayName(day) {
-      return ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][day];
-    }
-
-    function getNextProgram(day, minutes) {
-      for (let daysAhead = 0; daysAhead < 7; daysAhead++) {
-        const candidateDay = (day + daysAhead) % 7;
-        const candidates = programSchedule
-          .filter(program => program.days.includes(candidateDay))
-          .sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
-
-        for (const program of candidates) {
-          if (daysAhead > 0 || timeToMinutes(program.start) > minutes) {
-            return { program, day: candidateDay, daysAhead };
-          }
-        }
-      }
-      return null;
-    }
-
-    function updateLiveProgram() {
-      const card = document.getElementById('liveProgramCard');
-      const text = document.getElementById('liveProgramText');
-      if (!card || !text) return;
-
-      const now = getRadioTime();
-      const currentProgram = programSchedule.find(program => {
-        return program.days.includes(now.day)
-          && now.minutes >= timeToMinutes(program.start)
-          && now.minutes < timeToMinutes(program.end);
-      });
-
-      if (currentProgram) {
-        card.classList.remove('is-off-air');
-        text.innerText = `Ahora: ${currentProgram.name} · termina a las ${currentProgram.end}`;
-        return;
-      }
-
-      const next = getNextProgram(now.day, now.minutes);
-      card.classList.add('is-off-air');
-      text.innerText = next
-        ? `Próximo: ${next.program.name} · ${getDayName(next.day)} ${next.program.start}`
-        : 'Programación de radio disponible próximamente';
-    }
-
-    updateLiveProgram();
-    setInterval(updateLiveProgram, 30000);
 
     function fetchZenoMetadata() {
       const streamId = "391d8c8yus8uv"; 
