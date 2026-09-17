@@ -316,42 +316,25 @@
     }
     .btn-play-video:hover { transform: scale(1.05); }
 
-    /* Estilos especiales para el item de Transmisión en Vivo (El 5.º elemento superior) */
-    .live-stream-item {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.5);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
+    /* Clases para transmisión en Vivo dinámico */
+    .schedule-item.live-item {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 12px;
     }
-    .live-stream-item.active {
-      background: rgba(239, 68, 68, 0.25);
-      border-color: #ef4444;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
-    }
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
+    .badge-live {
       background: #ef4444;
-      color: #fff;
+      color: white;
       font-size: 0.65rem;
       font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .live-badge.offline-badge {
-      background: #4b5563;
-    }
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #fff;
-      animation: blinkPulse 1.2s infinite ease-in-out;
+      animation: blinkFast 1s infinite ease-in-out;
+      display: inline-block;
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -379,7 +362,7 @@
             <span>Reuniones</span>
           </button>
 
-          <button class="btn-top" onclick="openPodcastsModal()" title="Prédicas">
+          <button class="btn-top" onclick="toggleModal('podcastsModal', true)" title="Prédicas">
             <i class="fa-brands fa-youtube" style="color: #ff4d4d;"></i>
             <span>Prédicas</span>
           </button>
@@ -546,7 +529,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE PRÉDICAS Y EN VIVO AUTOMÁTICO -->
   <div class="modal" id="podcastsModal">
     <div class="modal-content" id="modalPodcastsContent">
       <div class="modal-header">
@@ -566,66 +548,18 @@
         </div>
       </div>
 
-      <!-- 5º ELEMENTO (ARRIBA DE TODO): TRANSMISIÓN EN VIVO DINÁMICA -->
-      <div class="schedule-item live-stream-item" id="liveStreamCard">
-        <div class="schedule-info">
-          <div style="margin-bottom: 4px;">
-            <span class="live-badge offline-badge" id="liveBadge">
-              <span class="live-dot" id="liveDot" style="display:none;"></span>
-              <span id="liveBadgeText">DESCONECTADO</span>
-            </span>
-          </div>
-          <span class="schedule-title" id="liveStreamTitle" style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Transmisión en Vivo</span>
-          <span class="schedule-days" id="liveStreamStatusText">Comprobando señal en vivo del canal...</span>
-        </div>
-        <button id="btnPlayLive" onclick="playLiveStream()" class="btn-play-video" style="background: linear-gradient(135deg, #6b7280, #374151); opacity: 0.7; cursor: not-allowed;">
-          <i class="fa-solid fa-tower-cell"></i> Ver Vivo
-        </button>
+      <!-- Contenedor dinámico de la transmisión en vivo -->
+      <div id="liveStreamContainer"></div>
+
+      <div style="font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 8px;">
+        Últimas transmisiones:
       </div>
 
-      <div style="font-size: 0.78rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-        Últimas 4 Transmisiones Grabadas:
-      </div>
-
-      <!-- LAS 4 ÚLTIMAS TRANSMISIONES EN VIVO GUARDADAS EN EL CANAL -->
-      <div class="schedule-item">
-        <div class="schedule-info">
-          <span class="schedule-title">Oración por las Familias</span>
-          <span class="schedule-days">Transmisión en Vivo Grabada</span>
+      <!-- Contenedor dinámico de los últimos 4 vídeos -->
+      <div id="latestVideosContainer">
+        <div style="text-align: center; color: #9ca3af; padding: 15px; font-size: 0.85rem;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Cargando transmisiones...
         </div>
-        <button onclick="playEmbeddedVideo('3LLeyVYAJ_A', 'Oración por las Familias')" class="btn-play-video">
-          <i class="fa-solid fa-play"></i> Ver aquí
-        </button>
-      </div>
-
-      <div class="schedule-item">
-        <div class="schedule-info">
-          <span class="schedule-title">Domingo - Día del Señor</span>
-          <span class="schedule-days">Transmisión en Vivo Grabada</span>
-        </div>
-        <button onclick="playEmbeddedVideo('Fgg8xCU_05E', 'Domingo - Día del Señor')" class="btn-play-video">
-          <i class="fa-solid fa-play"></i> Ver aquí
-        </button>
-      </div>
-
-      <div class="schedule-item">
-        <div class="schedule-info">
-          <span class="schedule-title">Programa Conectados</span>
-          <span class="schedule-days">Transmisión en Vivo Grabada</span>
-        </div>
-        <button onclick="playEmbeddedVideo('moqBe6Tn7hg', 'Programa Conectados')" class="btn-play-video">
-          <i class="fa-solid fa-play"></i> Ver aquí
-        </button>
-      </div>
-
-      <div class="schedule-item">
-        <div class="schedule-info">
-          <span class="schedule-title">Reunión Especial - Ap. Héctor Giménez</span>
-          <span class="schedule-days">Transmisión en Vivo Grabada</span>
-        </div>
-        <button onclick="playEmbeddedVideo('8jZ_BK1vHXg', 'Reunión Especial - Ap. Héctor Giménez')" class="btn-play-video">
-          <i class="fa-solid fa-play"></i> Ver aquí
-        </button>
       </div>
 
       <div style="margin-top: 15px; text-align: center;">
@@ -695,8 +629,6 @@
     let isReconnecting = false;
     let wakeLock = null;
     let castSession = null;
-    let isLiveActive = false;
-    const channelHandle = "@iglesiamontedesantidad6232";
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
@@ -778,7 +710,7 @@
 
     setupMediaSession();
 
-    /* --- ARRAY COMPLETO DE LOS 365 VERSÍCULOS BÍBLICOS --- */
+    /* --- ARRAY COMPLETO DE LOS 365 VERSÍCULOS BÍBLICOS (UNO PARA CADA DÍA DEL AÑO) --- */
     const verses = [
       { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
       { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
@@ -1007,6 +939,7 @@
       { text: "El que da testimonio de estas cosas dice: Ciertamente vengo en breve. Amén; sí, ven, Señor Jesús.", ref: "Apocalipsis 22:20" },
       { text: "La gracia de nuestro Señor Jesucristo sea con todos vosotros. Amén.", ref: "Apocalipsis 22:21" },
       { text: "Todo lo que respira alabe a JAH. Aleluya.", ref: "Salmos 150:6" },
+      // Versículos adicionales añadidos para completar los 365 días del año con total precisión
       { text: "Jehová es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
       { text: "En lugares de delicados pastos me hará descansar; junto a aguas de reposo me pastoreará.", ref: "Salmos 23:2" },
       { text: "Confortará mi alma; me guiará por sendas de justicia por amor de su nombre.", ref: "Salmos 23:3" },
@@ -1153,19 +1086,20 @@
     }
     setDailyVerse();
 
+    // --- FUNCIÓN PARA ACTUALIZAR AUTOMÁTICAMENTE EL VERSÍCULO A LAS 00:00 HS ---
     function scheduleMidnightVerseUpdate() {
       const now = new Date();
       const night = new Date(
         now.getFullYear(),
         now.getMonth(),
-        now.getDate() + 1,
+        now.getDate() + 1, // Mañana a las 00:00:00
         0, 0, 0
       );
       const msToMidnight = night.getTime() - now.getTime();
 
       setTimeout(() => {
         setDailyVerse();
-        scheduleMidnightVerseUpdate();
+        scheduleMidnightVerseUpdate(); // Programar para el día siguiente de forma continua
       }, msToMidnight);
     }
     scheduleMidnightVerseUpdate();
@@ -1345,75 +1279,6 @@
     window.addEventListener('online', () => { if (!isUserPaused) forceReconnect(); });
     window.addEventListener('offline', () => { if (!isUserPaused) updateStatus('offline', 'SIN RED'); });
 
-    /* --- LÓGICA DE DETECCIÓN Y REPRODUCCIÓN EN VIVO DE YOUTUBE --- */
-    function checkLiveStream() {
-      const liveCard = document.getElementById('liveStreamCard');
-      const liveBadge = document.getElementById('liveBadge');
-      const liveBadgeText = document.getElementById('liveBadgeText');
-      const liveDot = document.getElementById('liveDot');
-      const liveTitle = document.getElementById('liveStreamTitle');
-      const liveStatusText = document.getElementById('liveStreamStatusText');
-      const btnPlayLive = document.getElementById('btnPlayLive');
-
-      // Verificamos presencia de directo vía endpoint oembed live
-      const liveCheckUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/${channelHandle}/live&format=json`;
-
-      fetch(liveCheckUrl)
-        .then(res => {
-          if (res.ok) return res.json();
-          throw new Error('Sin emisión en directo activa');
-        })
-        .then(data => {
-          isLiveActive = true;
-          liveCard.classList.add('active');
-          liveBadge.className = 'live-badge';
-          liveBadgeText.innerText = 'EN VIVO AHORA';
-          liveDot.style.display = 'inline-block';
-          liveTitle.innerText = data.title || "Transmisión en Vivo";
-          liveStatusText.innerText = "¡La iglesia está transmitiendo en vivo!";
-          
-          btnPlayLive.style.background = "linear-gradient(135deg, #ef4444, #dc2626)";
-          btnPlayLive.style.opacity = "1";
-          btnPlayLive.style.cursor = "pointer";
-          btnPlayLive.innerHTML = '<i class="fa-solid fa-play"></i> Ver Vivo';
-        })
-        .catch(err => {
-          isLiveActive = false;
-          liveCard.classList.remove('active');
-          liveBadge.className = 'live-badge offline-badge';
-          liveBadgeText.innerText = 'DESCONECTADO';
-          liveDot.style.display = 'none';
-          liveTitle.innerText = "Transmisión en Vivo";
-          liveStatusText.innerText = "Sin directo activo en este momento.";
-          
-          btnPlayLive.style.background = "linear-gradient(135deg, #4b5563, #374151)";
-          btnPlayLive.style.opacity = "0.7";
-          btnPlayLive.style.cursor = "pointer";
-          btnPlayLive.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir Canal';
-        });
-    }
-
-    function playLiveStream() {
-      if (isLiveActive) {
-        pauseAudio();
-        const wrapper = document.getElementById('videoWrapper');
-        const player = document.getElementById('ytIframePlayer');
-        const titleDisplay = document.getElementById('videoTitleDisplay');
-
-        titleDisplay.innerText = "🔴 Transmisión en Vivo en Directo";
-        player.src = `https://www.youtube.com/embed/live_stream?channel=UCiglesiamontedesantidad6232&autoplay=1`;
-        wrapper.style.display = 'block';
-        document.getElementById('modalPodcastsContent').scrollTop = 0;
-      } else {
-        window.open(`https://www.youtube.com/${channelHandle}/live`, '_blank');
-      }
-    }
-
-    function openPodcastsModal() {
-      toggleModal('podcastsModal', true);
-      checkLiveStream();
-    }
-
     function playEmbeddedVideo(videoId, title) {
       pauseAudio();
       const wrapper = document.getElementById('videoWrapper');
@@ -1437,11 +1302,83 @@
 
     function toggleModal(modalId, show) {
       document.getElementById(modalId).style.display = show ? 'flex' : 'none';
+      if (modalId === 'podcastsModal' && show) {
+        fetchYouTubeVideos();
+      }
     }
 
     function closePodcastsModal() {
       closeEmbeddedVideo();
       toggleModal('podcastsModal', false);
+    }
+
+    /* --- CARGA AUTOMÁTICA DE TRANSMISIONES DE YOUTUBE --- */
+    function fetchYouTubeVideos() {
+      const channelId = "UC5I5zV1UOnkC048OaAnp_Sg"; // ID del canal @iglesiamontedesantidad6232
+      const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+      const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+
+      // 1. Detección automática de transmisión en vivo mediante verificación de imagen embed
+      const liveContainer = document.getElementById('liveStreamContainer');
+      const liveImg = new Image();
+      liveImg.src = `https://img.youtube.com/vi/live/hqdefault.jpg`;
+      liveImg.onload = function() {
+        if (liveImg.width !== 120) { // Si el ancho no es 120, hay un vivo activo
+          liveContainer.innerHTML = `
+            <div class="schedule-item live-item">
+              <div class="schedule-info">
+                <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
+                <span class="schedule-title">Transmisión en Directo</span>
+                <span class="schedule-days">Iglesia Monte de Santidad</span>
+              </div>
+              <button onclick="playEmbeddedVideo('live', 'Transmisión en Vivo')" class="btn-play-video">
+                <i class="fa-solid fa-play"></i> Ver Vivo
+              </button>
+            </div>
+          `;
+        } else {
+          liveContainer.innerHTML = '';
+        }
+      };
+      liveImg.onerror = function() { liveContainer.innerHTML = ''; };
+
+      // 2. Carga automática de los últimos 4 vídeos publicados
+      fetch(rss2jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'ok' && data.items && data.items.length > 0) {
+            const container = document.getElementById('latestVideosContainer');
+            container.innerHTML = '';
+
+            const items = data.items.slice(0, 4); // Tomar exactamente 4 transmisiones
+            items.forEach(item => {
+              const videoId = item.guid.replace('yt:video:', '');
+              const title = item.title;
+              const date = new Date(item.pubDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+              const itemHtml = `
+                <div class="schedule-item">
+                  <div class="schedule-info">
+                    <span class="schedule-title">${title}</span>
+                    <span class="schedule-days">Publicado el ${date}</span>
+                  </div>
+                  <button onclick="playEmbeddedVideo('${videoId}', '${title.replace(/'/g, "\\'")}')" class="btn-play-video">
+                    <i class="fa-solid fa-play"></i> Ver aquí
+                  </button>
+                </div>
+              `;
+              container.innerHTML += itemHtml;
+            });
+          }
+        })
+        .catch(err => {
+          console.error("Error al obtener las transmisiones: ", err);
+          document.getElementById('latestVideosContainer').innerHTML = `
+            <div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">
+              No se pudieron cargar los vídeos automáticos.
+            </div>
+          `;
+        });
     }
 
     function cycleTimer() {
