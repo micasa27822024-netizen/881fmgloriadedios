@@ -106,6 +106,16 @@
 
     .btn-top:hover { transform: scale(1.03); background: rgba(0, 0, 0, 0.75); }
 
+    /* El versículo se abre desde la barra superior para dejar visible el logo. */
+    .verse-top-btn i { color: #f59e0b; }
+    .verse-card { display: none; }
+
+    @media (max-width: 420px) {
+      .top-actions { gap: 2px; }
+      .btn-top.verse-top-btn { width: 30px; padding: 0; flex-shrink: 0; }
+      .btn-top.verse-top-btn span { display: none; }
+    }
+
     /* --- ÁREA INFERIOR --- */
     .bottom-section {
       width: 100%; max-width: 500px; display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -393,6 +403,12 @@
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
           </button>
+
+          <!-- Sexto botón: abre el versículo sin ocupar espacio sobre el logo. -->
+          <button class="btn-top verse-top-btn" onclick="openVerseModal()" title="Versículo diario">
+            <i class="fa-solid fa-book-bible"></i>
+            <span>Versículo</span>
+          </button>
         </div>
       </div>
 
@@ -482,6 +498,18 @@
   <!-- Audio principal con preload="auto" para evitar microcortes -->
   <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+
+  <!-- Versículo diario: se abre desde el botón de Biblia de la barra superior. -->
+  <div class="modal" id="verseModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #f59e0b;"><i class="fa-solid fa-book-bible"></i> Versículo Diario</h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('verseModal', false)"></i>
+      </div>
+      <p id="verseModalText" style="font-size: 1.05rem; font-style: italic; line-height: 1.55; text-align: center;"></p>
+      <p id="verseModalRef" style="margin-top: 12px; color: #f59e0b; font-weight: 800; text-align: center;"></p>
+    </div>
+  </div>
 
   <!-- Modales -->
   <div class="modal" id="scheduleModal">
@@ -836,6 +864,24 @@
       document.getElementById('verseRef').innerText = verses[verseIndex].ref;
     }
     setDailyVerse();
+
+    function updateVerseModal() {
+      const verseText = document.getElementById('verseText');
+      const verseRef = document.getElementById('verseRef');
+      const modalText = document.getElementById('verseModalText');
+      const modalRef = document.getElementById('verseModalRef');
+      if (verseText && verseRef && modalText && modalRef) {
+        modalText.innerText = verseText.innerText;
+        modalRef.innerText = verseRef.innerText;
+      }
+    }
+
+    function openVerseModal() {
+      updateVerseModal();
+      toggleModal('verseModal', true);
+    }
+
+    updateVerseModal();
 
     const radioTimeZone = 'America/Argentina/Buenos_Aires';
     const programSchedule = [
