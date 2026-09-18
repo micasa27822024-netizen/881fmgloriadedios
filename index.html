@@ -75,10 +75,10 @@
 
     .top-actions {
       display: flex; 
-      gap: 3px;
+      gap: 3px; /* Espaciado ultra compacto entre botones */
       justify-content: center; 
       align-items: center; 
-      flex-wrap: nowrap;
+      flex-wrap: nowrap; /* Impide que bajen a otra línea */
       width: 100%;
       max-width: 100%;
     }
@@ -89,12 +89,12 @@
       border: 1px solid rgba(255, 255, 255, 0.22);
       color: #ffffff; 
       height: 30px; 
-      padding: 0 5px;
+      padding: 0 5px; /* Padding ajustado para que entren los 5 holgados */
       border-radius: 15px;
       display: inline-flex; 
       justify-content: center; 
       align-items: center;
-      font-size: 0.68rem;
+      font-size: 0.68rem; /* Tamaño de fuente optimizado */
       font-weight: 600; 
       cursor: pointer; 
       text-decoration: none;
@@ -122,7 +122,7 @@
     .verse-text { font-size: 0.95rem; font-style: italic; color: #fdfdfd; line-height: 1.35; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
     .verse-ref { font-size: 0.75rem; font-weight: 700; color: #f59e0b; margin-top: 3px; letter-spacing: 0.5px; }
 
-    /* Tarjeta de Canción / Artista en Vivo */
+    /* Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado */
     .song-card {
       background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(12px);
@@ -138,6 +138,7 @@
       box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
     }
 
+    /* Ecualizador de ondas musicales de lujo */
     .equalizer {
       display: flex;
       align-items: flex-end;
@@ -218,6 +219,7 @@
 
     .btn-play-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
 
+    /* Botón de Play con Animación Espectacular */
     .btn-play {
       position: relative; z-index: 2; width: 62px; height: 62px; border-radius: 50%;
       background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -342,7 +344,7 @@
     <div class="overlay"></div>
 
     <div class="content">
-      <!-- Barra Superior -->
+      <!-- Barra Superior con botones en una sola fila protegida -->
       <div class="top-bar">
         <div class="top-actions">
           <button class="btn-top" onclick="cycleTimer()" id="timerBtn" title="Temporizador">
@@ -374,13 +376,13 @@
 
       <!-- Área Inferior -->
       <div class="bottom-section">
-        <!-- Versículo Diario -->
+        <!-- Versículo Diario (Arriba) -->
         <div class="verse-card">
           <div class="verse-text" id="verseText">Cargando versículo...</div>
           <div class="verse-ref" id="verseRef">Radio 88.1 FM</div>
         </div>
 
-        <!-- Tarjeta de Canción / Artista en Vivo -->
+        <!-- Tarjeta de Canción / Artista en Vivo con Ecualizador de Audio Avanzado -->
         <div class="song-card">
           <div class="equalizer">
             <div class="eq-bar"></div>
@@ -428,10 +430,12 @@
               <i class="fa-brands fa-youtube"></i>
             </a>
 
+            <!-- Botón Compartir App -->
             <button onclick="shareWebsite()" class="social-btn compartir" title="Compartir App">
               <i class="fa-solid fa-share-nodes"></i>
             </button>
 
+            <!-- Botón Transmitir a TV -->
             <button onclick="triggerCast()" class="social-btn cast-btn" title="Transmitir a Smart TV">
               <i class="fa-solid fa-tv"></i>
             </button>
@@ -441,6 +445,7 @@
     </div>
   </div>
 
+  <!-- Audio principal con preload="auto" para evitar microcortes -->
   <audio id="radioStream" crossorigin="anonymous" preload="auto"></audio>
   <audio id="silentAudio" loop src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
 
@@ -550,7 +555,7 @@
         Últimas transmisiones:
       </div>
 
-      <!-- Contenedor dinámico de los últimos vídeos -->
+      <!-- Contenedor dinámico de los últimos 4 vídeos -->
       <div id="latestVideosContainer">
         <div style="text-align: center; color: #9ca3af; padding: 15px; font-size: 0.85rem;">
           <i class="fa-solid fa-spinner fa-spin"></i> Cargando transmisiones...
@@ -626,6 +631,7 @@
     let castSession = null;
     let lastVolume = 1;
 
+    /* --- GESTIÓN DE VOLUMEN Y TEMPORIZADOR --- */
     function setVolume(val) {
       audio.volume = val;
       if (val == 0) {
@@ -750,7 +756,7 @@
 
     setupMediaSession();
 
-    /* Versículos Bíblicos */
+    /* --- ARRAY COMPLETO DE LOS VERSÍCULOS BÍBLICOS --- */
     const verses = [
      { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
       { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
@@ -1126,6 +1132,23 @@
     }
     setDailyVerse();
 
+    function scheduleMidnightVerseUpdate() {
+      const now = new Date();
+      const night = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0, 0, 0
+      );
+      const msToMidnight = night.getTime() - now.getTime();
+
+      setTimeout(() => {
+        setDailyVerse();
+        scheduleMidnightVerseUpdate();
+      }, msToMidnight);
+    }
+    scheduleMidnightVerseUpdate();
+
     function fetchZenoMetadata() {
       const streamId = "391d8c8yus8uv"; 
       const zenoUrl = `https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`;
@@ -1144,12 +1167,20 @@
           }
 
           if (tituloCancion && tituloCancion.trim() !== "") {
-            if (songTextElement) songTextElement.innerText = tituloCancion;
-            if (typeof setupMediaSession === 'function') setupMediaSession(tituloCancion);
+            if (songTextElement) {
+              songTextElement.innerText = tituloCancion;
+            }
+            if (typeof setupMediaSession === 'function') {
+              setupMediaSession(tituloCancion);
+            }
           } else {
-            if (songTextElement) songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+            if (songTextElement) {
+              songTextElement.innerText = "Radio 88.1 FM - Gloria de Dios";
+            }
           }
-        } catch (e) {}
+        } catch (e) {
+          console.log("Error parseando los datos de Zeno: ", e);
+        }
       };
 
       eventSource.onerror = function(err) {
@@ -1279,9 +1310,23 @@
     audio.addEventListener('waiting', () => { if (!isUserPaused) { playIcon.className = 'fa-solid fa-spinner fa-spin'; updateStatus('reconnecting', 'BUFFERING'); } });
     audio.addEventListener('playing', () => { if (!isUserPaused) { playBtn.classList.add('playing'); playIcon.className = 'fa-solid fa-pause'; updateStatus('online', 'EN LÍNEA'); } });
     audio.addEventListener('pause', () => { if (!isUserPaused && !isReconnecting) { updateMediaSessionState('paused'); updateStatus('reconnecting', 'RECONECTANDO'); setTimeout(() => { if (!isUserPaused) forceReconnect(); }, 1000); } });
+    audio.addEventListener('ended', () => { if (!isUserPaused) forceReconnect(); });
+    audio.addEventListener('stalled', () => { if (!isUserPaused) forceReconnect(); });
+    audio.addEventListener('error', () => { if (!isUserPaused) forceReconnect(); });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !isUserPaused) {
+        requestWakeLock();
+        if (audio.paused || audio.readyState < 2) { forceReconnect(); }
+      }
+    });
+
+    window.addEventListener('online', () => { if (!isUserPaused) forceReconnect(); });
+    window.addEventListener('offline', () => { if (!isUserPaused) updateStatus('offline', 'SIN RED'); });
 
     function playEmbeddedVideo(videoId, title) {
       if (!videoId) return;
+
       pauseAudio();
 
       const wrapper = document.getElementById('videoWrapper');
@@ -1291,7 +1336,12 @@
       if (!wrapper || !player || !titleDisplay) return;
 
       titleDisplay.textContent = title || 'Reproduciendo...';
-      player.src = 'https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?autoplay=1&playsinline=1&rel=0';
+
+      player.src =
+        'https://www.youtube.com/embed/' +
+        encodeURIComponent(videoId) +
+        '?autoplay=1&playsinline=1&rel=0';
+
       wrapper.style.display = 'block';
 
       const content = document.getElementById('modalPodcastsContent');
@@ -1329,11 +1379,12 @@
     }
 
     /* ==========================================================
-       SISTEMA DE DETECCIÓN Y CARGA DE VIVO / VIDEOS EN YOUTUBE
+       YOUTUBE - VIVO ACTUAL + 4 ULTIMAS TRANSMISIONES EN VIVO
        ========================================================== */
 
     const YOUTUBE_API_KEY = "AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI";
     const YOUTUBE_CHANNEL_ID = "UC5I5zV1UOnkC048OaAnp_Sg";
+    const YOUTUBE_CHANNEL_HANDLE = "@iglesiamontedesantidad6232";
 
     let youtubeRefreshInterval = null;
     let youtubeRequestInProgress = false;
@@ -1342,7 +1393,58 @@
       if (!dateString) return '';
       const date = new Date(dateString);
       if (Number.isNaN(date.getTime())) return '';
-      return date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
+      return date.toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    }
+
+    async function youtubeFetchJSON(url, timeout = 12000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (e) {}
+
+        if (!response.ok) {
+          const message = data?.error?.message || `HTTP ${response.status}`;
+          throw new Error(`YouTube API: ${message}`);
+        }
+
+        return data;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    function createYouTubePlayButton(videoId, title, text = 'Ver aquí') {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn-play-video';
+
+      const icon = document.createElement('i');
+      icon.className = 'fa-solid fa-play';
+
+      button.appendChild(icon);
+      button.appendChild(document.createTextNode(' ' + text));
+
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        playEmbeddedVideo(videoId, title);
+      });
+
+      return button;
     }
 
     function renderYouTubeItem(container, videoId, title, dateText, isLive) {
@@ -1355,7 +1457,12 @@
       if (isLive) {
         const badge = document.createElement('span');
         badge.className = 'badge-live';
-        badge.innerHTML = '<i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA';
+
+        const badgeIcon = document.createElement('i');
+        badgeIcon.className = 'fa-solid fa-satellite-dish';
+
+        badge.appendChild(badgeIcon);
+        badge.appendChild(document.createTextNode(' EN VIVO AHORA'));
         info.appendChild(badge);
       }
 
@@ -1366,21 +1473,35 @@
 
       const daysSpan = document.createElement('span');
       daysSpan.className = 'schedule-days';
-      daysSpan.textContent = isLive ? 'Iglesia Monte de Santidad' : 'Transmisión · ' + (dateText || '');
+      daysSpan.textContent = isLive
+        ? 'Iglesia Monte de Santidad'
+        : 'Transmisión en vivo · ' + (dateText || '');
       info.appendChild(daysSpan);
 
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'btn-play-video';
-      button.innerHTML = `<i class="fa-solid fa-play"></i> ${isLive ? 'Ver Vivo' : 'Ver aquí'}`;
-      button.onclick = (e) => {
-        e.preventDefault();
-        playEmbeddedVideo(videoId, title);
-      };
-
       item.appendChild(info);
-      item.appendChild(button);
+      item.appendChild(
+        createYouTubePlayButton(
+          videoId,
+          title || 'Transmisión en vivo',
+          isLive ? 'Ver Vivo' : 'Ver aquí'
+        )
+      );
+
       container.appendChild(item);
+    }
+
+    async function resolveYouTubeChannelId() {
+      try {
+        const handleClean = YOUTUBE_CHANNEL_HANDLE.replace('@', '');
+        const url = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handleClean)}&key=${YOUTUBE_API_KEY}`;
+        const data = await youtubeFetchJSON(url);
+        if (data && data.items && data.items.length > 0) {
+          return data.items[0].id;
+        }
+      } catch (e) {
+        console.log("No se pudo obtener ID por Handle, usando fallback:", e);
+      }
+      return YOUTUBE_CHANNEL_ID;
     }
 
     async function fetchYouTubeData() {
@@ -1391,38 +1512,30 @@
       const latestContainer = document.getElementById('latestVideosContainer');
 
       try {
-        let isLiveFound = false;
+        const channelId = await resolveYouTubeChannelId();
 
-        // 1. Verificar directo activo mediante API
-        try {
-          const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${YOUTUBE_CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
-          const resLive = await fetch(liveUrl);
-          const dataLive = await resLive.json();
+        // 1. Buscar si hay directo en vivo
+        const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
+        const liveData = await youtubeFetchJSON(liveUrl);
 
-          if (dataLive && dataLive.items && dataLive.items.length > 0) {
-            isLiveFound = true;
-            const item = dataLive.items[0];
-            if (liveContainer) {
-              liveContainer.innerHTML = '';
-              renderYouTubeItem(liveContainer, item.id.videoId, item.snippet.title, '', true);
-            }
-          }
-        } catch (e) { console.log("Error buscando vivo por API", e); }
-
-        // Si no hay vivo por API, limpiar contenedor
-        if (!isLiveFound && liveContainer) {
+        if (liveContainer) {
           liveContainer.innerHTML = '';
+          if (liveData && liveData.items && liveData.items.length > 0) {
+            const liveItem = liveData.items[0];
+            const videoId = liveItem.id.videoId;
+            const title = liveItem.snippet.title;
+            renderYouTubeItem(liveContainer, videoId, title, '', true);
+          }
         }
 
-        // 2. Cargar últimos vídeos/transmisiones
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${YOUTUBE_CHANNEL_ID}&order=date&type=video&maxResults=4&key=${YOUTUBE_API_KEY}`;
-        const resSearch = await fetch(searchUrl);
-        const dataSearch = await resSearch.json();
+        // 2. Buscar las últimas 4 transmisiones finalizadas o recientes
+        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=4&key=${YOUTUBE_API_KEY}`;
+        const searchData = await youtubeFetchJSON(searchUrl);
 
         if (latestContainer) {
           latestContainer.innerHTML = '';
-          if (dataSearch && dataSearch.items && dataSearch.items.length > 0) {
-            dataSearch.items.forEach(item => {
+          if (searchData && searchData.items && searchData.items.length > 0) {
+            searchData.items.forEach(item => {
               const videoId = item.id.videoId;
               const title = item.snippet.title;
               const dateText = formatYouTubeDate(item.snippet.publishedAt);
@@ -1432,41 +1545,21 @@
             latestContainer.innerHTML = '<div style="text-align:center; color:#9ca3af; padding:10px; font-size:0.85rem;">No se encontraron transmisiones recientes.</div>';
           }
         }
+
       } catch (err) {
-        console.error("Error cargando transmisiones:", err);
-        // Fallback vía RSS si la API falla o agota cuotas
-        fetchYouTubeRSSFallback();
-      } finally {
-        youtubeRequestInProgress = false;
-      }
-    }
-
-    async function fetchYouTubeRSSFallback() {
-      const latestContainer = document.getElementById('latestVideosContainer');
-      try {
-        const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
-        const res = await fetch(rssUrl);
-        const data = await res.json();
-
-        if (latestContainer && data.items && data.items.length > 0) {
-          latestContainer.innerHTML = '';
-          data.items.slice(0, 4).forEach(item => {
-            const videoId = item.guid.replace('yt:video:', '');
-            const dateText = formatYouTubeDate(item.pubDate);
-            renderYouTubeItem(latestContainer, videoId, item.title, dateText, false);
-          });
-        }
-      } catch (e) {
+        console.error("Error al obtener transmisiones de YouTube:", err);
         if (latestContainer) {
           latestContainer.innerHTML = '<div style="text-align:center; color:#ef4444; padding:10px; font-size:0.8rem;">No se pudieron cargar las transmisiones.</div>';
         }
+      } finally {
+        youtubeRequestInProgress = false;
       }
     }
 
     function startYouTubeAutoRefresh() {
       fetchYouTubeData();
       if (!youtubeRefreshInterval) {
-        youtubeRefreshInterval = setInterval(fetchYouTubeData, 45000);
+        youtubeRefreshInterval = setInterval(fetchYouTubeData, 60000); // Refresco automático cada 60 segundos
       }
     }
 
