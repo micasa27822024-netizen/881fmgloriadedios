@@ -1498,10 +1498,6 @@
 
       youtubeRequestInProgress = true;
 
-      /*
-       * El vivo siempre se muestra primero, separado de las
-       * transmisiones archivadas. Los 4 archivados se cargan debajo.
-       */
       liveContainer.innerHTML = `
         <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
           <i class="fa-solid fa-spinner fa-spin"></i>
@@ -1521,52 +1517,8 @@
 
         const channelId = await resolveYouTubeChannelId();
 
-        let liveVideoId = null;
-
         /* ======================================================
-           1. BUSCAR EL VIVO ACTUAL DEL CANAL
-           ====================================================== */
-        try {
-          const liveURL =
-            'https://www.googleapis.com/youtube/v3/search' +
-            '?part=snippet' +
-            '&channelId=' + encodeURIComponent(channelId) +
-            '&eventType=live' +
-            '&type=video' +
-            '&order=date' +
-            '&maxResults=1' +
-            '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
-          const liveData = await youtubeFetchJSON(liveURL);
-
-          if (liveData.items?.length && liveData.items[0]?.id?.videoId) {
-            const liveVideo = liveData.items[0];
-            liveVideoId = liveVideo.id.videoId;
-
-            /*
-             * ESTE CONTENEDOR SIEMPRE ESTÁ ANTES DE
-             * latestVideosContainer EN EL HTML, por lo que
-             * el vivo aparece arriba de las 4 transmisiones.
-             */
-            liveContainer.innerHTML = '';
-
-            renderYouTubeItem(
-              liveContainer,
-              liveVideoId,
-              liveVideo.snippet?.title || 'Transmisión en vivo',
-              '',
-              true
-            );
-          } else {
-            liveContainer.innerHTML = '';
-          }
-        } catch (error) {
-          console.warn('No se pudo consultar el vivo actual:', error);
-          liveContainer.innerHTML = '';
-        }
-
-        /* ======================================================
-           2. OBTENER EL PLAYLIST DE SUBIDAS DEL CANAL
+           1. OBTENER LAS PUBLICACIONES DEL CANAL
            ====================================================== */
         const channelURL =
           'https://www.googleapis.com/youtube/v3/channels' +
@@ -1583,6 +1535,11 @@
           throw new Error('No se encontró la lista de videos del canal.');
         }
 
+        /*
+         * Tomamos suficientes videos recientes para detectar el vivo
+         * aunque todavía no haya sido indexado por la búsqueda
+         * eventType=live.
+         */
         const playlistURL =
           'https://www.googleapis.com/youtube/v3/playlistItems' +
           '?part=snippet,contentDetails' +
@@ -1592,17 +1549,20 @@
 
         const playlistData = await youtubeFetchJSON(playlistURL);
 
-        const ids = (playlistData.items || [])
-          .map(item => item.contentDetails?.videoId)
-          .filter(Boolean);
+        const playlistItems = (playlistData.items || [])
+          .filter(item => item?.contentDetails?.videoId);
+
+        const ids = playlistItems
+          .map(item => item.contentDetails.videoId);
 
         if (!ids.length) {
           throw new Error('El canal no devolvió videos.');
         }
 
         /* ======================================================
-           3. CONSULTAR DETALLES PARA IDENTIFICAR
-              TRANSMISIONES EN VIVO YA ARCHIVADAS
+           2. DETALLE DE LOS VIDEOS:
+              - liveStreamingDetails detecta vivos y archivados
+              - snippet.liveBroadcastContent sirve como respaldo
            ====================================================== */
         const videosURL =
           'https://www.googleapis.com/youtube/v3/videos' +
@@ -1611,21 +1571,96 @@
           '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
 
         const videosData = await youtubeFetchJSON(videosURL);
+        const channelVideos = videosData.items || [];
 
-        const archivedLives = (videosData.items || [])
+        /*
+         * Un vivo actual puede aparecer en el playlist de subidas
+         * antes de que /search?eventType=live lo devuelva.
+         *
+         * Se consideran activos:
+         *   - liveBroadcastContent === "live"
+         *   - liveStreamingDetails.actualStartTime sin actualEndTime
+         *   - liveStreamingDetails.concurrentViewers presente
+         */
+        let liveVideo = channelVideos.find(video => {
+          const details = video.liveStreamingDetails || {};
+          const contentState = video.snippet?.liveBroadcastContent;
+
+          return (
+            contentState === 'live' ||
+            (
+              details.actualStartTime &&
+              !details.actualEndTime
+            ) ||
+            details.concurrentViewers !== undefined
+          );
+        });
+
+        /*
+         * Respaldo adicional: consulta directa de transmisiones EN VIVO.
+         * Esto cubre casos donde el playlist todavía no refleja
+         * liveBroadcastContent.
+         */
+        if (!liveVideo) {
+          try {
+            const liveURL =
+              'https://www.googleapis.com/youtube/v3/search' +
+              '?part=snippet' +
+              '&channelId=' + encodeURIComponent(channelId) +
+              '&eventType=live' +
+              '&type=video' +
+              '&order=date' +
+              '&maxResults=1' +
+              '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
+            const liveData = await youtubeFetchJSON(liveURL);
+
+            if (liveData.items?.length && liveData.items[0]?.id?.videoId) {
+              const liveId = liveData.items[0].id.videoId;
+
+              liveVideo =
+                channelVideos.find(video => video.id === liveId) || {
+                  id: liveId,
+                  snippet: liveData.items[0].snippet || {}
+                };
+            }
+          } catch (error) {
+            console.warn('No se pudo consultar el vivo actual:', error);
+          }
+        }
+
+        const liveVideoId = liveVideo?.id || null;
+
+        /* ======================================================
+           3. EL VIVO SIEMPRE SE DIBUJA PRIMERO
+           ====================================================== */
+        liveContainer.innerHTML = '';
+
+        if (liveVideo) {
+          renderYouTubeItem(
+            liveContainer,
+            liveVideo.id,
+            liveVideo.snippet?.title || 'Transmisión en vivo',
+            '',
+            true
+          );
+        }
+
+        /* ======================================================
+           4. ÚLTIMAS 4 TRANSMISIONES YA ARCHIVADAS
+           ====================================================== */
+        const archivedLives = channelVideos
           .filter(video => {
-            if (!video?.id) return false;
-            if (video.id === liveVideoId) return false;
+            if (!video?.id || video.id === liveVideoId) return false;
+
+            const details = video.liveStreamingDetails || {};
 
             /*
-             * Una transmisión archivada tiene liveStreamingDetails
-             * y actualEndTime. Así no se mezclan videos normales
-             * del canal con las últimas transmisiones en vivo.
+             * actualEndTime confirma que la transmisión terminó.
+             * Esto evita mostrar como "últimas transmisiones"
+             * videos normales del canal.
              */
-            return !!(
-              video.liveStreamingDetails &&
-              video.liveStreamingDetails.actualEndTime
-            );
+            return !!details.actualEndTime;
           })
           .sort((a, b) => {
             const dateA = new Date(
@@ -1644,18 +1679,26 @@
           })
           .slice(0, 4);
 
-        /* ======================================================
-           4. MOSTRAR SOLAMENTE LAS 4 ÚLTIMAS TRANSMISIONES
-              ARCHIVADAS DEBAJO DEL VIVO
-           ====================================================== */
         videosContainer.innerHTML = '';
 
+        archivedLives.forEach(video => {
+          renderYouTubeItem(
+            videosContainer,
+            video.id,
+            video.snippet?.title || 'Transmisión en vivo',
+            formatYouTubeDate(
+              video.liveStreamingDetails?.actualEndTime ||
+              video.snippet?.publishedAt
+            ),
+            false
+          );
+        });
+
+        /*
+         * Respaldo si la API no entrega liveStreamingDetails
+         * para los videos archivados.
+         */
         if (!archivedLives.length) {
-          /*
-           * Respaldo: search=completed.
-           * Se mantiene para cubrir casos en que la API no entregue
-           * liveStreamingDetails en la primera consulta.
-           */
           try {
             const completedURL =
               'https://www.googleapis.com/youtube/v3/search' +
@@ -1669,41 +1712,27 @@
 
             const completedData = await youtubeFetchJSON(completedURL);
 
-            const fallbackLives = (completedData.items || [])
+            (completedData.items || [])
               .filter(item =>
                 item?.id?.videoId &&
                 item.id.videoId !== liveVideoId
               )
-              .slice(0, 4);
-
-            fallbackLives.forEach(item => {
-              renderYouTubeItem(
-                videosContainer,
-                item.id.videoId,
-                item.snippet?.title || 'Transmisión en vivo',
-                formatYouTubeDate(item.snippet?.publishedAt),
-                false
-              );
-            });
+              .slice(0, 4)
+              .forEach(item => {
+                renderYouTubeItem(
+                  videosContainer,
+                  item.id.videoId,
+                  item.snippet?.title || 'Transmisión en vivo',
+                  formatYouTubeDate(item.snippet?.publishedAt),
+                  false
+                );
+              });
           } catch (fallbackError) {
             console.warn(
-              'Tampoco se pudieron obtener las transmisiones archivadas:',
+              'No se pudieron obtener transmisiones archivadas mediante respaldo:',
               fallbackError
             );
           }
-        } else {
-          archivedLives.forEach(video => {
-            renderYouTubeItem(
-              videosContainer,
-              video.id,
-              video.snippet?.title || 'Transmisión en vivo',
-              formatYouTubeDate(
-                video.liveStreamingDetails?.actualEndTime ||
-                video.snippet?.publishedAt
-              ),
-              false
-            );
-          });
         }
 
         if (!videosContainer.children.length) {
