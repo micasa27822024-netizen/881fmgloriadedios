@@ -1313,7 +1313,6 @@
     }
 
 async function fetchYouTubeVideos() {
-    const apiKey = 'AIzaSyDgEkwFFQjAcCTVvbH8zrb3rN0-ax3QiRI';
     const channelId = 'UC5I5zV1UOnkC048OaAnp_Sg';
     const liveContainer = document.getElementById('liveStreamContainer');
     const videosContainer = document.getElementById('latestVideosContainer');
@@ -1322,67 +1321,77 @@ async function fetchYouTubeVideos() {
     if (videosContainer) videosContainer.innerHTML = '';
 
     try {
-        // 1. Detección de transmisión en vivo (vía API oficial)
-        try {
-            const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${apiKey}`;
-            const liveResponse = await fetch(liveUrl);
-            const liveData = await liveResponse.json();
+        // Obtenemos el feed RSS del canal a través del proxy AllOrigins
+        const rssTarget = encodeURIComponent(`https://youtube.com{channelId}`);
+        const feedUrl = `https://allorigins.win{rssTarget}`;
+        
+        const response = await fetch(feedUrl);
+        const data = await response.json();
 
-            if (liveContainer && liveData.items && liveData.items.length > 0) {
-                const liveVideo = liveData.items[0];
-                const liveVideoId = liveVideo.id.videoId;
-                const liveTitle = liveVideo.snippet.title.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+        if (!data || !data.contents) {
+            throw new Error("No se recibieron datos del servidor proxy.");
+        }
 
+        // Parseamos el XML devuelto
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
+        const entries = Array.from(xmlDoc.querySelectorAll('entry'));
+
+        if (entries.length === 0) {
+            if (videosContainer) {
+                videosContainer.innerHTML = '<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones recientes.</div>';
+            }
+            return;
+        }
+
+        let liveFound = false;
+        let videosMostrados = 0;
+
+        // Recorremos los videos para separar el vivo (si existe) y los últimos subidos
+        entries.forEach((entry) => {
+            const videoId = entry.querySelector('videoId')?.textContent || entry.querySelector('id')?.textContent.replace('yt:video:', '');
+            const titleRaw = entry.querySelector('title')?.textContent || 'Sin título';
+            const titleEscaped = titleRaw.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+            
+            // Verificamos si es una transmisión en vivo activa mediante la etiqueta de comunidad de YT
+            // (El RSS suele marcar los directos activos de esta forma en su estructura interna)
+            const isLive = entry.innerHTML.includes('live-raw') || titleRaw.toLowerCase().includes('en vivo');
+
+            // 1. Si está en vivo y aún no hemos asignado el contenedor de vivo, lo ponemos primero
+            if (isLive && !liveFound && liveContainer) {
                 liveContainer.innerHTML = `
                     <div class="schedule-item live-item">
                         <div class="schedule-info">
                             <span class="badge-live"><i class="fa-solid fa-satellite-dish"></i> EN VIVO AHORA</span>
-                            <span class="schedule-title">${liveVideo.snippet.title}</span>
+                            <span class="schedule-title">${titleRaw}</span>
                             <span class="schedule-days">Iglesia Monte de Santidad</span>
                         </div>
-                        <button onclick="playEmbeddedVideo('${liveVideoId}', '${liveTitle}')" class="btn-play-video">
+                        <button onclick="playEmbeddedVideo('${videoId}', '${titleEscaped}')" class="btn-play-video">
                             <i class="fa-solid fa-play"></i> Ver Vivo
                         </button>
                     </div>`;
+                liveFound = true;
+            } 
+            
+            // 2. Mostramos los últimos 4 videos (excluyendo el que está en vivo si ya se detectó)
+            if (videosContainer && videosMostrados < 4) {
+                const published = entry.querySelector('published')?.textContent;
+                const date = published ? new Date(published).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
+
+                videosContainer.innerHTML += `
+                    <div class="schedule-item">
+                        <div class="schedule-info">
+                            <span class="schedule-title">${titleRaw}</span>
+                            <span class="schedule-days">Publicado el ${date}</span>
+                        </div>
+                        <button onclick="playEmbeddedVideo('${videoId}', '${titleEscaped}')" class="btn-play-video">
+                            <i class="fa-solid fa-play"></i> Ver aquí
+                        </button>
+                    </div>`;
+                videosMostrados++;
             }
-        } catch (e) {
-            console.warn('No se pudo verificar el vivo:', e);
-        }
+        });
 
-        // 2. Obtener videos subidos desde el RSS público parseado en JSON
-        const rssTarget = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
-        const feedUrl = `https://api.allorigins.win/get?url=${rssTarget}`;
-        const response = await fetch(feedUrl);
-        const data = await response.json();
-
-        if (videosContainer && data.contents) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(data.contents, 'text/xml');
-            const entries = Array.from(xmlDoc.querySelectorAll('entry')).slice(0, 4);
-
-            if (entries.length > 0) {
-                entries.forEach(entry => {
-                    const videoId = entry.querySelector('videoId')?.textContent || entry.querySelector('id')?.textContent.replace('yt:video:', '');
-                    const titleRaw = entry.querySelector('title')?.textContent || 'Sin título';
-                    const title = titleRaw.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-                    const published = entry.querySelector('published')?.textContent;
-                    const date = published ? new Date(published).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '';
-
-                    videosContainer.innerHTML += `
-                        <div class="schedule-item">
-                            <div class="schedule-info">
-                                <span class="schedule-title">${titleRaw}</span>
-                                <span class="schedule-days">Publicado el ${date}</span>
-                            </div>
-                            <button onclick="playEmbeddedVideo('${videoId}', '${title}')" class="btn-play-video">
-                                <i class="fa-solid fa-play"></i> Ver aquí
-                            </button>
-                        </div>`;
-                });
-            } else {
-                videosContainer.innerHTML = '<div style="text-align: center; color: #9ca3af; padding: 10px; font-size: 0.8rem;">No se encontraron transmisiones.</div>';
-            }
-        }
     } catch (err) {
         console.error('Error al obtener las transmisiones:', err);
         if (videosContainer) {
@@ -1390,6 +1399,7 @@ async function fetchYouTubeVideos() {
         }
     }
 }
+
 
     function cycleTimer() {
       if (timerMinutes === 0) timerMinutes = 15;
