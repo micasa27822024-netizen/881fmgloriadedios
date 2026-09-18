@@ -1499,7 +1499,8 @@
       youtubeRequestInProgress = true;
 
       /*
-       * No dejamos el modal girando indefinidamente.
+       * El vivo siempre se muestra primero, separado de las
+       * transmisiones archivadas. Los 4 archivados se cargan debajo.
        */
       liveContainer.innerHTML = `
         <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
@@ -1523,7 +1524,7 @@
         let liveVideoId = null;
 
         /* ======================================================
-           1. VIVO REAL EN ESTE MOMENTO
+           1. BUSCAR EL VIVO ACTUAL DEL CANAL
            ====================================================== */
         try {
           const liveURL =
@@ -1532,6 +1533,7 @@
             '&channelId=' + encodeURIComponent(channelId) +
             '&eventType=live' +
             '&type=video' +
+            '&order=date' +
             '&maxResults=1' +
             '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
 
@@ -1541,7 +1543,13 @@
             const liveVideo = liveData.items[0];
             liveVideoId = liveVideo.id.videoId;
 
+            /*
+             * ESTE CONTENEDOR SIEMPRE ESTÁ ANTES DE
+             * latestVideosContainer EN EL HTML, por lo que
+             * el vivo aparece arriba de las 4 transmisiones.
+             */
             liveContainer.innerHTML = '';
+
             renderYouTubeItem(
               liveContainer,
               liveVideoId,
@@ -1559,10 +1567,7 @@
 
         /* ======================================================
            2. OBTENER EL PLAYLIST DE SUBIDAS DEL CANAL
-           Esto es más fiable para encontrar transmisiones
-           archivadas que depender solamente de search.
            ====================================================== */
-
         const channelURL =
           'https://www.googleapis.com/youtube/v3/channels' +
           '?part=contentDetails' +
@@ -1596,11 +1601,9 @@
         }
 
         /* ======================================================
-           3. CONSULTAR LOS DETALLES DE LOS VIDEOS
-           liveStreamingDetails permite distinguir videos
-           normales de transmisiones en vivo archivadas.
+           3. CONSULTAR DETALLES PARA IDENTIFICAR
+              TRANSMISIONES EN VIVO YA ARCHIVADAS
            ====================================================== */
-
         const videosURL =
           'https://www.googleapis.com/youtube/v3/videos' +
           '?part=snippet,liveStreamingDetails' +
@@ -1615,8 +1618,9 @@
             if (video.id === liveVideoId) return false;
 
             /*
-             * Un video con liveStreamingDetails es una transmisión
-             * de YouTube. Para las archivadas debe existir endTime.
+             * Una transmisión archivada tiene liveStreamingDetails
+             * y actualEndTime. Así no se mezclan videos normales
+             * del canal con las últimas transmisiones en vivo.
              */
             return !!(
               video.liveStreamingDetails &&
@@ -1641,16 +1645,16 @@
           .slice(0, 4);
 
         /* ======================================================
-           4. MOSTRAR LAS 4 ÚLTIMAS TRANSMISIONES
+           4. MOSTRAR SOLAMENTE LAS 4 ÚLTIMAS TRANSMISIONES
+              ARCHIVADAS DEBAJO DEL VIVO
            ====================================================== */
-
         videosContainer.innerHTML = '';
 
         if (!archivedLives.length) {
           /*
-           * Si la API no devuelve liveStreamingDetails, hacemos
-           * una segunda consulta usando search=completed como
-           * respaldo. Esto evita depender de una sola respuesta.
+           * Respaldo: search=completed.
+           * Se mantiene para cubrir casos en que la API no entregue
+           * liveStreamingDetails en la primera consulta.
            */
           try {
             const completedURL =
