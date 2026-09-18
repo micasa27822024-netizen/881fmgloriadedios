@@ -629,52 +629,6 @@
     let isReconnecting = false;
     let wakeLock = null;
     let castSession = null;
-    let lastVolume = 1;
-
-    /* --- GESTIÓN DE VOLUMEN Y TEMPORIZADOR --- */
-    function setVolume(val) {
-      audio.volume = val;
-      if (val == 0) {
-        volIcon.className = 'fa-solid fa-volume-xmark';
-      } else if (val < 0.5) {
-        volIcon.className = 'fa-solid fa-volume-low';
-      } else {
-        volIcon.className = 'fa-solid fa-volume-high';
-      }
-    }
-
-    function toggleMute() {
-      if (audio.volume > 0) {
-        lastVolume = audio.volume;
-        volSlider.value = 0;
-        setVolume(0);
-      } else {
-        volSlider.value = lastVolume || 1;
-        setVolume(volSlider.value);
-      }
-    }
-
-    function cycleTimer() {
-      const times = [0, 15, 30, 60, 90, 120];
-      let currentIndex = times.indexOf(timerMinutes);
-      let nextIndex = (currentIndex + 1) % times.length;
-      timerMinutes = times[nextIndex];
-
-      const label = document.getElementById('timerLabel');
-      if (timerTimeout) clearTimeout(timerTimeout);
-
-      if (timerMinutes > 0) {
-        label.innerText = timerMinutes + 'm';
-        timerTimeout = setTimeout(() => {
-          pauseAudio();
-          timerMinutes = 0;
-          label.innerText = 'Off';
-          alert('Temporizador finalizado: Se ha pausado la radio.');
-        }, timerMinutes * 60 * 1000);
-      } else {
-        label.innerText = 'Off';
-      }
-    }
 
     window.__onGCastApiAvailable = function(isAvailable) {
       if (isAvailable) {
@@ -756,9 +710,9 @@
 
     setupMediaSession();
 
-    /* --- ARRAY COMPLETO DE LOS VERSÍCULOS BÍBLICOS --- */
+    /* --- ARRAY COMPLETO DE LOS 365 VERSÍCULOS BÍBLICOS (UNO PARA CADA DÍA DEL AÑO) --- */
     const verses = [
-     { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
+      { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmos 23:1" },
       { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
       { text: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.", ref: "Jeremías 29:11" },
       { text: "Clama a mí, y yo te responderé, y te enseñaré cosas grandes y ocultas que tú no conoces.", ref: "Jeremías 33:3" },
@@ -1118,6 +1072,7 @@
       { text: "Alaben su nombre con danza; con pandero y arpa canten a él.", ref: "Salmos 149:3" },
       { text: "Todo lo que respira alabe a JAH. Aleluya.", ref: "Salmos 150:6" }
     ];
+
     function setDailyVerse() {
       const now = new Date();
       const start = new Date(now.getFullYear(), 0, 0);
@@ -1131,19 +1086,20 @@
     }
     setDailyVerse();
 
+    // --- FUNCIÓN PARA ACTUALIZAR AUTOMÁTICAMENTE EL VERSÍCULO A LAS 00:00 HS ---
     function scheduleMidnightVerseUpdate() {
       const now = new Date();
       const night = new Date(
         now.getFullYear(),
         now.getMonth(),
-        now.getDate() + 1,
+        now.getDate() + 1, // Mañana a las 00:00:00
         0, 0, 0
       );
       const msToMidnight = night.getTime() - now.getTime();
 
       setTimeout(() => {
         setDailyVerse();
-        scheduleMidnightVerseUpdate();
+        scheduleMidnightVerseUpdate(); // Programar para el día siguiente de forma continua
       }, msToMidnight);
     }
     scheduleMidnightVerseUpdate();
@@ -1336,6 +1292,10 @@
 
       titleDisplay.textContent = title || 'Reproduciendo...';
 
+      /*
+       * Parámetros compatibles con el reproductor de YouTube.
+       * playsinline permite reproducción integrada en móviles.
+       */
       player.src =
         'https://www.youtube.com/embed/' +
         encodeURIComponent(videoId) +
@@ -1388,6 +1348,15 @@
     let youtubeRefreshInterval = null;
     let youtubeRequestInProgress = false;
 
+    function escapeYouTubeHTML(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function formatYouTubeDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
@@ -1426,6 +1395,12 @@
       }
     }
 
+    /*
+     * IMPORTANTE:
+     * Los botones se crean con addEventListener en vez de onclick
+     * dentro del HTML. Así un título de YouTube con comillas,
+     * apóstrofes o caracteres especiales nunca rompe el botón.
+     */
     function createYouTubePlayButton(videoId, title, text = 'Ver aquí') {
       const button = document.createElement('button');
       button.type = 'button';
@@ -1490,76 +1465,313 @@
     }
 
     async function resolveYouTubeChannelId() {
+      /*
+       * Primero intentamos confirmar el canal mediante su handle.
+       * Si no se puede, utilizamos el ID que ya estaba configurado.
+       */
       try {
-        const handleClean = YOUTUBE_CHANNEL_HANDLE.replace('@', '');
-        const url = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handleClean)}&key=${YOUTUBE_API_KEY}`;
+        const url =
+          'https://www.googleapis.com/youtube/v3/channels' +
+          '?part=id' +
+          '&forHandle=' + encodeURIComponent(YOUTUBE_CHANNEL_HANDLE) +
+          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
         const data = await youtubeFetchJSON(url);
-        if (data && data.items && data.items.length > 0) {
+
+        if (data.items?.length && data.items[0]?.id) {
           return data.items[0].id;
         }
-      } catch (e) {
-        console.log("No se pudo obtener ID por Handle, usando fallback:", e);
+      } catch (error) {
+        console.warn('No se pudo resolver el handle de YouTube:', error);
       }
+
       return YOUTUBE_CHANNEL_ID;
     }
 
-    async function fetchYouTubeData() {
+    async function fetchYouTubeVideos() {
       if (youtubeRequestInProgress) return;
-      youtubeRequestInProgress = true;
 
       const liveContainer = document.getElementById('liveStreamContainer');
-      const latestContainer = document.getElementById('latestVideosContainer');
+      const videosContainer = document.getElementById('latestVideosContainer');
+
+      if (!liveContainer || !videosContainer) return;
+
+      youtubeRequestInProgress = true;
+
+      /*
+       * No dejamos el modal girando indefinidamente.
+       */
+      liveContainer.innerHTML = `
+        <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Comprobando transmisión en vivo...
+        </div>`;
+
+      videosContainer.innerHTML = `
+        <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Cargando transmisiones...
+        </div>`;
 
       try {
+        if (!YOUTUBE_API_KEY) {
+          throw new Error('No hay API Key de YouTube configurada.');
+        }
+
         const channelId = await resolveYouTubeChannelId();
 
-        // 1. Buscar si hay directo en vivo
-        const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
-        const liveData = await youtubeFetchJSON(liveUrl);
+        let liveVideoId = null;
 
-        if (liveContainer) {
-          liveContainer.innerHTML = '';
-          if (liveData && liveData.items && liveData.items.length > 0) {
-            const liveItem = liveData.items[0];
-            const videoId = liveItem.id.videoId;
-            const title = liveItem.snippet.title;
-            renderYouTubeItem(liveContainer, videoId, title, '', true);
-          }
-        }
+        /* ======================================================
+           1. VIVO REAL EN ESTE MOMENTO
+           ====================================================== */
+        try {
+          const liveURL =
+            'https://www.googleapis.com/youtube/v3/search' +
+            '?part=snippet' +
+            '&channelId=' + encodeURIComponent(channelId) +
+            '&eventType=live' +
+            '&type=video' +
+            '&maxResults=1' +
+            '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
 
-        // 2. Buscar las últimas 4 transmisiones finalizadas o recientes
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=4&key=${YOUTUBE_API_KEY}`;
-        const searchData = await youtubeFetchJSON(searchUrl);
+          const liveData = await youtubeFetchJSON(liveURL);
 
-        if (latestContainer) {
-          latestContainer.innerHTML = '';
-          if (searchData && searchData.items && searchData.items.length > 0) {
-            searchData.items.forEach(item => {
-              const videoId = item.id.videoId;
-              const title = item.snippet.title;
-              const dateText = formatYouTubeDate(item.snippet.publishedAt);
-              renderYouTubeItem(latestContainer, videoId, title, dateText, false);
-            });
+          if (liveData.items?.length && liveData.items[0]?.id?.videoId) {
+            const liveVideo = liveData.items[0];
+            liveVideoId = liveVideo.id.videoId;
+
+            liveContainer.innerHTML = '';
+            renderYouTubeItem(
+              liveContainer,
+              liveVideoId,
+              liveVideo.snippet?.title || 'Transmisión en vivo',
+              '',
+              true
+            );
           } else {
-            latestContainer.innerHTML = '<div style="text-align:center; color:#9ca3af; padding:10px; font-size:0.85rem;">No se encontraron transmisiones recientes.</div>';
+            liveContainer.innerHTML = '';
           }
+        } catch (error) {
+          console.warn('No se pudo consultar el vivo actual:', error);
+          liveContainer.innerHTML = '';
         }
 
-      } catch (err) {
-        console.error("Error al obtener transmisiones de YouTube:", err);
-        if (latestContainer) {
-          latestContainer.innerHTML = '<div style="text-align:center; color:#ef4444; padding:10px; font-size:0.8rem;">No se pudieron cargar las transmisiones.</div>';
+        /* ======================================================
+           2. OBTENER EL PLAYLIST DE SUBIDAS DEL CANAL
+           Esto es más fiable para encontrar transmisiones
+           archivadas que depender solamente de search.
+           ====================================================== */
+
+        const channelURL =
+          'https://www.googleapis.com/youtube/v3/channels' +
+          '?part=contentDetails' +
+          '&id=' + encodeURIComponent(channelId) +
+          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
+        const channelData = await youtubeFetchJSON(channelURL);
+
+        const uploadsPlaylistId =
+          channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+
+        if (!uploadsPlaylistId) {
+          throw new Error('No se encontró la lista de videos del canal.');
         }
+
+        const playlistURL =
+          'https://www.googleapis.com/youtube/v3/playlistItems' +
+          '?part=snippet,contentDetails' +
+          '&playlistId=' + encodeURIComponent(uploadsPlaylistId) +
+          '&maxResults=50' +
+          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
+        const playlistData = await youtubeFetchJSON(playlistURL);
+
+        const ids = (playlistData.items || [])
+          .map(item => item.contentDetails?.videoId)
+          .filter(Boolean);
+
+        if (!ids.length) {
+          throw new Error('El canal no devolvió videos.');
+        }
+
+        /* ======================================================
+           3. CONSULTAR LOS DETALLES DE LOS VIDEOS
+           liveStreamingDetails permite distinguir videos
+           normales de transmisiones en vivo archivadas.
+           ====================================================== */
+
+        const videosURL =
+          'https://www.googleapis.com/youtube/v3/videos' +
+          '?part=snippet,liveStreamingDetails' +
+          '&id=' + ids.map(encodeURIComponent).join(',') +
+          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
+        const videosData = await youtubeFetchJSON(videosURL);
+
+        const archivedLives = (videosData.items || [])
+          .filter(video => {
+            if (!video?.id) return false;
+            if (video.id === liveVideoId) return false;
+
+            /*
+             * Un video con liveStreamingDetails es una transmisión
+             * de YouTube. Para las archivadas debe existir endTime.
+             */
+            return !!(
+              video.liveStreamingDetails &&
+              video.liveStreamingDetails.actualEndTime
+            );
+          })
+          .sort((a, b) => {
+            const dateA = new Date(
+              a.liveStreamingDetails?.actualEndTime ||
+              a.snippet?.publishedAt ||
+              0
+            );
+
+            const dateB = new Date(
+              b.liveStreamingDetails?.actualEndTime ||
+              b.snippet?.publishedAt ||
+              0
+            );
+
+            return dateB - dateA;
+          })
+          .slice(0, 4);
+
+        /* ======================================================
+           4. MOSTRAR LAS 4 ÚLTIMAS TRANSMISIONES
+           ====================================================== */
+
+        videosContainer.innerHTML = '';
+
+        if (!archivedLives.length) {
+          /*
+           * Si la API no devuelve liveStreamingDetails, hacemos
+           * una segunda consulta usando search=completed como
+           * respaldo. Esto evita depender de una sola respuesta.
+           */
+          try {
+            const completedURL =
+              'https://www.googleapis.com/youtube/v3/search' +
+              '?part=snippet' +
+              '&channelId=' + encodeURIComponent(channelId) +
+              '&eventType=completed' +
+              '&type=video' +
+              '&order=date' +
+              '&maxResults=10' +
+              '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+
+            const completedData = await youtubeFetchJSON(completedURL);
+
+            const fallbackLives = (completedData.items || [])
+              .filter(item =>
+                item?.id?.videoId &&
+                item.id.videoId !== liveVideoId
+              )
+              .slice(0, 4);
+
+            fallbackLives.forEach(item => {
+              renderYouTubeItem(
+                videosContainer,
+                item.id.videoId,
+                item.snippet?.title || 'Transmisión en vivo',
+                formatYouTubeDate(item.snippet?.publishedAt),
+                false
+              );
+            });
+          } catch (fallbackError) {
+            console.warn(
+              'Tampoco se pudieron obtener las transmisiones archivadas:',
+              fallbackError
+            );
+          }
+        } else {
+          archivedLives.forEach(video => {
+            renderYouTubeItem(
+              videosContainer,
+              video.id,
+              video.snippet?.title || 'Transmisión en vivo',
+              formatYouTubeDate(
+                video.liveStreamingDetails?.actualEndTime ||
+                video.snippet?.publishedAt
+              ),
+              false
+            );
+          });
+        }
+
+        if (!videosContainer.children.length) {
+          videosContainer.innerHTML = `
+            <div style="text-align:center;color:#9ca3af;padding:12px 10px;font-size:0.8rem;">
+              No se encontraron transmisiones anteriores.
+              <br><br>
+              <a
+                href="https://www.youtube.com/${YOUTUBE_CHANNEL_HANDLE}/streams"
+                target="_blank"
+                rel="noopener"
+                style="color:#d1d5db;text-decoration:underline;"
+              >
+                Abrir transmisiones en YouTube
+              </a>
+            </div>`;
+        }
+
+      } catch (error) {
+        console.error('Error al obtener las transmisiones de YouTube:', error);
+
+        liveContainer.innerHTML = '';
+
+        const message = String(error?.message || error);
+
+        videosContainer.innerHTML = `
+          <div style="text-align:center;color:#9ca3af;padding:12px 10px;font-size:0.8rem;">
+            <i class="fa-brands fa-youtube" style="color:#ff0000;"></i>
+            <br>
+            No se pudieron cargar las transmisiones.
+            <br><br>
+            <span style="font-size:0.72rem;">
+              ${escapeYouTubeHTML(message)}
+            </span>
+            <br><br>
+            <a
+              href="https://www.youtube.com/${YOUTUBE_CHANNEL_HANDLE}/streams"
+              target="_blank"
+              rel="noopener"
+              style="color:#d1d5db;text-decoration:underline;"
+            >
+              Abrir canal en YouTube
+            </a>
+          </div>`;
       } finally {
         youtubeRequestInProgress = false;
       }
     }
 
     function startYouTubeAutoRefresh() {
-      fetchYouTubeData();
-      if (!youtubeRefreshInterval) {
-        youtubeRefreshInterval = setInterval(fetchYouTubeData, 60000); // Refresco automático cada 60 segundos
+      /*
+       * Cargar inmediatamente al abrir Prédicas.
+       */
+      fetchYouTubeVideos();
+
+      /*
+       * Evitar intervalos duplicados.
+       */
+      if (youtubeRefreshInterval) {
+        clearInterval(youtubeRefreshInterval);
       }
+
+      youtubeRefreshInterval = setInterval(() => {
+        const modal = document.getElementById('podcastsModal');
+
+        if (
+          modal &&
+          getComputedStyle(modal).display !== 'none'
+        ) {
+          fetchYouTubeVideos();
+        }
+      }, 60000);
     }
 
     function stopYouTubeAutoRefresh() {
@@ -1567,6 +1779,36 @@
         clearInterval(youtubeRefreshInterval);
         youtubeRefreshInterval = null;
       }
+    }
+
+    function cycleTimer() {
+      if (timerMinutes === 0) timerMinutes = 15;
+      else if (timerMinutes === 15) timerMinutes = 30;
+      else if (timerMinutes === 30) timerMinutes = 60;
+      else timerMinutes = 0;
+
+      clearTimeout(timerTimeout);
+      const label = document.getElementById('timerLabel');
+
+      if (timerMinutes > 0) {
+        label.innerText = timerMinutes + 'm';
+        timerTimeout = setTimeout(() => {
+          if (!isUserPaused) pauseAudio();
+          timerMinutes = 0;
+          label.innerText = 'Off';
+        }, timerMinutes * 60 * 1000);
+      } else {
+        label.innerText = 'Off';
+      }
+    }
+
+    function setVolume(val) {
+      audio.volume = val;
+      volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
+    }
+
+    function toggleMute() {
+      if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
   </script>
 </body>
