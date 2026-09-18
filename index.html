@@ -1347,6 +1347,7 @@
 
     let youtubeRefreshInterval = null;
     let youtubeRequestInProgress = false;
+    let currentLiveVideoId = null;
 
     function escapeYouTubeHTML(value) {
       return String(value ?? '')
@@ -1395,12 +1396,6 @@
       }
     }
 
-    /*
-     * IMPORTANTE:
-     * Los botones se crean con addEventListener en vez de onclick
-     * dentro del HTML. Así un título de YouTube con comillas,
-     * apóstrofes o caracteres especiales nunca rompe el botón.
-     */
     function createYouTubePlayButton(videoId, title, text = 'Ver aquí') {
       const button = document.createElement('button');
       button.type = 'button';
@@ -1465,313 +1460,109 @@
     }
 
     async function resolveYouTubeChannelId() {
-      /*
-       * Primero intentamos confirmar el canal mediante su handle.
-       * Si no se puede, utilizamos el ID que ya estaba configurado.
-       */
       try {
-        const url =
-          'https://www.googleapis.com/youtube/v3/channels' +
-          '?part=id' +
-          '&forHandle=' + encodeURIComponent(YOUTUBE_CHANNEL_HANDLE) +
-          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
+        const handleClean = YOUTUBE_CHANNEL_HANDLE.replace(/^@/, '');
+        const url = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${encodeURIComponent(handleClean)}&key=${YOUTUBE_API_KEY}`;
         const data = await youtubeFetchJSON(url);
 
-        if (data.items?.length && data.items[0]?.id) {
+        if (data?.items && data.items.length > 0 && data.items[0].id) {
           return data.items[0].id;
         }
-      } catch (error) {
-        console.warn('No se pudo resolver el handle de YouTube:', error);
+      } catch (e) {
+        console.warn("No se pudo obtener el ID desde el handle:", e);
       }
-
       return YOUTUBE_CHANNEL_ID;
     }
 
-    async function fetchYouTubeVideos() {
+    async function fetchYouTubeContent() {
       if (youtubeRequestInProgress) return;
-
-      const liveContainer = document.getElementById('liveStreamContainer');
-      const videosContainer = document.getElementById('latestVideosContainer');
-
-      if (!liveContainer || !videosContainer) return;
-
       youtubeRequestInProgress = true;
 
-      /*
-       * No dejamos el modal girando indefinidamente.
-       */
-      liveContainer.innerHTML = `
-        <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          Comprobando transmisión en vivo...
-        </div>`;
-
-      videosContainer.innerHTML = `
-        <div style="text-align:center;color:#9ca3af;padding:10px;font-size:0.8rem;">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          Cargando transmisiones...
-        </div>`;
+      const liveContainer = document.getElementById('liveStreamContainer');
+      const latestContainer = document.getElementById('latestVideosContainer');
 
       try {
-        if (!YOUTUBE_API_KEY) {
-          throw new Error('No hay API Key de YouTube configurada.');
-        }
-
         const channelId = await resolveYouTubeChannelId();
 
-        let liveVideoId = null;
+        // 1. Consultar si hay un EN VIVO activo
+        const liveSearchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&eventType=live&key=${YOUTUBE_API_KEY}`;
+        const liveData = await youtubeFetchJSON(liveSearchUrl);
 
-        /* ======================================================
-           1. VIVO REAL EN ESTE MOMENTO
-           ====================================================== */
-        try {
-          const liveURL =
-            'https://www.googleapis.com/youtube/v3/search' +
-            '?part=snippet' +
-            '&channelId=' + encodeURIComponent(channelId) +
-            '&eventType=live' +
-            '&type=video' +
-            '&maxResults=1' +
-            '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
+        if (liveContainer) liveContainer.innerHTML = '';
 
-          const liveData = await youtubeFetchJSON(liveURL);
+        if (liveData?.items && liveData.items.length > 0) {
+          const liveItem = liveData.items[0];
+          const liveVideoId = liveItem.id.videoId;
+          const liveTitle = liveItem.snippet.title;
 
-          if (liveData.items?.length && liveData.items[0]?.id?.videoId) {
-            const liveVideo = liveData.items[0];
-            liveVideoId = liveVideo.id.videoId;
-
-            liveContainer.innerHTML = '';
+          if (liveContainer) {
             renderYouTubeItem(
               liveContainer,
               liveVideoId,
-              liveVideo.snippet?.title || 'Transmisión en vivo',
+              liveTitle,
               '',
               true
             );
-          } else {
-            liveContainer.innerHTML = '';
           }
-        } catch (error) {
-          console.warn('No se pudo consultar el vivo actual:', error);
-          liveContainer.innerHTML = '';
-        }
 
-        /* ======================================================
-           2. OBTENER EL PLAYLIST DE SUBIDAS DEL CANAL
-           Esto es más fiable para encontrar transmisiones
-           archivadas que depender solamente de search.
-           ====================================================== */
-
-        const channelURL =
-          'https://www.googleapis.com/youtube/v3/channels' +
-          '?part=contentDetails' +
-          '&id=' + encodeURIComponent(channelId) +
-          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
-        const channelData = await youtubeFetchJSON(channelURL);
-
-        const uploadsPlaylistId =
-          channelData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
-
-        if (!uploadsPlaylistId) {
-          throw new Error('No se encontró la lista de videos del canal.');
-        }
-
-        const playlistURL =
-          'https://www.googleapis.com/youtube/v3/playlistItems' +
-          '?part=snippet,contentDetails' +
-          '&playlistId=' + encodeURIComponent(uploadsPlaylistId) +
-          '&maxResults=50' +
-          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
-        const playlistData = await youtubeFetchJSON(playlistURL);
-
-        const ids = (playlistData.items || [])
-          .map(item => item.contentDetails?.videoId)
-          .filter(Boolean);
-
-        if (!ids.length) {
-          throw new Error('El canal no devolvió videos.');
-        }
-
-        /* ======================================================
-           3. CONSULTAR LOS DETALLES DE LOS VIDEOS
-           liveStreamingDetails permite distinguir videos
-           normales de transmisiones en vivo archivadas.
-           ====================================================== */
-
-        const videosURL =
-          'https://www.googleapis.com/youtube/v3/videos' +
-          '?part=snippet,liveStreamingDetails' +
-          '&id=' + ids.map(encodeURIComponent).join(',') +
-          '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
-        const videosData = await youtubeFetchJSON(videosURL);
-
-        const archivedLives = (videosData.items || [])
-          .filter(video => {
-            if (!video?.id) return false;
-            if (video.id === liveVideoId) return false;
-
-            /*
-             * Un video con liveStreamingDetails es una transmisión
-             * de YouTube. Para las archivadas debe existir endTime.
-             */
-            return !!(
-              video.liveStreamingDetails &&
-              video.liveStreamingDetails.actualEndTime
-            );
-          })
-          .sort((a, b) => {
-            const dateA = new Date(
-              a.liveStreamingDetails?.actualEndTime ||
-              a.snippet?.publishedAt ||
-              0
-            );
-
-            const dateB = new Date(
-              b.liveStreamingDetails?.actualEndTime ||
-              b.snippet?.publishedAt ||
-              0
-            );
-
-            return dateB - dateA;
-          })
-          .slice(0, 4);
-
-        /* ======================================================
-           4. MOSTRAR LAS 4 ÚLTIMAS TRANSMISIONES
-           ====================================================== */
-
-        videosContainer.innerHTML = '';
-
-        if (!archivedLives.length) {
-          /*
-           * Si la API no devuelve liveStreamingDetails, hacemos
-           * una segunda consulta usando search=completed como
-           * respaldo. Esto evita depender de una sola respuesta.
-           */
-          try {
-            const completedURL =
-              'https://www.googleapis.com/youtube/v3/search' +
-              '?part=snippet' +
-              '&channelId=' + encodeURIComponent(channelId) +
-              '&eventType=completed' +
-              '&type=video' +
-              '&order=date' +
-              '&maxResults=10' +
-              '&key=' + encodeURIComponent(YOUTUBE_API_KEY);
-
-            const completedData = await youtubeFetchJSON(completedURL);
-
-            const fallbackLives = (completedData.items || [])
-              .filter(item =>
-                item?.id?.videoId &&
-                item.id.videoId !== liveVideoId
-              )
-              .slice(0, 4);
-
-            fallbackLives.forEach(item => {
-              renderYouTubeItem(
-                videosContainer,
-                item.id.videoId,
-                item.snippet?.title || 'Transmisión en vivo',
-                formatYouTubeDate(item.snippet?.publishedAt),
-                false
-              );
-            });
-          } catch (fallbackError) {
-            console.warn(
-              'Tampoco se pudieron obtener las transmisiones archivadas:',
-              fallbackError
-            );
+          // Si detectamos un nuevo vivo y no se estaba reproduciendo, reproducir automáticamente
+          if (currentLiveVideoId !== liveVideoId) {
+            currentLiveVideoId = liveVideoId;
+            playEmbeddedVideo(liveVideoId, liveTitle);
           }
         } else {
-          archivedLives.forEach(video => {
-            renderYouTubeItem(
-              videosContainer,
-              video.id,
-              video.snippet?.title || 'Transmisión en vivo',
-              formatYouTubeDate(
-                video.liveStreamingDetails?.actualEndTime ||
-                video.snippet?.publishedAt
-              ),
-              false
-            );
+          currentLiveVideoId = null;
+        }
+
+        // 2. Consultar las últimas 4 transmisiones o videos
+        const completedSearchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=4&key=${YOUTUBE_API_KEY}`;
+        const completedData = await youtubeFetchJSON(completedSearchUrl);
+
+        if (latestContainer) latestContainer.innerHTML = '';
+
+        if (completedData?.items && completedData.items.length > 0) {
+          completedData.items.forEach(item => {
+            const videoId = item.id.videoId;
+            const title = item.snippet.title;
+            const publishedAt = item.snippet.publishedAt;
+            const formattedDate = formatYouTubeDate(publishedAt);
+
+            if (latestContainer) {
+              renderYouTubeItem(
+                latestContainer,
+                videoId,
+                title,
+                formattedDate,
+                false
+              );
+            }
           });
+        } else if (latestContainer) {
+          latestContainer.innerHTML = `
+            <div style="text-align: center; color: #9ca3af; padding: 15px; font-size: 0.85rem;">
+              No se encontraron transmisiones recientes.
+            </div>
+          `;
         }
-
-        if (!videosContainer.children.length) {
-          videosContainer.innerHTML = `
-            <div style="text-align:center;color:#9ca3af;padding:12px 10px;font-size:0.8rem;">
-              No se encontraron transmisiones anteriores.
-              <br><br>
-              <a
-                href="https://www.youtube.com/${YOUTUBE_CHANNEL_HANDLE}/streams"
-                target="_blank"
-                rel="noopener"
-                style="color:#d1d5db;text-decoration:underline;"
-              >
-                Abrir transmisiones en YouTube
-              </a>
-            </div>`;
+      } catch (err) {
+        console.error("Error al cargar transmisiones de YouTube:", err);
+        if (latestContainer && latestContainer.children.length === 0) {
+          latestContainer.innerHTML = `
+            <div style="text-align: center; color: #ef4444; padding: 15px; font-size: 0.85rem;">
+              Ocurrió un error al cargar las transmisiones.
+            </div>
+          `;
         }
-
-      } catch (error) {
-        console.error('Error al obtener las transmisiones de YouTube:', error);
-
-        liveContainer.innerHTML = '';
-
-        const message = String(error?.message || error);
-
-        videosContainer.innerHTML = `
-          <div style="text-align:center;color:#9ca3af;padding:12px 10px;font-size:0.8rem;">
-            <i class="fa-brands fa-youtube" style="color:#ff0000;"></i>
-            <br>
-            No se pudieron cargar las transmisiones.
-            <br><br>
-            <span style="font-size:0.72rem;">
-              ${escapeYouTubeHTML(message)}
-            </span>
-            <br><br>
-            <a
-              href="https://www.youtube.com/${YOUTUBE_CHANNEL_HANDLE}/streams"
-              target="_blank"
-              rel="noopener"
-              style="color:#d1d5db;text-decoration:underline;"
-            >
-              Abrir canal en YouTube
-            </a>
-          </div>`;
       } finally {
         youtubeRequestInProgress = false;
       }
     }
 
     function startYouTubeAutoRefresh() {
-      /*
-       * Cargar inmediatamente al abrir Prédicas.
-       */
-      fetchYouTubeVideos();
-
-      /*
-       * Evitar intervalos duplicados.
-       */
-      if (youtubeRefreshInterval) {
-        clearInterval(youtubeRefreshInterval);
+      fetchYouTubeContent();
+      if (!youtubeRefreshInterval) {
+        youtubeRefreshInterval = setInterval(fetchYouTubeContent, 30000); // Consulta periódica cada 30 segundos
       }
-
-      youtubeRefreshInterval = setInterval(() => {
-        const modal = document.getElementById('podcastsModal');
-
-        if (
-          modal &&
-          getComputedStyle(modal).display !== 'none'
-        ) {
-          fetchYouTubeVideos();
-        }
-      }, 60000);
     }
 
     function stopYouTubeAutoRefresh() {
@@ -1779,36 +1570,6 @@
         clearInterval(youtubeRefreshInterval);
         youtubeRefreshInterval = null;
       }
-    }
-
-    function cycleTimer() {
-      if (timerMinutes === 0) timerMinutes = 15;
-      else if (timerMinutes === 15) timerMinutes = 30;
-      else if (timerMinutes === 30) timerMinutes = 60;
-      else timerMinutes = 0;
-
-      clearTimeout(timerTimeout);
-      const label = document.getElementById('timerLabel');
-
-      if (timerMinutes > 0) {
-        label.innerText = timerMinutes + 'm';
-        timerTimeout = setTimeout(() => {
-          if (!isUserPaused) pauseAudio();
-          timerMinutes = 0;
-          label.innerText = 'Off';
-        }, timerMinutes * 60 * 1000);
-      } else {
-        label.innerText = 'Off';
-      }
-    }
-
-    function setVolume(val) {
-      audio.volume = val;
-      volIcon.className = val == 0 ? 'fa-solid fa-volume-xmark' : (val < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high');
-    }
-
-    function toggleMute() {
-      if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
   </script>
 </body>
