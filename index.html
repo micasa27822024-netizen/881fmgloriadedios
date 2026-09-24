@@ -1871,6 +1871,46 @@
     function toggleMute() {
       if (audio.volume > 0) { volSlider.value = 0; setVolume(0); } else { volSlider.value = 1; setVolume(1); }
     }
+
+    /* === Canal Luz: rotar a horizontal en pantalla completa y volver a vertical al salir === */
+    (function () {
+      function isCanalLuzFullscreen() {
+        var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!fsEl) return false;
+        var modal = document.getElementById('canalLuzModal');
+        // El elemento en pantalla completa es el iframe del canal (o el modal que lo contiene)
+        return !!(modal && (modal.contains(fsEl) || fsEl === modal));
+      }
+
+      function lockLandscape() {
+        try {
+          if (screen.orientation && typeof screen.orientation.lock === 'function') {
+            screen.orientation.lock('landscape').catch(function () {});
+          }
+        } catch (e) { /* no soportado: se ignora */ }
+      }
+
+      function unlockOrientation() {
+        try {
+          if (screen.orientation && typeof screen.orientation.unlock === 'function') {
+            screen.orientation.unlock();
+          }
+        } catch (e) { /* no soportado: se ignora */ }
+      }
+
+      function handleFullscreenChange() {
+        var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        if (fsEl && isCanalLuzFullscreen()) {
+          lockLandscape();
+        } else {
+          // Al salir de pantalla completa volvemos a vertical
+          unlockOrientation();
+        }
+      }
+
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    })();
   </script>
 </body>
 </html>
