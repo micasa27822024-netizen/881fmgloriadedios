@@ -1293,13 +1293,46 @@
       titleDisplay.textContent = title || 'Reproduciendo...';
 
       /*
-       * Parámetros compatibles con el reproductor de YouTube.
-       * playsinline permite reproducción integrada en móviles.
+       * Usamos el reproductor oficial en modo de privacidad mejorada.
+       * Esto mantiene la reproducción integrada, pero reduce problemas
+       * de compatibilidad asociados al reproductor embebido tradicional.
        */
       player.src =
-        'https://www.youtube.com/embed/' +
+        'https://www.youtube-nocookie.com/embed/' +
         encodeURIComponent(videoId) +
-        '?autoplay=1&playsinline=1&rel=0';
+        '?autoplay=1&playsinline=1&rel=0&origin=' +
+        encodeURIComponent(window.location.origin);
+
+      /*
+       * Respaldo para redes, cuentas o dispositivos que bloqueen
+       * el reproductor incrustado: el mismo vivo se puede abrir
+       * directamente en YouTube.
+       */
+      let directLink = document.getElementById('youtubeDirectLink');
+
+      if (!directLink) {
+        directLink = document.createElement('a');
+        directLink.id = 'youtubeDirectLink';
+        directLink.target = '_blank';
+        directLink.rel = 'noopener noreferrer';
+        directLink.style.cssText =
+          'display:block;margin:10px auto 0;padding:10px 14px;' +
+          'background:#ff0000;color:#fff;border-radius:10px;' +
+          'text-align:center;text-decoration:none;font-weight:700;' +
+          'font-size:0.85rem;max-width:280px;';
+
+        const icon = document.createElement('i');
+        icon.className = 'fa-brands fa-youtube';
+        directLink.appendChild(icon);
+        directLink.appendChild(document.createTextNode(' Ver en YouTube directamente'));
+
+        wrapper.appendChild(directLink);
+      }
+
+      directLink.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(videoId);
+      directLink.onclick = function () {
+        pauseAudio();
+      };
 
       wrapper.style.display = 'block';
 
