@@ -367,6 +367,11 @@
             <span>Prédicas</span>
           </button>
 
+          <button class="btn-top" onclick="pauseAudio(); toggleModal('canalLuzModal', true)" title="Canal Luz">
+            <i class="fa-solid fa-tv" style="color: #f59e0b;"></i>
+            <span>Canal Luz</span>
+          </button>
+
           <button class="btn-top" id="pwaInstallBtn" onclick="installPWA()" title="Instalar App">
             <i class="fa-solid fa-mobile-screen-button"></i>
             <span>App</span>
@@ -524,6 +529,29 @@
         <div class="reunion-details">
           <div class="reunion-time-tag"><span class="day">DOMINGO</span><span class="hour">10:30 HS</span></div>
           <span class="reunion-name">Reunión General</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="canalLuzModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; color: #f59e0b;">
+          <i class="fa-solid fa-tv" style="color: #f59e0b;"></i> Canal Luz - En Vivo
+        </h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 1.2rem;" onclick="toggleModal('canalLuzModal', false)"></i>
+      </div>
+
+      <div class="video-wrapper" style="display: block; margin-bottom: 0;">
+        <div class="video-container">
+          <iframe
+            src="https://vmf.edge-apps.net/embed/live.php?streamname=canal_luz01-100009&autoplay=0&loop=0"
+            title="Canal Luz en vivo"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            referrerpolicy="strict-origin-when-cross-origin">
+          </iframe>
         </div>
       </div>
     </div>
@@ -1293,46 +1321,13 @@
       titleDisplay.textContent = title || 'Reproduciendo...';
 
       /*
-       * Usamos el reproductor oficial en modo de privacidad mejorada.
-       * Esto mantiene la reproducción integrada, pero reduce problemas
-       * de compatibilidad asociados al reproductor embebido tradicional.
+       * Parámetros compatibles con el reproductor de YouTube.
+       * playsinline permite reproducción integrada en móviles.
        */
       player.src =
-        'https://www.youtube-nocookie.com/embed/' +
+        'https://www.youtube.com/embed/' +
         encodeURIComponent(videoId) +
-        '?autoplay=1&playsinline=1&rel=0&origin=' +
-        encodeURIComponent(window.location.origin);
-
-      /*
-       * Respaldo para redes, cuentas o dispositivos que bloqueen
-       * el reproductor incrustado: el mismo vivo se puede abrir
-       * directamente en YouTube.
-       */
-      let directLink = document.getElementById('youtubeDirectLink');
-
-      if (!directLink) {
-        directLink = document.createElement('a');
-        directLink.id = 'youtubeDirectLink';
-        directLink.target = '_blank';
-        directLink.rel = 'noopener noreferrer';
-        directLink.style.cssText =
-          'display:block;margin:10px auto 0;padding:10px 14px;' +
-          'background:#ff0000;color:#fff;border-radius:10px;' +
-          'text-align:center;text-decoration:none;font-weight:700;' +
-          'font-size:0.85rem;max-width:280px;';
-
-        const icon = document.createElement('i');
-        icon.className = 'fa-brands fa-youtube';
-        directLink.appendChild(icon);
-        directLink.appendChild(document.createTextNode(' Ver en YouTube directamente'));
-
-        wrapper.appendChild(directLink);
-      }
-
-      directLink.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(videoId);
-      directLink.onclick = function () {
-        pauseAudio();
-      };
+        '?autoplay=1&playsinline=1&rel=0';
 
       wrapper.style.display = 'block';
 
